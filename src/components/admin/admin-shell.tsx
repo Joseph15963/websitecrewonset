@@ -1,7 +1,14 @@
 import Link from "@/components/next-compat/link";
 import { usePathname, useRouter } from "@/components/next-compat/navigation";
 import { Toaster } from "@/components/ui/sonner";
-import { adminAccountStore, adsStore, alertReadStore, applicationsStore } from "@/lib/demo/store";
+import {
+  adminAccountStore,
+  adsStore,
+  alertReadStore,
+  applicationsStore,
+  bugReportsStore,
+  playerReportsStore,
+} from "@/lib/demo/store";
 import { buildAlerts } from "@/components/admin/admin-alerts";
 import {
   Banknote,
@@ -62,7 +69,12 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
   const [account] = adminAccountStore.useStore();
   const [applications] = applicationsStore.useStore();
   const [ads] = adsStore.useStore();
-  const alerts = useMemo(() => buildAlerts(applications, ads), [applications, ads]);
+  const [bugs] = bugReportsStore.useStore();
+  const [playerReports] = playerReportsStore.useStore();
+  const alerts = useMemo(
+    () => buildAlerts(applications, ads, bugs, playerReports),
+    [applications, ads, bugs, playerReports],
+  );
   const [readIds, setReadIds] = alertReadStore.useStore();
   const unread = alerts.filter((alert) => !readIds.includes(alert.id)).length;
 

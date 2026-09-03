@@ -7,7 +7,7 @@ export const Route = createFileRoute("/admin/player-reports")({
       { name: "description", content: "Review player-submitted reports." },
     ],
   }),
-  component: PlayerReportsPage,
+  component: PlayerReportsRouteComponent,
 });
 
 import { useMemo, useState } from "react";
@@ -34,7 +34,7 @@ function formatDate(iso: string) {
       });
 }
 
-function PlayerReportsPage() {
+function PlayerReportsRouteComponent() {
   const [reports, setReports] = playerReportsStore.useStore();
   const [query, setQuery] = useState("");
   const [status, setStatus] = useState<"All Statuses" | PlayerReportStatus>("All Statuses");
@@ -239,4 +239,4 @@ function PlayerReportsPage() {
   );
 }
 
-export default PlayerReportsPage;
+export default PlayerReportsRouteComponent;

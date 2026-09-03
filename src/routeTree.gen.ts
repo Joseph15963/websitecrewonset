@@ -30,6 +30,7 @@ import { Route as AdminPartnershipsRouteImport } from './routes/admin.partnershi
 import { Route as AdminPlayersRouteImport } from './routes/admin.players'
 import { Route as AdminSettingsRouteImport } from './routes/admin.settings'
 import { Route as AdminTransactionsRouteImport } from './routes/admin.transactions'
+import { Route as AdminLoginRouteImport } from './routes/admin_.login'
 import { Route as PortalIndexRouteImport } from './routes/portal.index'
 import { Route as PortalAchievementsRouteImport } from './routes/portal.achievements'
 import { Route as PortalAlmanacRouteImport } from './routes/portal.almanac'
@@ -146,6 +147,11 @@ const AdminTransactionsRoute = AdminTransactionsRouteImport.update({
   path: '/transactions',
   getParentRoute: () => AdminRoute,
 } as any)
+const AdminLoginRoute = AdminLoginRouteImport.update({
+  id: '/admin_/login',
+  path: '/admin/login',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const PortalIndexRoute = PortalIndexRouteImport.update({
   id: '/',
   path: '/',
@@ -218,6 +224,7 @@ export interface FileRoutesByFullPath {
   '/admin/players': typeof AdminPlayersRoute
   '/admin/settings': typeof AdminSettingsRoute
   '/admin/transactions': typeof AdminTransactionsRoute
+  '/admin/login': typeof AdminLoginRoute
   '/portal/achievements': typeof PortalAchievementsRoute
   '/portal/almanac': typeof PortalAlmanacRoute
   '/portal/friends': typeof PortalFriendsRoute
@@ -249,6 +256,7 @@ export interface FileRoutesByTo {
   '/admin/players': typeof AdminPlayersRoute
   '/admin/settings': typeof AdminSettingsRoute
   '/admin/transactions': typeof AdminTransactionsRoute
+  '/admin/login': typeof AdminLoginRoute
   '/portal/achievements': typeof PortalAchievementsRoute
   '/portal/almanac': typeof PortalAlmanacRoute
   '/portal/friends': typeof PortalFriendsRoute
@@ -283,6 +291,7 @@ export interface FileRoutesById {
   '/admin/players': typeof AdminPlayersRoute
   '/admin/settings': typeof AdminSettingsRoute
   '/admin/transactions': typeof AdminTransactionsRoute
+  '/admin_/login': typeof AdminLoginRoute
   '/portal/achievements': typeof PortalAchievementsRoute
   '/portal/almanac': typeof PortalAlmanacRoute
   '/portal/friends': typeof PortalFriendsRoute
@@ -318,6 +327,7 @@ export interface FileRouteTypes {
     | '/admin/players'
     | '/admin/settings'
     | '/admin/transactions'
+    | '/admin/login'
     | '/portal/achievements'
     | '/portal/almanac'
     | '/portal/friends'
@@ -349,6 +359,7 @@ export interface FileRouteTypes {
     | '/admin/players'
     | '/admin/settings'
     | '/admin/transactions'
+    | '/admin/login'
     | '/portal/achievements'
     | '/portal/almanac'
     | '/portal/friends'
@@ -382,6 +393,7 @@ export interface FileRouteTypes {
     | '/admin/players'
     | '/admin/settings'
     | '/admin/transactions'
+    | '/admin_/login'
     | '/portal/achievements'
     | '/portal/almanac'
     | '/portal/friends'
@@ -407,6 +419,7 @@ export interface RootRouteChildren {
   SignupRoute: typeof SignupRoute
   StoryRoute: typeof StoryRoute
   TeamRoute: typeof TeamRoute
+  AdminLoginRoute: typeof AdminLoginRoute
   ApiAdminLoginRoute: typeof ApiAdminLoginRoute
   ApiAdminLogoutRoute: typeof ApiAdminLogoutRoute
 }
@@ -560,6 +573,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminTransactionsRouteImport
       parentRoute: typeof AdminRoute
     }
+    '/admin_/login': {
+      id: '/admin_/login'
+      path: '/admin/login'
+      fullPath: '/admin/login'
+      preLoaderRoute: typeof AdminLoginRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/portal/': {
       id: '/portal/'
       path: '/'
@@ -698,6 +718,7 @@ const rootRouteChildren: RootRouteChildren = {
   SignupRoute: SignupRoute,
   StoryRoute: StoryRoute,
   TeamRoute: TeamRoute,
+  AdminLoginRoute: AdminLoginRoute,
   ApiAdminLoginRoute: ApiAdminLoginRoute,
   ApiAdminLogoutRoute: ApiAdminLogoutRoute,
 }

@@ -347,6 +347,29 @@ const searchablePlayers: Player[] = [
   },
 ];
 
+function resolveProfile(entry: {
+  name: string;
+  level: number;
+  role: string;
+  crewId: string;
+}): Friend {
+  return (
+    searchablePlayers.find((player) => player.name === entry.name) ??
+    initialFriends.find((friend) => friend.name === entry.name) ?? {
+      ...entry,
+      online: false,
+      bio: "Crew On Set member.",
+      joinedDate: "Recently",
+      socials: {},
+      career: {
+        productionsCompleted: 0,
+        yearsExperience: 0,
+        specialties: [entry.role],
+      },
+    }
+  );
+}
+
 const crewId = "COS-2847-CP";
 
 function FriendsPage() {
@@ -965,7 +988,10 @@ function FriendsPage() {
                                 key={
                                   player.name
                                 }
-                                className="flex items-center gap-3 rounded-lg border border-white/[0.07] bg-white/[0.02] p-3"
+                                onClick={() =>
+                                  openProfile(player)
+                                }
+                                className="flex cursor-pointer items-center gap-3 rounded-lg border border-white/[0.07] bg-white/[0.02] p-3 transition hover:bg-white/[0.04]"
                               >
                                 <PlayerAvatar
                                   player={
@@ -981,9 +1007,7 @@ function FriendsPage() {
 
                                   <p className="text-xs text-white/40">
                                     Level{" "}
-                                    {player.level}{" "}
-                                    ·{" "}
-                                    {player.role}
+                                    {player.level}
                                   </p>
 
                                   <p className="mt-0.5 text-[10px] font-bold text-white/25">
@@ -997,11 +1021,12 @@ function FriendsPage() {
                                   disabled={
                                     isFriend
                                   }
-                                  onClick={() =>
+                                  onClick={(event) => {
+                                    event.stopPropagation();
                                     addFriend(
                                       player
-                                    )
-                                  }
+                                    );
+                                  }}
                                   className={`rounded-md px-3 py-2 text-[10px] font-black ${
                                     isFriend
                                       ? "cursor-not-allowed bg-white/[0.06] text-white/25"
@@ -1102,7 +1127,8 @@ function FriendsPage() {
                   sentRequests.map((request) => (
                     <article
                       key={request.name}
-                      className="flex items-center gap-4 border-b border-white/[0.06] p-4 last:border-b-0 sm:p-5"
+                      onClick={() => openProfile(resolveProfile(request))}
+                      className="flex cursor-pointer items-center gap-4 border-b border-white/[0.06] p-4 transition last:border-b-0 hover:bg-white/[0.025] sm:p-5"
                     >
 
                       <div className="grid size-12 shrink-0 place-items-center rounded-full bg-[#0d121c] text-xs font-black text-yellow">
@@ -1116,7 +1142,7 @@ function FriendsPage() {
                         </h3>
 
                         <p className="text-xs text-white/40">
-                          Level {request.level} · {request.role}
+                          Level {request.level}
                         </p>
 
                         <p className="mt-0.5 text-[10px] uppercase tracking-wide text-white/25">
@@ -1127,7 +1153,10 @@ function FriendsPage() {
 
                       <button
                         type="button"
-                        onClick={() => cancelSentRequest(request.name)}
+                        onClick={(event) => {
+                          event.stopPropagation();
+                          cancelSentRequest(request.name);
+                        }}
                         className="inline-flex items-center gap-1.5 rounded-md border border-white/10 px-3 py-2 text-[11px] font-black uppercase tracking-wide text-white/50 transition hover:border-coral hover:text-coral"
                       >
                         <X className="size-3.5" />
@@ -1178,7 +1207,10 @@ function FriendsPage() {
                         key={
                           request.name
                         }
-                        className="flex items-center gap-4 border-b border-white/[0.06] p-4 last:border-b-0 sm:p-5"
+                        onClick={() =>
+                          openProfile(resolveProfile(request))
+                        }
+                        className="flex cursor-pointer items-center gap-4 border-b border-white/[0.06] p-4 transition last:border-b-0 hover:bg-white/[0.025] sm:p-5"
                       >
 
                         <div className="grid size-12 shrink-0 place-items-center rounded-full bg-[#0d121c] text-xs font-black text-yellow">
@@ -1198,9 +1230,7 @@ function FriendsPage() {
 
                           <p className="text-xs text-white/40">
                             Level{" "}
-                            {request.level}{" "}
-                            ·{" "}
-                            {request.role}
+                            {request.level}
                           </p>
 
                         </div>
@@ -1209,11 +1239,12 @@ function FriendsPage() {
 
                           <button
                             type="button"
-                            onClick={() =>
+                            onClick={(event) => {
+                              event.stopPropagation();
                               acceptRequest(
                                 request
-                              )
-                            }
+                              );
+                            }}
                             className="grid size-9 place-items-center rounded-md bg-coral text-white"
                             title="Accept request"
                           >
@@ -1222,11 +1253,12 @@ function FriendsPage() {
 
                           <button
                             type="button"
-                            onClick={() =>
+                            onClick={(event) => {
+                              event.stopPropagation();
                               declineRequest(
                                 request.name
-                              )
-                            }
+                              );
+                            }}
                             className="grid size-9 place-items-center rounded-md border border-white/10 text-white/35 hover:border-coral hover:text-coral"
                             title="Decline request"
                           >
@@ -1280,7 +1312,10 @@ function FriendsPage() {
                         key={
                           player.name
                         }
-                        className="flex items-center gap-4 border-b border-white/[0.06] p-4 last:border-b-0 sm:p-5"
+                        onClick={() =>
+                          openProfile(player)
+                        }
+                        className="flex cursor-pointer items-center gap-4 border-b border-white/[0.06] p-4 transition last:border-b-0 hover:bg-white/[0.025] sm:p-5"
                       >
 
                         <PlayerAvatar
@@ -1295,20 +1330,19 @@ function FriendsPage() {
 
                           <p className="text-xs text-white/40">
                             Level{" "}
-                            {player.level}{" "}
-                            ·{" "}
-                            {player.role}
+                            {player.level}
                           </p>
 
                         </div>
 
                         <button
                           type="button"
-                          onClick={() =>
+                          onClick={(event) => {
+                            event.stopPropagation();
                             unblockPlayer(
                               player.name
-                            )
-                          }
+                            );
+                          }}
                           className="rounded-md border border-white/10 px-3 py-2 text-[10px] font-black text-white/45 hover:border-coral hover:text-coral"
                         >
                           UNBLOCK
@@ -1507,10 +1541,6 @@ function PlayerProfile({
                   </span>
 
                 </div>
-
-                <p className="mt-2 text-sm font-black uppercase tracking-wide text-yellow">
-                  {player.role}
-                </p>
 
                 <div className="mt-3 flex flex-wrap items-center justify-center gap-x-4 gap-y-1 text-[10px] font-bold uppercase tracking-wider text-white/30 sm:justify-start">
 
@@ -1808,7 +1838,7 @@ function FriendRow({
         </h3>
 
         <p className="text-xs text-white/40">
-          Level {friend.level} · {friend.role}
+          Level {friend.level}
         </p>
 
       </div>

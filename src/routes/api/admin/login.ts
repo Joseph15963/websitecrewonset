@@ -16,13 +16,19 @@ export const Route = createFileRoute("/api/admin/login")({
   server: {
     handlers: {
       POST: async ({ request }) => {
-        const { username, password } = (await request.json()) as {
+        const { username, password, scope } = (await request.json()) as {
           username?: string;
           password?: string;
+          scope?: "player" | "admin";
         };
 
-        const isAdmin = username === "admin" && password === "admin";
-        const isPlayer = username === "player@gmail.com" && password === "player";
+        // The scope is decided by which login surface issued the request. The
+        // public/player form never sends scope "admin", so it can never mint an
+        // admin session even if admin credentials are entered.
+        const wantsAdmin = scope === "admin";
+        const isAdmin = wantsAdmin && username === "admin" && password === "admin";
+        const isPlayer =
+          !wantsAdmin && username === "player@gmail.com" && password === "player";
 
         if (!isAdmin && !isPlayer) {
           return Response.json({ error: "Invalid email or password." }, { status: 401 });

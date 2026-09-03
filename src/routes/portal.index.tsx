@@ -29,6 +29,7 @@ import {
   User,
 } from "lucide-react";
 import { cosmeticCatalog, ownedItemsStore } from "@/lib/demo/portal-shop";
+import { Leaderboards } from "@/components/portal/leaderboards";
 
 const badges = [
   {
@@ -338,6 +339,9 @@ function PlayerDashboardPage() {
             </div>
           </section>
         </div>
+
+        {/* LEADERBOARDS */}
+        <Leaderboards />
 
         {/* QUICK LINKS */}
         <div className="mt-6 flex flex-wrap gap-3">

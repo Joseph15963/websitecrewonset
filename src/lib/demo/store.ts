@@ -155,12 +155,7 @@ export const notificationsStore = createStore<PlayerNotification>(
 
 /* --------------------------------------------------- partnership applications */
 
-export type PartnershipStatus =
-  | "Pending"
-  | "Approved"
-  | "On-going"
-  | "Done"
-  | "Declined";
+export type PartnershipStatus = "Pending" | "Approved" | "On-going" | "Done" | "Declined";
 
 export type PartnershipApplication = {
   id: string;
@@ -354,6 +349,15 @@ export function formatMoney(value: number) {
   return `₱${value.toLocaleString("en-US")}`;
 }
 
+export function readAttachmentAsDataUrl(file: File): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(typeof reader.result === "string" ? reader.result : "");
+    reader.onerror = () => reject(reader.error ?? new Error("Unable to read attachment."));
+    reader.readAsDataURL(file);
+  });
+}
+
 /* ------------------------------------------------- system requirements (admin) */
 
 /**
@@ -369,12 +373,32 @@ export type SystemRequirementRow = {
 
 export const seedSystemRequirements: SystemRequirementRow[] = [
   { id: "req-os", label: "OS", minimum: "Windows 10 64-bit", recommended: "Windows 11 64-bit" },
-  { id: "req-cpu", label: "Processor", minimum: "Intel Core i3-8100 / AMD Ryzen 3 2200G", recommended: "Intel Core i5-10400 / AMD Ryzen 5 3600" },
+  {
+    id: "req-cpu",
+    label: "Processor",
+    minimum: "Intel Core i3-8100 / AMD Ryzen 3 2200G",
+    recommended: "Intel Core i5-10400 / AMD Ryzen 5 3600",
+  },
   { id: "req-ram", label: "Memory", minimum: "8 GB RAM", recommended: "16 GB RAM" },
-  { id: "req-gpu", label: "Graphics", minimum: "GTX 960 / RX 570 (2 GB VRAM)", recommended: "GTX 1660 / RX 5600 XT (6 GB VRAM)" },
+  {
+    id: "req-gpu",
+    label: "Graphics",
+    minimum: "GTX 960 / RX 570 (2 GB VRAM)",
+    recommended: "GTX 1660 / RX 5600 XT (6 GB VRAM)",
+  },
   { id: "req-dx", label: "DirectX", minimum: "Version 11", recommended: "Version 12" },
-  { id: "req-storage", label: "Storage", minimum: "6 GB available space", recommended: "10 GB available space (SSD)" },
-  { id: "req-net", label: "Network", minimum: "Broadband internet for co-op play", recommended: "Broadband internet for co-op play" },
+  {
+    id: "req-storage",
+    label: "Storage",
+    minimum: "6 GB available space",
+    recommended: "10 GB available space (SSD)",
+  },
+  {
+    id: "req-net",
+    label: "Network",
+    minimum: "Broadband internet for co-op play",
+    recommended: "Broadband internet for co-op play",
+  },
 ];
 
 export const systemRequirementsStore = createStore<SystemRequirementRow>(
@@ -429,8 +453,7 @@ export type PlayerTransaction = {
   createdAt: string;
 };
 
-const daysAgo = (days: number) =>
-  new Date(Date.now() - days * 24 * 60 * 60 * 1000).toISOString();
+const daysAgo = (days: number) => new Date(Date.now() - days * 24 * 60 * 60 * 1000).toISOString();
 
 export const seedTransactions: PlayerTransaction[] = [
   {
@@ -502,10 +525,26 @@ export type InstallStep = { id: string; title: string; text: string };
 export const MAX_INSTALL_STEPS = 4;
 
 export const installStepsStore = createStore<InstallStep>("cos.installSteps", [
-  { id: "step-1", title: "Download the installer", text: 'Click "Download the Game" above to get the latest CrewOnSet-Setup package.' },
-  { id: "step-2", title: "Run the installer", text: "Open the downloaded file and follow the on-screen setup wizard." },
-  { id: "step-3", title: "Choose an install location", text: "Pick a drive with enough free space, ideally an SSD for faster load times." },
-  { id: "step-4", title: "Launch and sign in", text: "Start the game, sign in with your Crew On Set! account, and play with your crew." },
+  {
+    id: "step-1",
+    title: "Download the installer",
+    text: 'Click "Download the Game" above to get the latest CrewOnSet-Setup package.',
+  },
+  {
+    id: "step-2",
+    title: "Run the installer",
+    text: "Open the downloaded file and follow the on-screen setup wizard.",
+  },
+  {
+    id: "step-3",
+    title: "Choose an install location",
+    text: "Pick a drive with enough free space, ideally an SSD for faster load times.",
+  },
+  {
+    id: "step-4",
+    title: "Launch and sign in",
+    text: "Start the game, sign in with your Crew On Set! account, and play with your crew.",
+  },
 ]);
 
 /* ------------------------------------------------------------- game build */
@@ -554,6 +593,8 @@ export type BugReport = {
   attachmentName?: string;
   /** Existing URL/data for the optional attachment, when available. */
   attachmentUrl?: string;
+  /** MIME type captured with the attachment for reliable previews. */
+  attachmentType?: string;
   /** Admin-only triage state. Never shown in the player portal. */
   status: BugStatus;
 };
@@ -585,8 +626,7 @@ export const bugReportsStore = createStore<BugReport>("cos.bugReports", [
     playerName: "BoomBuddy",
     playerId: "COS-0002",
     category: "Audio",
-    description:
-      "Boom mic audio keeps clipping even when the meter stays in the green range.",
+    description: "Boom mic audio keeps clipping even when the meter stays in the green range.",
     submittedAt: "2026-08-26T15:02:00.000Z",
     status: "Investigating",
   },
@@ -595,8 +635,7 @@ export const bugReportsStore = createStore<BugReport>("cos.bugReports", [
     playerName: "LightLeak",
     playerId: "COS-0003",
     category: "Graphics / Visual",
-    description:
-      "Softbox diffusion renders as a black square on low graphics settings.",
+    description: "Softbox diffusion renders as a black square on low graphics settings.",
     submittedAt: "2026-08-22T11:40:00.000Z",
     status: "Resolved",
   },
@@ -619,21 +658,15 @@ export type PlayerReport = {
   attachmentName?: string;
   /** Existing URL/data for the optional attachment, when available. */
   attachmentUrl?: string;
+  /** MIME type captured with the attachment for reliable previews. */
+  attachmentType?: string;
   /** Admin-only triage state. Never shown in the player portal. */
   status: PlayerReportStatus;
 };
 
-export const playerReportTypes = [
-  "Trolling",
-  "Negative Attitude",
-  "Verbal Abuse",
-  "Other",
-];
+export const playerReportTypes = ["Trolling", "Negative Attitude", "Verbal Abuse", "Other"];
 
-export const playerReportsStore = createStore<PlayerReport>(
-  "cos.playerReports",
-  []
-);
+export const playerReportsStore = createStore<PlayerReport>("cos.playerReports", []);
 
 /* --------------------------------------------------------- equipped loadout */
 
@@ -652,21 +685,25 @@ export type LoadoutPiece = {
 export const loadoutStore = createStore<LoadoutPiece>("cos.loadout", [
   { slot: "Head", itemName: "Crew Cap", initials: "CC", gradient: "from-slate-400 to-slate-600" },
   { slot: "Hair", itemName: "Buzz Cut", initials: "BZ", gradient: "from-amber-400 to-orange-600" },
-  { slot: "Shirt", itemName: "PA Windbreaker", initials: "PA", gradient: "from-sky-400 to-blue-600" },
-  { slot: "Accessory", itemName: "Boom Headphones", initials: "BH", gradient: "from-emerald-400 to-teal-600" },
+  {
+    slot: "Shirt",
+    itemName: "PA Windbreaker",
+    initials: "PA",
+    gradient: "from-sky-400 to-blue-600",
+  },
+  {
+    slot: "Accessory",
+    itemName: "Boom Headphones",
+    initials: "BH",
+    gradient: "from-emerald-400 to-teal-600",
+  },
   { slot: "Shoes", itemName: null },
 ]);
 
 /* ------------------------------------------------------ admin activity log */
 
 export type AdminActivityKind =
-  | "player"
-  | "news"
-  | "gallery"
-  | "game"
-  | "announcement"
-  | "almanac"
-  | "bug";
+  "player" | "news" | "gallery" | "game" | "announcement" | "almanac" | "bug";
 
 export type AdminActivity = {
   id: string;
@@ -677,12 +714,48 @@ export type AdminActivity = {
 };
 
 export const adminActivityStore = createStore<AdminActivity>("cos.admin.activity", [
-  { id: "aa-1", kind: "player", label: "Player status changed", detail: "FinalTake was banned until Sep 12, 2026.", createdAt: "2026-08-30T14:20:00.000Z" },
-  { id: "aa-2", kind: "game", label: "Game build uploaded", detail: "Version 0.9.4 (build 940) is now live.", createdAt: "2026-08-27T08:05:00.000Z" },
-  { id: "aa-3", kind: "announcement", label: "Announcement sent", detail: "Season 3 production slate is live — all players.", createdAt: "2026-08-27T09:12:00.000Z" },
-  { id: "aa-4", kind: "player", label: "Player progress reset", detail: "CutToChaos progression was reset on request.", createdAt: "2026-08-25T17:44:00.000Z" },
-  { id: "aa-5", kind: "gallery", label: "Gallery updated", detail: "Added 6 new set-photography stills.", createdAt: "2026-08-24T10:30:00.000Z" },
-  { id: "aa-6", kind: "news", label: "News article published", detail: '"Inside the Studio B rebuild" went live.', createdAt: "2026-08-21T12:00:00.000Z" },
+  {
+    id: "aa-1",
+    kind: "player",
+    label: "Player status changed",
+    detail: "FinalTake was banned until Sep 12, 2026.",
+    createdAt: "2026-08-30T14:20:00.000Z",
+  },
+  {
+    id: "aa-2",
+    kind: "game",
+    label: "Game build uploaded",
+    detail: "Version 0.9.4 (build 940) is now live.",
+    createdAt: "2026-08-27T08:05:00.000Z",
+  },
+  {
+    id: "aa-3",
+    kind: "announcement",
+    label: "Announcement sent",
+    detail: "Season 3 production slate is live — all players.",
+    createdAt: "2026-08-27T09:12:00.000Z",
+  },
+  {
+    id: "aa-4",
+    kind: "player",
+    label: "Player progress reset",
+    detail: "CutToChaos progression was reset on request.",
+    createdAt: "2026-08-25T17:44:00.000Z",
+  },
+  {
+    id: "aa-5",
+    kind: "gallery",
+    label: "Gallery updated",
+    detail: "Added 6 new set-photography stills.",
+    createdAt: "2026-08-24T10:30:00.000Z",
+  },
+  {
+    id: "aa-6",
+    kind: "news",
+    label: "News article published",
+    detail: '"Inside the Studio B rebuild" went live.',
+    createdAt: "2026-08-21T12:00:00.000Z",
+  },
 ]);
 
 /** Record a new admin action (newest first, capped for the demo). */
@@ -710,11 +783,51 @@ export type AdminMessage = {
 };
 
 export const messagesStore = createStore<AdminMessage>("cos.admin.messages", [
-  { id: "MSG-771", subject: "Partnership follow-up — Northline Optics", sender: "Dana Cruz", email: "partners@northlineoptics.example", body: "Following up on our lens-wall placement proposal for the next slate.", createdAt: "2026-08-30T09:15:00.000Z", status: "Unread" },
-  { id: "MSG-770", subject: "Press kit request", sender: "Miguel Tan", email: "miguel@filmbeat.example", body: "Could we get the high-resolution key art for a feature piece?", createdAt: "2026-08-29T13:48:00.000Z", status: "Unread" },
-  { id: "MSG-769", subject: "Co-op lobby keeps dropping", sender: "SlateRunner", email: "slate@example.com", body: "Our four-player lobby disconnects around the second take every session.", createdAt: "2026-08-28T20:02:00.000Z", status: "In Progress" },
-  { id: "MSG-767", subject: "Localization volunteer", sender: "Ana Reyes", email: "ana@example.com", body: "Happy to help with Filipino localization for the playtest build.", createdAt: "2026-08-26T07:31:00.000Z", status: "Resolved" },
-  { id: "MSG-765", subject: "Refund on duplicate top-up", sender: "ColorGrade", email: "color@example.com", body: "I was charged twice for the 2,600 C-Coin bundle.", createdAt: "2026-08-24T18:19:00.000Z", status: "Resolved" },
+  {
+    id: "MSG-771",
+    subject: "Partnership follow-up — Northline Optics",
+    sender: "Dana Cruz",
+    email: "partners@northlineoptics.example",
+    body: "Following up on our lens-wall placement proposal for the next slate.",
+    createdAt: "2026-08-30T09:15:00.000Z",
+    status: "Unread",
+  },
+  {
+    id: "MSG-770",
+    subject: "Press kit request",
+    sender: "Miguel Tan",
+    email: "miguel@filmbeat.example",
+    body: "Could we get the high-resolution key art for a feature piece?",
+    createdAt: "2026-08-29T13:48:00.000Z",
+    status: "Unread",
+  },
+  {
+    id: "MSG-769",
+    subject: "Co-op lobby keeps dropping",
+    sender: "SlateRunner",
+    email: "slate@example.com",
+    body: "Our four-player lobby disconnects around the second take every session.",
+    createdAt: "2026-08-28T20:02:00.000Z",
+    status: "In Progress",
+  },
+  {
+    id: "MSG-767",
+    subject: "Localization volunteer",
+    sender: "Ana Reyes",
+    email: "ana@example.com",
+    body: "Happy to help with Filipino localization for the playtest build.",
+    createdAt: "2026-08-26T07:31:00.000Z",
+    status: "Resolved",
+  },
+  {
+    id: "MSG-765",
+    subject: "Refund on duplicate top-up",
+    sender: "ColorGrade",
+    email: "color@example.com",
+    body: "I was charged twice for the 2,600 C-Coin bundle.",
+    createdAt: "2026-08-24T18:19:00.000Z",
+    status: "Resolved",
+  },
 ]);
 
 /* ---------------------------------------------------------- content library */

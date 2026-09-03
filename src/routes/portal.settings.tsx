@@ -6,7 +6,10 @@ export const Route = createFileRoute("/portal/settings")({
       { title: "Settings — Crew On Set!" },
       { name: "description", content: "Manage your account details and gameplay preferences." },
       { property: "og:title", content: "Settings — Crew On Set!" },
-      { property: "og:description", content: "Manage your account details and gameplay preferences." },
+      {
+        property: "og:description",
+        content: "Manage your account details and gameplay preferences.",
+      },
     ],
   }),
   component: SettingsPage,
@@ -38,6 +41,7 @@ import {
   playerReportsStore,
   playerReportTypes,
   uid,
+  readAttachmentAsDataUrl,
 } from "@/lib/demo/store";
 
 /** Accepted attachment MIME types for reports: images and PDF only. */
@@ -49,8 +53,7 @@ function isAllowedAttachment(file: File): boolean {
     (type) =>
       file.type === type ||
       file.type.startsWith(type) ||
-      (type === "application/pdf" &&
-        file.name.toLowerCase().endsWith(".pdf"))
+      (type === "application/pdf" && file.name.toLowerCase().endsWith(".pdf")),
   );
 }
 
@@ -115,49 +118,36 @@ const defaultPreferences: Preferences = {
 function SettingsPage() {
   const [section, setSection] = useState("Account");
 
-  const [account, setAccount] =
-    useState<AccountData>(defaultAccount);
+  const [account, setAccount] = useState<AccountData>(defaultAccount);
 
-  const [savedAccount, setSavedAccount] =
-    useState<AccountData>(defaultAccount);
+  const [savedAccount, setSavedAccount] = useState<AccountData>(defaultAccount);
 
-  const [preferences, setPreferences] =
-    useState<Preferences>(defaultPreferences);
+  const [preferences, setPreferences] = useState<Preferences>(defaultPreferences);
 
-  const [savedPreferences, setSavedPreferences] =
-    useState<Preferences>(defaultPreferences);
+  const [savedPreferences, setSavedPreferences] = useState<Preferences>(defaultPreferences);
 
-  const [editing, setEditing] =
-    useState<string | null>(null);
+  const [editing, setEditing] = useState<string | null>(null);
 
   const [draftValue, setDraftValue] = useState("");
 
   const [deleteOpen, setDeleteOpen] = useState(false);
   const [passwordOpen, setPasswordOpen] = useState(false);
 
-  const [currentPassword, setCurrentPassword] =
-    useState("");
+  const [currentPassword, setCurrentPassword] = useState("");
 
-  const [newPassword, setNewPassword] =
-    useState("");
+  const [newPassword, setNewPassword] = useState("");
 
-  const [confirmPassword, setConfirmPassword] =
-    useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
 
-  const [showCurrentPassword, setShowCurrentPassword] =
-    useState(false);
+  const [showCurrentPassword, setShowCurrentPassword] = useState(false);
 
-  const [showNewPassword, setShowNewPassword] =
-    useState(false);
+  const [showNewPassword, setShowNewPassword] = useState(false);
 
-  const [showConfirmPassword, setShowConfirmPassword] =
-    useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
-  const [passwordError, setPasswordError] =
-    useState("");
+  const [passwordError, setPasswordError] = useState("");
 
-  const [passwordSuccess, setPasswordSuccess] =
-    useState(false);
+  const [passwordSuccess, setPasswordSuccess] = useState(false);
 
   const [deleteText, setDeleteText] = useState("");
   const [deleteError, setDeleteError] = useState("");
@@ -176,16 +166,13 @@ function SettingsPage() {
   const [playerReportType, setPlayerReportType] = useState("");
   const [playerReportUsername, setPlayerReportUsername] = useState("");
   const [playerReportDescription, setPlayerReportDescription] = useState("");
-  const [playerReportAttachment, setPlayerReportAttachment] =
-    useState<File | null>(null);
+  const [playerReportAttachment, setPlayerReportAttachment] = useState<File | null>(null);
   const [playerReportError, setPlayerReportError] = useState("");
   const [playerReportSubmitted, setPlayerReportSubmitted] = useState(false);
   const playerReportAttachmentInput = useRef<HTMLInputElement>(null);
 
-
   const [message, setMessage] = useState("");
-  const [messageType, setMessageType] =
-    useState<"success" | "error">("success");
+  const [messageType, setMessageType] = useState<"success" | "error">("success");
 
   const [loaded, setLoaded] = useState(false);
 
@@ -197,11 +184,9 @@ function SettingsPage() {
 
   useEffect(() => {
     try {
-      const storedAccount =
-        localStorage.getItem("player-account");
+      const storedAccount = localStorage.getItem("player-account");
 
-      const storedPreferences =
-        localStorage.getItem("player-preferences");
+      const storedPreferences = localStorage.getItem("player-preferences");
 
       const loadedAccount = storedAccount
         ? {
@@ -223,9 +208,7 @@ function SettingsPage() {
       setPreferences(loadedPreferences);
       setSavedPreferences(loadedPreferences);
     } catch {
-      console.error(
-        "Unable to load player settings."
-      );
+      console.error("Unable to load player settings.");
     } finally {
       setLoaded(true);
     }
@@ -236,19 +219,14 @@ function SettingsPage() {
   ========================================================= */
 
   const hasUnsavedChanges =
-    JSON.stringify(account) !==
-      JSON.stringify(savedAccount) ||
-    JSON.stringify(preferences) !==
-      JSON.stringify(savedPreferences);
+    JSON.stringify(account) !== JSON.stringify(savedAccount) ||
+    JSON.stringify(preferences) !== JSON.stringify(savedPreferences);
 
   /* =========================================================
      MESSAGE
   ========================================================= */
 
-  const showMessage = (
-    text: string,
-    type: "success" | "error" = "success"
-  ) => {
+  const showMessage = (text: string, type: "success" | "error" = "success") => {
     setMessage(text);
     setMessageType(type);
 
@@ -263,15 +241,9 @@ function SettingsPage() {
 
   const saveChanges = () => {
     try {
-      localStorage.setItem(
-        "player-account",
-        JSON.stringify(account)
-      );
+      localStorage.setItem("player-account", JSON.stringify(account));
 
-      localStorage.setItem(
-        "player-preferences",
-        JSON.stringify(preferences)
-      );
+      localStorage.setItem("player-preferences", JSON.stringify(preferences));
 
       setSavedAccount(account);
       setSavedPreferences(preferences);
@@ -279,14 +251,9 @@ function SettingsPage() {
       setEditing(null);
       setDraftValue("");
 
-      showMessage(
-        "Your settings have been saved."
-      );
+      showMessage("Your settings have been saved.");
     } catch {
-      showMessage(
-        "Unable to save your settings.",
-        "error"
-      );
+      showMessage("Unable to save your settings.", "error");
     }
   };
 
@@ -301,22 +268,14 @@ function SettingsPage() {
     setEditing(null);
     setDraftValue("");
 
-    showMessage(
-      "Unsaved changes were discarded."
-    );
+    showMessage("Unsaved changes were discarded.");
   };
 
   /* =========================================================
      EDIT ACCOUNT FIELD
   ========================================================= */
 
-  const startEditing = (
-    field:
-      | "Username"
-      | "Email"
-      | "Display Name",
-    value: string
-  ) => {
+  const startEditing = (field: "Username" | "Email" | "Display Name", value: string) => {
     setEditing(field);
     setDraftValue(value);
   };
@@ -325,32 +284,16 @@ function SettingsPage() {
      SAVE ACCOUNT FIELD
   ========================================================= */
 
-  const saveAccountField = (
-    field:
-      | "Username"
-      | "Email"
-      | "Display Name"
-  ) => {
+  const saveAccountField = (field: "Username" | "Email" | "Display Name") => {
     const value = draftValue.trim();
 
     if (!value) {
-      showMessage(
-        `${field} cannot be empty.`,
-        "error"
-      );
+      showMessage(`${field} cannot be empty.`, "error");
       return;
     }
 
-    if (
-      field === "Email" &&
-      !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(
-        value
-      )
-    ) {
-      showMessage(
-        "Please enter a valid email address.",
-        "error"
-      );
+    if (field === "Email" && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)) {
+      showMessage("Please enter a valid email address.", "error");
       return;
     }
 
@@ -383,30 +326,18 @@ function SettingsPage() {
      AVATAR
   ========================================================= */
 
-  const handleAvatarChange = (
-    event: ChangeEvent<HTMLInputElement>
-  ) => {
+  const handleAvatarChange = (event: ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
 
     if (!file) return;
 
-    if (
-      !["image/jpeg", "image/png"].includes(
-        file.type
-      )
-    ) {
-      showMessage(
-        "Please select a JPG or PNG image.",
-        "error"
-      );
+    if (!["image/jpeg", "image/png"].includes(file.type)) {
+      showMessage("Please select a JPG or PNG image.", "error");
       return;
     }
 
     if (file.size > 5 * 1024 * 1024) {
-      showMessage(
-        "Avatar must be smaller than 5 MB.",
-        "error"
-      );
+      showMessage("Avatar must be smaller than 5 MB.", "error");
       return;
     }
 
@@ -416,10 +347,7 @@ function SettingsPage() {
       const result = reader.result;
 
       if (typeof result !== "string") {
-        showMessage(
-          "Unable to load the selected image.",
-          "error"
-        );
+        showMessage("Unable to load the selected image.", "error");
         return;
       }
 
@@ -430,10 +358,7 @@ function SettingsPage() {
     };
 
     reader.onerror = () => {
-      showMessage(
-        "Unable to load the selected image.",
-        "error"
-      );
+      showMessage("Unable to load the selected image.", "error");
     };
 
     reader.readAsDataURL(file);
@@ -449,48 +374,29 @@ function SettingsPage() {
     setPasswordError("");
     setPasswordSuccess(false);
 
-    if (
-      !currentPassword ||
-      !newPassword ||
-      !confirmPassword
-    ) {
-      setPasswordError(
-        "Please complete all password fields."
-      );
+    if (!currentPassword || !newPassword || !confirmPassword) {
+      setPasswordError("Please complete all password fields.");
       return;
     }
 
     if (newPassword.length < 8) {
-      setPasswordError(
-        "Your new password must contain at least 8 characters."
-      );
+      setPasswordError("Your new password must contain at least 8 characters.");
       return;
     }
 
     if (newPassword !== confirmPassword) {
-      setPasswordError(
-        "New passwords do not match."
-      );
+      setPasswordError("New passwords do not match.");
       return;
     }
 
-    const savedPassword =
-      localStorage.getItem("player-password");
+    const savedPassword = localStorage.getItem("player-password");
 
-    if (
-      savedPassword &&
-      currentPassword !== savedPassword
-    ) {
-      setPasswordError(
-        "Current password is incorrect."
-      );
+    if (savedPassword && currentPassword !== savedPassword) {
+      setPasswordError("Current password is incorrect.");
       return;
     }
 
-    localStorage.setItem(
-      "player-password",
-      newPassword
-    );
+    localStorage.setItem("player-password", newPassword);
 
     setPasswordSuccess(true);
 
@@ -512,30 +418,20 @@ function SettingsPage() {
     setDeleteError("");
 
     if (deleteText !== "DELETE") {
-      setDeleteError(
-        "Type DELETE to confirm."
-      );
+      setDeleteError("Type DELETE to confirm.");
       return;
     }
 
     if (deletePassword !== DEMO_PASSWORD) {
-      setDeleteError(
-        "Incorrect password. This is a demo — try \"player\"."
-      );
+      setDeleteError('Incorrect password. This is a demo — try "player".');
       return;
     }
 
-    localStorage.removeItem(
-      "player-account"
-    );
+    localStorage.removeItem("player-account");
 
-    localStorage.removeItem(
-      "player-preferences"
-    );
+    localStorage.removeItem("player-preferences");
 
-    localStorage.removeItem(
-      "player-password"
-    );
+    localStorage.removeItem("player-password");
 
     setAccount(defaultAccount);
     setSavedAccount(defaultAccount);
@@ -547,9 +443,7 @@ function SettingsPage() {
     setDeleteText("");
     setDeletePassword("");
 
-    showMessage(
-      "Your player account data has been cleared."
-    );
+    showMessage("Your player account data has been cleared.");
   };
 
   /* =========================================================
@@ -576,9 +470,7 @@ function SettingsPage() {
     setBugSubmitted(false);
   };
 
-  const handleBugAttachmentChange = (
-    event: ChangeEvent<HTMLInputElement>
-  ) => {
+  const handleBugAttachmentChange = (event: ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (!file) {
       setBugAttachment(null);
@@ -594,7 +486,7 @@ function SettingsPage() {
     setBugAttachment(file);
   };
 
-  const submitBugReport = () => {
+  const submitBugReport = async () => {
     setBugError("");
 
     if (!bugCategory.trim()) {
@@ -617,6 +509,16 @@ function SettingsPage() {
       return;
     }
 
+    let attachmentUrl = "";
+    if (bugAttachment) {
+      try {
+        attachmentUrl = await readAttachmentAsDataUrl(bugAttachment);
+      } catch {
+        setBugError("We could not read that attachment. Please try again.");
+        return;
+      }
+    }
+
     bugReportsStore.set([
       ...bugReportsStore.get(),
       {
@@ -627,6 +529,8 @@ function SettingsPage() {
         description: bugDescription.trim(),
         email: bugEmail.trim(),
         attachmentName: bugAttachment?.name,
+        attachmentUrl: attachmentUrl || undefined,
+        attachmentType: bugAttachment?.type,
         submittedAt: new Date().toISOString(),
         status: "New",
       },
@@ -663,9 +567,7 @@ function SettingsPage() {
     setPlayerReportSubmitted(false);
   };
 
-  const handlePlayerReportAttachmentChange = (
-    event: ChangeEvent<HTMLInputElement>
-  ) => {
+  const handlePlayerReportAttachmentChange = (event: ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (!file) {
       setPlayerReportAttachment(null);
@@ -681,7 +583,7 @@ function SettingsPage() {
     setPlayerReportAttachment(file);
   };
 
-  const submitPlayerReport = () => {
+  const submitPlayerReport = async () => {
     setPlayerReportError("");
 
     if (!playerReportType.trim()) {
@@ -699,12 +601,19 @@ function SettingsPage() {
       return;
     }
 
-    if (
-      playerReportAttachment &&
-      !isAllowedAttachment(playerReportAttachment)
-    ) {
+    if (playerReportAttachment && !isAllowedAttachment(playerReportAttachment)) {
       setPlayerReportError("Only image or PDF files are allowed.");
       return;
+    }
+
+    let attachmentUrl = "";
+    if (playerReportAttachment) {
+      try {
+        attachmentUrl = await readAttachmentAsDataUrl(playerReportAttachment);
+      } catch {
+        setPlayerReportError("We could not read that attachment. Please try again.");
+        return;
+      }
     }
 
     playerReportsStore.set([
@@ -717,6 +626,8 @@ function SettingsPage() {
         description: playerReportDescription.trim(),
         reportedUsername: playerReportUsername.trim(),
         attachmentName: playerReportAttachment?.name,
+        attachmentUrl: attachmentUrl || undefined,
+        attachmentType: playerReportAttachment?.type,
         submittedAt: new Date().toISOString(),
         status: "New",
       },
@@ -733,14 +644,11 @@ function SettingsPage() {
      DEACTIVATE ACCOUNT (SIMULATED)
   ========================================================= */
 
-
   /* =========================================================
      TOGGLE
   ========================================================= */
 
-  const togglePreference = (
-    key: keyof Preferences
-  ) => {
+  const togglePreference = (key: keyof Preferences) => {
     setPreferences((prev) => ({
       ...prev,
       [key]: !prev[key],
@@ -783,17 +691,13 @@ function SettingsPage() {
 
   return (
     <div className="min-h-screen bg-[#0d121c] px-4 pb-20 text-white sm:px-6 lg:px-8">
-
       <div className="mx-auto max-w-[1450px] pt-8 sm:pt-10">
-
         {/* =====================================================
             HEADER
         ===================================================== */}
 
         <header className="flex flex-col justify-between gap-5 sm:flex-row sm:items-end">
-
           <div>
-
             <p className="text-xs font-black uppercase tracking-[.18em] text-coral">
               ACCOUNT CONTROL
             </p>
@@ -801,13 +705,11 @@ function SettingsPage() {
             <h1 className="mt-2 text-4xl font-black uppercase tracking-tight text-white sm:text-5xl">
               Settings
             </h1>
-
           </div>
 
           {/* SAVE / DISCARD */}
 
           <div className="flex items-center gap-2">
-
             {hasUnsavedChanges && (
               <button
                 type="button"
@@ -828,9 +730,7 @@ function SettingsPage() {
               <Save className="size-4" />
               SAVE CHANGES
             </button>
-
           </div>
-
         </header>
 
         {/* =====================================================
@@ -845,7 +745,6 @@ function SettingsPage() {
                 : "border-coral/30 bg-[#24151a] text-white"
             }`}
           >
-
             {messageType === "success" ? (
               <Check className="size-4 text-yellow" />
             ) : (
@@ -853,7 +752,6 @@ function SettingsPage() {
             )}
 
             {message}
-
           </div>
         )}
 
@@ -862,40 +760,29 @@ function SettingsPage() {
         ===================================================== */}
 
         <div className="mt-7 grid gap-6 lg:grid-cols-[220px_1fr]">
-
           {/* ===================================================
               SIDEBAR
           =================================================== */}
 
           <aside className="h-fit rounded-xl border border-white/[0.07] bg-[#151c29] p-2">
-
             {sections.map((item) => (
               <button
                 type="button"
                 key={item.name}
-                onClick={() =>
-                  setSection(item.name)
-                }
+                onClick={() => setSection(item.name)}
                 className={`flex w-full items-center gap-3 rounded-md px-4 py-3 text-left text-sm font-bold transition ${
                   section === item.name
                     ? "bg-[#0d121c] text-white shadow-sm"
                     : "text-white/40 hover:bg-white/[0.04] hover:text-white/75"
                 }`}
               >
-
                 <item.icon
-                  className={`size-4 ${
-                    section === item.name
-                      ? "text-yellow"
-                      : "text-white/30"
-                  }`}
+                  className={`size-4 ${section === item.name ? "text-yellow" : "text-white/30"}`}
                 />
 
                 {item.name}
-
               </button>
             ))}
-
           </aside>
 
           {/* ===================================================
@@ -903,18 +790,14 @@ function SettingsPage() {
           =================================================== */}
 
           <main>
-
             {/* =================================================
                 ACCOUNT
             ================================================= */}
 
             {section === "Account" && (
               <section className="overflow-hidden rounded-xl border border-white/[0.07] bg-[#151c29]">
-
                 <div className="flex flex-col justify-between gap-4 border-b border-white/[0.07] p-6 sm:flex-row sm:items-center">
-
                   <div>
-
                     <p className="text-[10px] font-black uppercase tracking-[.18em] text-coral">
                       ACCOUNT
                     </p>
@@ -924,10 +807,8 @@ function SettingsPage() {
                     </h2>
 
                     <p className="mt-1 text-sm text-white/35">
-                      Manage your sign-in and identity
-                      information.
+                      Manage your sign-in and identity information.
                     </p>
-
                   </div>
 
                   <button
@@ -942,11 +823,9 @@ function SettingsPage() {
                     <Lock className="size-4" />
                     CHANGE PASSWORD
                   </button>
-
                 </div>
 
                 <div className="divide-y divide-white/[0.07] px-6">
-
                   {/* ACCOUNT FIELDS */}
 
                   {accountRows.map((row) => (
@@ -954,9 +833,7 @@ function SettingsPage() {
                       key={row.label}
                       className="flex flex-col justify-between gap-3 py-5 sm:flex-row sm:items-center"
                     >
-
                       <div className="w-full">
-
                         <p className="text-[10px] font-black uppercase tracking-wider text-white/30">
                           {row.label}
                         </p>
@@ -964,103 +841,63 @@ function SettingsPage() {
                         {editing === row.key ? (
                           <input
                             value={draftValue}
-                            onChange={(event) =>
-                              setDraftValue(
-                                event.target.value
-                              )
-                            }
+                            onChange={(event) => setDraftValue(event.target.value)}
                             onKeyDown={(event) => {
-                              if (
-                                event.key ===
-                                "Enter"
-                              ) {
-                                saveAccountField(
-                                  row.key
-                                );
+                              if (event.key === "Enter") {
+                                saveAccountField(row.key);
                               }
 
-                              if (
-                                event.key ===
-                                "Escape"
-                              ) {
+                              if (event.key === "Escape") {
                                 setEditing(null);
                                 setDraftValue("");
                               }
                             }}
                             autoFocus
-                            type={
-                              row.key === "Email"
-                                ? "email"
-                                : "text"
-                            }
+                            type={row.key === "Email" ? "email" : "text"}
                             className="mt-2 w-full rounded-md border border-white/10 bg-[#0d121c] px-3 py-2.5 text-sm text-white outline-none transition placeholder:text-white/20 focus:border-coral"
                           />
                         ) : (
-                          <p className="mt-1 font-bold text-white/80">
-                            {row.value}
-                          </p>
+                          <p className="mt-1 font-bold text-white/80">{row.value}</p>
                         )}
-
                       </div>
 
                       <button
                         type="button"
                         onClick={() => {
-                          if (
-                            editing === row.key
-                          ) {
-                            saveAccountField(
-                              row.key
-                            );
+                          if (editing === row.key) {
+                            saveAccountField(row.key);
                           } else {
-                            startEditing(
-                              row.key,
-                              row.value
-                            );
+                            startEditing(row.key, row.value);
                           }
                         }}
                         className="w-fit rounded-md border border-white/10 px-3 py-2 text-xs font-black text-white/45 transition hover:border-coral hover:text-coral"
                       >
-                        {editing === row.key
-                          ? "DONE"
-                          : "CHANGE"}
+                        {editing === row.key ? "DONE" : "CHANGE"}
                       </button>
-
                     </div>
                   ))}
 
                   {/* AVATAR */}
 
                   <div className="flex flex-col justify-between gap-4 py-5 sm:flex-row sm:items-center">
-
                     <div className="flex items-center gap-4">
-
                       <div className="relative size-16 overflow-hidden rounded-full border-2 border-yellow bg-[#0d121c]">
-
                         <Image
                           src={account.avatar}
                           alt="Player avatar"
                           fill
-                          unoptimized={account.avatar.startsWith(
-                            "data:"
-                          )}
+                          unoptimized={account.avatar.startsWith("data:")}
                           className="object-cover object-[62%_45%]"
                         />
-
                       </div>
 
                       <div>
-
                         <p className="text-[10px] font-black uppercase tracking-wider text-white/30">
                           Avatar
                         </p>
 
-                        <p className="mt-1 text-sm text-white/40">
-                          JPG or PNG, up to 5 MB
-                        </p>
-
+                        <p className="mt-1 text-sm text-white/40">JPG or PNG, up to 5 MB</p>
                       </div>
-
                     </div>
 
                     <input
@@ -1073,37 +910,25 @@ function SettingsPage() {
 
                     <button
                       type="button"
-                      onClick={() =>
-                        fileInput.current?.click()
-                      }
+                      onClick={() => fileInput.current?.click()}
                       className="w-fit rounded-md border border-white/10 px-3 py-2 text-xs font-black text-white/45 transition hover:border-coral hover:text-coral"
                     >
                       CHANGE
                     </button>
-
                   </div>
-
                 </div>
 
                 {/* DELETE ACCOUNT */}
 
                 <div className="border-t border-coral/20 bg-coral/[0.04] p-6">
-
                   <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
-
                     <div>
-
-                      <h3 className="font-black uppercase text-coral">
-                        Delete Account
-                      </h3>
+                      <h3 className="font-black uppercase text-coral">Delete Account</h3>
 
                       <p className="mt-1 max-w-xl text-sm leading-relaxed text-white/40">
-                        Deleting your account is permanent.
-                        Your progression, productions,
-                        purchases, and social connections
-                        cannot be recovered.
+                        Deleting your account is permanent. Your progression, productions,
+                        purchases, and social connections cannot be recovered.
                       </p>
-
                     </div>
 
                     <button
@@ -1118,11 +943,8 @@ function SettingsPage() {
                       <Trash2 className="size-4" />
                       DELETE ACCOUNT
                     </button>
-
                   </div>
-
                 </div>
-
               </section>
             )}
 
@@ -1132,9 +954,7 @@ function SettingsPage() {
 
             {section === "Profile" && (
               <section className="overflow-hidden rounded-xl border border-white/[0.07] bg-[#151c29]">
-
                 <div className="border-b border-white/[0.07] p-7">
-
                   <p className="text-[10px] font-black uppercase tracking-[.18em] text-coral">
                     PROFILE CONTROL
                   </p>
@@ -1144,55 +964,32 @@ function SettingsPage() {
                   </h2>
 
                   <p className="mt-2 text-sm text-white/40">
-                    Control what other players can see
-                    on your profile.
+                    Control what other players can see on your profile.
                   </p>
-
                 </div>
 
                 <div className="space-y-3 p-7">
-
                   <PreferenceRow
                     label="Show Career Information"
                     description="Display your career overview and achievements."
-                    checked={
-                      preferences.showCareerInfo
-                    }
-                    onChange={() =>
-                      togglePreference(
-                        "showCareerInfo"
-                      )
-                    }
+                    checked={preferences.showCareerInfo}
+                    onChange={() => togglePreference("showCareerInfo")}
                   />
 
                   <PreferenceRow
                     label="Show Crew Activity"
                     description="Allow other players to see your recent crew activity."
-                    checked={
-                      preferences.showCrewActivity
-                    }
-                    onChange={() =>
-                      togglePreference(
-                        "showCrewActivity"
-                      )
-                    }
+                    checked={preferences.showCrewActivity}
+                    onChange={() => togglePreference("showCrewActivity")}
                   />
 
                   <PreferenceRow
                     label="Public Profile"
                     description="Allow other players to open and view your profile."
-                    checked={
-                      preferences.profileVisibility
-                    }
-                    onChange={() =>
-                      togglePreference(
-                        "profileVisibility"
-                      )
-                    }
+                    checked={preferences.profileVisibility}
+                    onChange={() => togglePreference("profileVisibility")}
                   />
-
                 </div>
-
               </section>
             )}
 
@@ -1202,9 +999,7 @@ function SettingsPage() {
 
             {section === "Display" && (
               <section className="overflow-hidden rounded-xl border border-white/[0.07] bg-[#151c29]">
-
                 <div className="border-b border-white/[0.07] p-7">
-
                   <p className="text-[10px] font-black uppercase tracking-[.18em] text-coral">
                     DISPLAY CONTROL
                   </p>
@@ -1214,14 +1009,12 @@ function SettingsPage() {
                   </h2>
 
                   <p className="mt-2 text-sm text-white/40">
-                    Fine-tune the portal's look and feel. These
-                    preferences are saved to this device.
+                    Fine-tune the portal's look and feel. These preferences are saved to this
+                    device.
                   </p>
-
                 </div>
 
                 <div className="space-y-3 p-7">
-
                   <PreferenceRow
                     label="Compact Mode"
                     description="Reduce spacing to fit more information on screen."
@@ -1249,9 +1042,7 @@ function SettingsPage() {
                     checked={preferences.largeText}
                     onChange={() => togglePreference("largeText")}
                   />
-
                 </div>
-
               </section>
             )}
 
@@ -1261,9 +1052,7 @@ function SettingsPage() {
 
             {section === "Privacy" && (
               <section className="overflow-hidden rounded-xl border border-white/[0.07] bg-[#151c29]">
-
                 <div className="border-b border-white/[0.07] p-7">
-
                   <p className="text-[10px] font-black uppercase tracking-[.18em] text-coral">
                     PRIVACY CONTROL
                   </p>
@@ -1273,55 +1062,32 @@ function SettingsPage() {
                   </h2>
 
                   <p className="mt-2 text-sm text-white/40">
-                    Manage your visibility and personal
-                    information settings.
+                    Manage your visibility and personal information settings.
                   </p>
-
                 </div>
 
                 <div className="space-y-3 p-7">
-
                   <PreferenceRow
                     label="Profile Visibility"
                     description="Let other players find and view your player profile."
-                    checked={
-                      preferences.profileVisibility
-                    }
-                    onChange={() =>
-                      togglePreference(
-                        "profileVisibility"
-                      )
-                    }
+                    checked={preferences.profileVisibility}
+                    onChange={() => togglePreference("profileVisibility")}
                   />
 
                   <PreferenceRow
                     label="Career Information"
                     description="Show your career statistics and achievements."
-                    checked={
-                      preferences.showCareerInfo
-                    }
-                    onChange={() =>
-                      togglePreference(
-                        "showCareerInfo"
-                      )
-                    }
+                    checked={preferences.showCareerInfo}
+                    onChange={() => togglePreference("showCareerInfo")}
                   />
 
                   <PreferenceRow
                     label="Crew Activity"
                     description="Show your activity to current crew members."
-                    checked={
-                      preferences.showCrewActivity
-                    }
-                    onChange={() =>
-                      togglePreference(
-                        "showCrewActivity"
-                      )
-                    }
+                    checked={preferences.showCrewActivity}
+                    onChange={() => togglePreference("showCrewActivity")}
                   />
-
                 </div>
-
               </section>
             )}
 
@@ -1331,9 +1097,7 @@ function SettingsPage() {
 
             {section === "Notifications" && (
               <section className="overflow-hidden rounded-xl border border-white/[0.07] bg-[#151c29]">
-
                 <div className="border-b border-white/[0.07] p-7">
-
                   <p className="text-[10px] font-black uppercase tracking-[.18em] text-coral">
                     NOTIFICATION CONTROL
                   </p>
@@ -1343,68 +1107,39 @@ function SettingsPage() {
                   </h2>
 
                   <p className="mt-2 text-sm text-white/40">
-                    Choose which player and crew
-                    notifications you receive.
+                    Choose which player and crew notifications you receive.
                   </p>
-
                 </div>
 
                 <div className="space-y-3 p-7">
-
                   <PreferenceRow
                     label="Production Updates"
                     description="Receive updates about productions you are involved in."
-                    checked={
-                      preferences.productionUpdates
-                    }
-                    onChange={() =>
-                      togglePreference(
-                        "productionUpdates"
-                      )
-                    }
+                    checked={preferences.productionUpdates}
+                    onChange={() => togglePreference("productionUpdates")}
                   />
 
                   <PreferenceRow
                     label="Friend Requests"
                     description="Receive notifications when players send you friend requests."
-                    checked={
-                      preferences.friendRequests
-                    }
-                    onChange={() =>
-                      togglePreference(
-                        "friendRequests"
-                      )
-                    }
+                    checked={preferences.friendRequests}
+                    onChange={() => togglePreference("friendRequests")}
                   />
 
                   <PreferenceRow
                     label="Crew Invitations"
                     description="Receive notifications when a crew invites you."
-                    checked={
-                      preferences.crewInvites
-                    }
-                    onChange={() =>
-                      togglePreference(
-                        "crewInvites"
-                      )
-                    }
+                    checked={preferences.crewInvites}
+                    onChange={() => togglePreference("crewInvites")}
                   />
 
                   <PreferenceRow
                     label="Email Notifications"
                     description="Receive important player updates through email."
-                    checked={
-                      preferences.emailNotifications
-                    }
-                    onChange={() =>
-                      togglePreference(
-                        "emailNotifications"
-                      )
-                    }
+                    checked={preferences.emailNotifications}
+                    onChange={() => togglePreference("emailNotifications")}
                   />
-
                 </div>
-
               </section>
             )}
 
@@ -1414,15 +1149,11 @@ function SettingsPage() {
 
             {section === "Support" && (
               <div className="space-y-6">
-
                 {/* REPORT A BUG */}
 
                 <section className="overflow-hidden rounded-xl border border-white/[0.07] bg-[#151c29]">
-
                   <div className="flex flex-col justify-between gap-4 border-b border-white/[0.07] p-7 sm:flex-row sm:items-center">
-
                     <div>
-
                       <p className="text-[10px] font-black uppercase tracking-[.18em] text-coral">
                         SUPPORT
                       </p>
@@ -1432,10 +1163,8 @@ function SettingsPage() {
                       </h2>
 
                       <p className="mt-2 text-sm text-white/40">
-                        Run into a glitch on set? Let the crew know so we can
-                        fix it.
+                        Run into a glitch on set? Let the crew know so we can fix it.
                       </p>
-
                     </div>
 
                     <button
@@ -1446,26 +1175,21 @@ function SettingsPage() {
                       <Bug className="size-4" />
                       REPORT A BUG
                     </button>
-
                   </div>
 
                   <div className="p-7">
                     <p className="text-sm text-white/40">
-                      Include as much detail as possible — what you were
-                      doing, what happened, and how to reproduce it.
+                      Include as much detail as possible — what you were doing, what happened, and
+                      how to reproduce it.
                     </p>
                   </div>
-
                 </section>
 
                 {/* REPORT A PLAYER */}
 
                 <section className="overflow-hidden rounded-xl border border-white/[0.07] bg-[#151c29]">
-
                   <div className="flex flex-col justify-between gap-4 border-b border-white/[0.07] p-7 sm:flex-row sm:items-center">
-
                     <div>
-
                       <p className="text-[10px] font-black uppercase tracking-[.18em] text-coral">
                         SAFETY
                       </p>
@@ -1475,10 +1199,9 @@ function SettingsPage() {
                       </h2>
 
                       <p className="mt-2 text-sm text-white/40">
-                        Experienced bad behavior on set? Flag it so our crew
-                        can review and take action.
+                        Experienced bad behavior on set? Flag it so our crew can review and take
+                        action.
                       </p>
-
                     </div>
 
                     <button
@@ -1489,23 +1212,18 @@ function SettingsPage() {
                       <Flag className="size-4" />
                       REPORT A PLAYER
                     </button>
-
                   </div>
 
                   <div className="p-7">
                     <p className="text-sm text-white/40">
-                      Reports are confidential. Include as much detail as
-                      possible so the crew can investigate fairly.
+                      Reports are confidential. Include as much detail as possible so the crew can
+                      investigate fairly.
                     </p>
                   </div>
-
                 </section>
-
               </div>
             )}
-
           </main>
-
         </div>
       </div>
 
@@ -1518,14 +1236,12 @@ function SettingsPage() {
           className="fixed inset-0 z-[70] grid place-items-center bg-[#05080d]/85 p-5 backdrop-blur-md"
           onClick={closeBugReport}
         >
-
           <section
             role="dialog"
             aria-modal="true"
             className="max-h-[90vh] w-full max-w-lg overflow-y-auto rounded-xl border border-white/[0.09] bg-[#151c29] p-6 shadow-2xl shadow-black/50"
             onClick={(event) => event.stopPropagation()}
           >
-
             <div className="flex items-start justify-between gap-4">
               <div className="grid size-11 shrink-0 place-items-center rounded-md bg-coral/10 text-coral">
                 <Bug className="size-5" />
@@ -1565,10 +1281,8 @@ function SettingsPage() {
                 )}
 
                 <div className="mt-5 space-y-4">
-
                   <label className="block text-[10px] font-black uppercase tracking-wider text-white/35">
                     Bug Category
-
                     <select
                       value={bugCategory}
                       onChange={(event) => setBugCategory(event.target.value)}
@@ -1585,7 +1299,6 @@ function SettingsPage() {
 
                   <label className="block text-[10px] font-black uppercase tracking-wider text-white/35">
                     Email
-
                     <input
                       type="email"
                       value={bugEmail}
@@ -1597,7 +1310,6 @@ function SettingsPage() {
 
                   <label className="block text-[10px] font-black uppercase tracking-wider text-white/35">
                     Bug Description
-
                     <textarea
                       value={bugDescription}
                       onChange={(event) => setBugDescription(event.target.value)}
@@ -1612,7 +1324,6 @@ function SettingsPage() {
                     <span className="ml-1 normal-case text-white/25">
                       (optional — image or PDF)
                     </span>
-
                     <input
                       ref={bugAttachmentInput}
                       type="file"
@@ -1620,7 +1331,6 @@ function SettingsPage() {
                       onChange={handleBugAttachmentChange}
                       className="hidden"
                     />
-
                     <div className="mt-2 flex items-center gap-3">
                       <button
                         type="button"
@@ -1638,8 +1348,7 @@ function SettingsPage() {
                             type="button"
                             onClick={() => {
                               setBugAttachment(null);
-                              if (bugAttachmentInput.current)
-                                bugAttachmentInput.current.value = "";
+                              if (bugAttachmentInput.current) bugAttachmentInput.current.value = "";
                             }}
                             className="text-white/40 transition hover:text-coral"
                             aria-label="Remove attachment"
@@ -1650,11 +1359,9 @@ function SettingsPage() {
                       )}
                     </div>
                   </div>
-
                 </div>
 
                 <div className="mt-6 flex justify-end gap-2">
-
                   <button
                     type="button"
                     onClick={closeBugReport}
@@ -1670,13 +1377,10 @@ function SettingsPage() {
                   >
                     SUBMIT REPORT
                   </button>
-
                 </div>
               </>
             )}
-
           </section>
-
         </div>
       )}
 
@@ -1689,14 +1393,12 @@ function SettingsPage() {
           className="fixed inset-0 z-[70] grid place-items-center bg-[#05080d]/85 p-5 backdrop-blur-md"
           onClick={closePlayerReport}
         >
-
           <section
             role="dialog"
             aria-modal="true"
             className="max-h-[90vh] w-full max-w-lg overflow-y-auto rounded-xl border border-white/[0.09] bg-[#151c29] p-6 shadow-2xl shadow-black/50"
             onClick={(event) => event.stopPropagation()}
           >
-
             <div className="flex items-start justify-between gap-4">
               <div className="grid size-11 shrink-0 place-items-center rounded-md bg-coral/10 text-coral">
                 <Flag className="size-5" />
@@ -1717,8 +1419,7 @@ function SettingsPage() {
             </h2>
 
             <p className="mt-2 text-sm leading-relaxed text-white/45">
-              Tell us what happened. Reports are confidential and reviewed by
-              our crew.
+              Tell us what happened. Reports are confidential and reviewed by our crew.
             </p>
 
             {playerReportSubmitted ? (
@@ -1737,15 +1438,11 @@ function SettingsPage() {
                 )}
 
                 <div className="mt-5 space-y-4">
-
                   <label className="block text-[10px] font-black uppercase tracking-wider text-white/35">
                     Report Type
-
                     <select
                       value={playerReportType}
-                      onChange={(event) =>
-                        setPlayerReportType(event.target.value)
-                      }
+                      onChange={(event) => setPlayerReportType(event.target.value)}
                       className="mt-2 w-full rounded-md border border-white/10 bg-[#0d121c] px-3 py-3 text-sm font-bold text-white outline-none focus:border-coral"
                     >
                       <option value="">Select a report type</option>
@@ -1759,13 +1456,10 @@ function SettingsPage() {
 
                   <label className="block text-[10px] font-black uppercase tracking-wider text-white/35">
                     Reported Player Username
-
                     <input
                       type="text"
                       value={playerReportUsername}
-                      onChange={(event) =>
-                        setPlayerReportUsername(event.target.value)
-                      }
+                      onChange={(event) => setPlayerReportUsername(event.target.value)}
                       placeholder="Enter the username of the player"
                       className="mt-2 w-full rounded-md border border-white/10 bg-[#0d121c] px-3 py-3 text-sm font-bold text-white outline-none placeholder:text-white/15 focus:border-coral"
                     />
@@ -1773,12 +1467,9 @@ function SettingsPage() {
 
                   <label className="block text-[10px] font-black uppercase tracking-wider text-white/35">
                     Description
-
                     <textarea
                       value={playerReportDescription}
-                      onChange={(event) =>
-                        setPlayerReportDescription(event.target.value)
-                      }
+                      onChange={(event) => setPlayerReportDescription(event.target.value)}
                       placeholder="Describe what happened, including who was involved and when..."
                       rows={5}
                       className="mt-2 w-full resize-none rounded-md border border-white/10 bg-[#0d121c] px-3 py-3 text-sm font-bold text-white outline-none placeholder:text-white/15 focus:border-coral"
@@ -1790,7 +1481,6 @@ function SettingsPage() {
                     <span className="ml-1 normal-case text-white/25">
                       (optional — image or PDF)
                     </span>
-
                     <input
                       ref={playerReportAttachmentInput}
                       type="file"
@@ -1798,13 +1488,10 @@ function SettingsPage() {
                       onChange={handlePlayerReportAttachmentChange}
                       className="hidden"
                     />
-
                     <div className="mt-2 flex items-center gap-3">
                       <button
                         type="button"
-                        onClick={() =>
-                          playerReportAttachmentInput.current?.click()
-                        }
+                        onClick={() => playerReportAttachmentInput.current?.click()}
                         className="inline-flex items-center gap-2 rounded-md border border-white/10 bg-[#0d121c] px-3 py-2.5 text-xs font-black text-white/70 transition hover:border-coral/40 hover:text-white"
                       >
                         <Paperclip className="size-4" />
@@ -1813,9 +1500,7 @@ function SettingsPage() {
 
                       {playerReportAttachment && (
                         <span className="flex min-w-0 items-center gap-2 text-xs font-bold text-white/60">
-                          <span className="truncate">
-                            {playerReportAttachment.name}
-                          </span>
+                          <span className="truncate">{playerReportAttachment.name}</span>
                           <button
                             type="button"
                             onClick={() => {
@@ -1832,11 +1517,9 @@ function SettingsPage() {
                       )}
                     </div>
                   </div>
-
                 </div>
 
                 <div className="mt-6 flex justify-end gap-2">
-
                   <button
                     type="button"
                     onClick={closePlayerReport}
@@ -1852,13 +1535,10 @@ function SettingsPage() {
                   >
                     SUBMIT REPORT
                   </button>
-
                 </div>
               </>
             )}
-
           </section>
-
         </div>
       )}
 
@@ -1869,22 +1549,14 @@ function SettingsPage() {
       {passwordOpen && (
         <div
           className="fixed inset-0 z-[70] grid place-items-center bg-[#05080d]/85 p-5 backdrop-blur-md"
-          onClick={() =>
-            setPasswordOpen(false)
-          }
+          onClick={() => setPasswordOpen(false)}
         >
-
           <section
             className="w-full max-w-md overflow-hidden rounded-xl border border-white/[0.09] bg-[#151c29] shadow-2xl shadow-black/50"
-            onClick={(event) =>
-              event.stopPropagation()
-            }
+            onClick={(event) => event.stopPropagation()}
           >
-
             <div className="flex items-center justify-between border-b border-white/[0.07] p-6">
-
               <div>
-
                 <p className="text-[10px] font-black uppercase tracking-[.18em] text-coral">
                   ACCOUNT SECURITY
                 </p>
@@ -1892,40 +1564,30 @@ function SettingsPage() {
                 <h2 className="mt-2 text-2xl font-black uppercase tracking-tight text-white">
                   Change Password
                 </h2>
-
               </div>
 
               <button
                 type="button"
-                onClick={() =>
-                  setPasswordOpen(false)
-                }
+                onClick={() => setPasswordOpen(false)}
                 aria-label="Close"
                 className="grid size-9 place-items-center rounded-md text-white/30 transition hover:bg-white/[0.05] hover:text-white"
               >
                 <X className="size-5" />
               </button>
-
             </div>
 
             <div className="p-6">
-
               {passwordSuccess ? (
                 <div className="rounded-lg border border-[#2d9d8f]/20 bg-[#2d9d8f]/10 p-5 text-center">
-
                   <div className="mx-auto grid size-11 place-items-center rounded-full bg-[#2d9d8f]/15 text-[#55b8aa]">
                     <Check className="size-5" />
                   </div>
 
-                  <p className="mt-3 font-black uppercase text-[#55b8aa]">
-                    Password Updated
-                  </p>
+                  <p className="mt-3 font-black uppercase text-[#55b8aa]">Password Updated</p>
 
                   <p className="mt-1 text-sm text-white/40">
-                    Your password has been changed
-                    successfully.
+                    Your password has been changed successfully.
                   </p>
-
                 </div>
               ) : (
                 <>
@@ -1936,21 +1598,12 @@ function SettingsPage() {
                   )}
 
                   <div className="mt-5 space-y-4">
-
                     <PasswordField
                       label="CURRENT PASSWORD"
                       value={currentPassword}
-                      onChange={
-                        setCurrentPassword
-                      }
-                      visible={
-                        showCurrentPassword
-                      }
-                      onToggle={() =>
-                        setShowCurrentPassword(
-                          (value) => !value
-                        )
-                      }
+                      onChange={setCurrentPassword}
+                      visible={showCurrentPassword}
+                      onToggle={() => setShowCurrentPassword((value) => !value)}
                     />
 
                     <PasswordField
@@ -1958,53 +1611,34 @@ function SettingsPage() {
                       value={newPassword}
                       onChange={setNewPassword}
                       visible={showNewPassword}
-                      onToggle={() =>
-                        setShowNewPassword(
-                          (value) => !value
-                        )
-                      }
+                      onToggle={() => setShowNewPassword((value) => !value)}
                     />
 
                     <PasswordField
                       label="CONFIRM NEW PASSWORD"
                       value={confirmPassword}
-                      onChange={
-                        setConfirmPassword
-                      }
-                      visible={
-                        showConfirmPassword
-                      }
-                      onToggle={() =>
-                        setShowConfirmPassword(
-                          (value) => !value
-                        )
-                      }
+                      onChange={setConfirmPassword}
+                      visible={showConfirmPassword}
+                      onToggle={() => setShowConfirmPassword((value) => !value)}
                     />
 
                     <p className="text-xs text-white/30">
-                      Password must contain at least
-                      8 characters.
+                      Password must contain at least 8 characters.
                     </p>
 
                     <button
                       type="button"
-                      onClick={
-                        handlePasswordChange
-                      }
+                      onClick={handlePasswordChange}
                       className="inline-flex w-full items-center justify-center gap-2 rounded-md bg-coral px-4 py-3 text-xs font-black text-white transition hover:opacity-90"
                     >
                       <Save className="size-4" />
                       SAVE PASSWORD
                     </button>
-
                   </div>
                 </>
               )}
-
             </div>
-
           </section>
-
         </div>
       )}
 
@@ -2021,16 +1655,12 @@ function SettingsPage() {
             setDeleteError("");
           }}
         >
-
           <section
             role="alertdialog"
             aria-modal="true"
             className="w-full max-w-md rounded-xl border border-white/[0.09] bg-[#151c29] p-6 shadow-2xl shadow-black/50"
-            onClick={(event) =>
-              event.stopPropagation()
-            }
+            onClick={(event) => event.stopPropagation()}
           >
-
             <div className="grid size-11 place-items-center rounded-md bg-coral/10 text-coral">
               <Trash2 className="size-5" />
             </div>
@@ -2040,9 +1670,7 @@ function SettingsPage() {
             </h2>
 
             <p className="mt-2 text-sm leading-relaxed text-white/45">
-              This action permanently clears your
-              local player account data. This cannot
-              be undone.
+              This action permanently clears your local player account data. This cannot be undone.
             </p>
 
             {deleteError && (
@@ -2052,43 +1680,31 @@ function SettingsPage() {
             )}
 
             <div className="mt-5">
-
               <label className="block text-[10px] font-black uppercase tracking-wider text-white/35">
                 Type DELETE to confirm
-
                 <input
                   value={deleteText}
-                  onChange={(event) =>
-                    setDeleteText(
-                      event.target.value.toUpperCase()
-                    )
-                  }
+                  onChange={(event) => setDeleteText(event.target.value.toUpperCase())}
                   placeholder="DELETE"
                   className="mt-2 w-full rounded-md border border-white/10 bg-[#0d121c] px-3 py-3 text-sm font-bold text-white outline-none placeholder:text-white/15 focus:border-coral"
                   autoComplete="off"
                 />
-
               </label>
 
               <label className="mt-4 block text-[10px] font-black uppercase tracking-wider text-white/35">
                 Confirm your password
-
                 <input
                   type="password"
                   value={deletePassword}
-                  onChange={(event) =>
-                    setDeletePassword(event.target.value)
-                  }
+                  onChange={(event) => setDeletePassword(event.target.value)}
                   placeholder="Enter password"
                   className="mt-2 w-full rounded-md border border-white/10 bg-[#0d121c] px-3 py-3 text-sm font-bold text-white outline-none placeholder:text-white/15 focus:border-coral"
                   autoComplete="off"
                 />
               </label>
-
             </div>
 
             <div className="mt-6 flex justify-end gap-2">
-
               <button
                 type="button"
                 onClick={() => {
@@ -2105,21 +1721,15 @@ function SettingsPage() {
               <button
                 type="button"
                 onClick={handleDeleteAccount}
-                disabled={
-                  deleteText !== "DELETE" || !deletePassword
-                }
+                disabled={deleteText !== "DELETE" || !deletePassword}
                 className="rounded-md bg-coral px-4 py-2.5 text-xs font-black text-white transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-30"
               >
                 CONFIRM DELETE
               </button>
-
             </div>
-
           </section>
-
         </div>
       )}
-
     </div>
   );
 }
@@ -2148,17 +1758,10 @@ function PreferenceRow({
       aria-label={label}
       className="group flex w-full items-center justify-between gap-5 rounded-lg border border-white/[0.07] bg-[#1b2433] p-4 text-left transition hover:border-white/[0.13] hover:bg-[#202a3a] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-coral/25"
     >
-
       <div>
+        <span className="text-sm font-bold text-white/85">{label}</span>
 
-        <span className="text-sm font-bold text-white/85">
-          {label}
-        </span>
-
-        <p className="mt-1 text-xs leading-relaxed text-white/35">
-          {description}
-        </p>
-
+        <p className="mt-1 text-xs leading-relaxed text-white/35">{description}</p>
       </div>
 
       <span
@@ -2166,15 +1769,12 @@ function PreferenceRow({
           checked ? "portal-switch-on" : "portal-switch-off"
         }`}
       >
-
         <span
           className={`portal-switch-thumb absolute size-4 rounded-full shadow-sm transition ${
             checked ? "left-6" : "left-1"
           }`}
         />
-
       </span>
-
     </button>
   );
 }
@@ -2198,21 +1798,13 @@ function PasswordField({
 }) {
   return (
     <label className="block text-[10px] font-black uppercase tracking-wider text-white/35">
-
       {label}
 
       <div className="relative mt-2">
-
         <input
-          type={
-            visible
-              ? "text"
-              : "password"
-          }
+          type={visible ? "text" : "password"}
           value={value}
-          onChange={(event) =>
-            onChange(event.target.value)
-          }
+          onChange={(event) => onChange(event.target.value)}
           className="w-full rounded-md border border-white/10 bg-[#0d121c] px-3 py-3 pr-11 text-sm font-bold text-white outline-none placeholder:text-white/15 focus:border-coral"
           autoComplete="off"
         />
@@ -2221,23 +1813,11 @@ function PasswordField({
           type="button"
           onClick={onToggle}
           className="absolute right-3 top-1/2 -translate-y-1/2 text-white/25 transition hover:text-white"
-          aria-label={
-            visible
-              ? "Hide password"
-              : "Show password"
-          }
+          aria-label={visible ? "Hide password" : "Show password"}
         >
-
-          {visible ? (
-            <EyeOff className="size-4" />
-          ) : (
-            <Eye className="size-4" />
-          )}
-
+          {visible ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
         </button>
-
       </div>
-
     </label>
   );
 }

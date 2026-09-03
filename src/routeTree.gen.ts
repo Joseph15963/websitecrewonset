@@ -27,6 +27,7 @@ import { Route as AdminBugsRouteImport } from './routes/admin.bugs'
 import { Route as AdminGameRouteImport } from './routes/admin.game'
 import { Route as AdminNotificationsRouteImport } from './routes/admin.notifications'
 import { Route as AdminPartnershipsRouteImport } from './routes/admin.partnerships'
+import { Route as AdminPlayerReportsRouteImport } from './routes/admin.player-reports'
 import { Route as AdminPlayersRouteImport } from './routes/admin.players'
 import { Route as AdminSettingsRouteImport } from './routes/admin.settings'
 import { Route as AdminTransactionsRouteImport } from './routes/admin.transactions'
@@ -132,6 +133,11 @@ const AdminPartnershipsRoute = AdminPartnershipsRouteImport.update({
   path: '/partnerships',
   getParentRoute: () => AdminRoute,
 } as any)
+const AdminPlayerReportsRoute = AdminPlayerReportsRouteImport.update({
+  id: '/player-reports',
+  path: '/player-reports',
+  getParentRoute: () => AdminRoute,
+} as any)
 const AdminPlayersRoute = AdminPlayersRouteImport.update({
   id: '/players',
   path: '/players',
@@ -221,6 +227,7 @@ export interface FileRoutesByFullPath {
   '/admin/game': typeof AdminGameRoute
   '/admin/notifications': typeof AdminNotificationsRoute
   '/admin/partnerships': typeof AdminPartnershipsRoute
+  '/admin/player-reports': typeof AdminPlayerReportsRoute
   '/admin/players': typeof AdminPlayersRoute
   '/admin/settings': typeof AdminSettingsRoute
   '/admin/transactions': typeof AdminTransactionsRoute
@@ -253,6 +260,7 @@ export interface FileRoutesByTo {
   '/admin/game': typeof AdminGameRoute
   '/admin/notifications': typeof AdminNotificationsRoute
   '/admin/partnerships': typeof AdminPartnershipsRoute
+  '/admin/player-reports': typeof AdminPlayerReportsRoute
   '/admin/players': typeof AdminPlayersRoute
   '/admin/settings': typeof AdminSettingsRoute
   '/admin/transactions': typeof AdminTransactionsRoute
@@ -288,6 +296,7 @@ export interface FileRoutesById {
   '/admin/game': typeof AdminGameRoute
   '/admin/notifications': typeof AdminNotificationsRoute
   '/admin/partnerships': typeof AdminPartnershipsRoute
+  '/admin/player-reports': typeof AdminPlayerReportsRoute
   '/admin/players': typeof AdminPlayersRoute
   '/admin/settings': typeof AdminSettingsRoute
   '/admin/transactions': typeof AdminTransactionsRoute
@@ -324,6 +333,7 @@ export interface FileRouteTypes {
     | '/admin/game'
     | '/admin/notifications'
     | '/admin/partnerships'
+    | '/admin/player-reports'
     | '/admin/players'
     | '/admin/settings'
     | '/admin/transactions'
@@ -356,6 +366,7 @@ export interface FileRouteTypes {
     | '/admin/game'
     | '/admin/notifications'
     | '/admin/partnerships'
+    | '/admin/player-reports'
     | '/admin/players'
     | '/admin/settings'
     | '/admin/transactions'
@@ -390,6 +401,7 @@ export interface FileRouteTypes {
     | '/admin/game'
     | '/admin/notifications'
     | '/admin/partnerships'
+    | '/admin/player-reports'
     | '/admin/players'
     | '/admin/settings'
     | '/admin/transactions'
@@ -552,6 +564,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminPartnershipsRouteImport
       parentRoute: typeof AdminRoute
     }
+    '/admin/player-reports': {
+      id: '/admin/player-reports'
+      path: '/player-reports'
+      fullPath: '/admin/player-reports'
+      preLoaderRoute: typeof AdminPlayerReportsRouteImport
+      parentRoute: typeof AdminRoute
+    }
     '/admin/players': {
       id: '/admin/players'
       path: '/players'
@@ -660,6 +679,7 @@ interface AdminRouteChildren {
   AdminGameRoute: typeof AdminGameRoute
   AdminNotificationsRoute: typeof AdminNotificationsRoute
   AdminPartnershipsRoute: typeof AdminPartnershipsRoute
+  AdminPlayerReportsRoute: typeof AdminPlayerReportsRoute
   AdminPlayersRoute: typeof AdminPlayersRoute
   AdminSettingsRoute: typeof AdminSettingsRoute
   AdminTransactionsRoute: typeof AdminTransactionsRoute
@@ -674,6 +694,7 @@ const AdminRouteChildren: AdminRouteChildren = {
   AdminGameRoute: AdminGameRoute,
   AdminNotificationsRoute: AdminNotificationsRoute,
   AdminPartnershipsRoute: AdminPartnershipsRoute,
+  AdminPlayerReportsRoute: AdminPlayerReportsRoute,
   AdminPlayersRoute: AdminPlayersRoute,
   AdminSettingsRoute: AdminSettingsRoute,
   AdminTransactionsRoute: AdminTransactionsRoute,

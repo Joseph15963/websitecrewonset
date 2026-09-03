@@ -43,6 +43,7 @@ const navigation = [
   { label: "Game & Updates", href: "/admin/game", icon: Gamepad2 },
   { label: "Almanac", href: "/admin/almanac", icon: BookOpen },
   { label: "Bug Reports", href: "/admin/bugs", icon: Bug },
+  { label: "Player Reports", href: "/admin/player-reports", icon: Bug },
   { label: "Transactions", href: "/admin/transactions", icon: Banknote },
   { label: "Partnerships & Ads", href: "/admin/partnerships", icon: HandCoins },
   { label: "Ad Revenue", href: "/admin/ad-revenue", icon: LineChart },

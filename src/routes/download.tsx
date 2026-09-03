@@ -72,7 +72,7 @@ function DownloadPage() {
                   <span className="hidden sm:inline">·</span>
                   <span>Build {currentBuild.buildNumber}</span>
                   <span className="hidden sm:inline">·</span>
-                  <span>{currentBuild.minAndroid}</span>
+                  <span>{currentBuild.minWindows}</span>
                 </>
               )}
             </div>

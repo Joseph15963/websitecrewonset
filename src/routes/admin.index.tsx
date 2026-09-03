@@ -352,7 +352,7 @@ function AdminDashboardPage() {
           {[
             { label: "Current Version", value: gameBuild?.version ?? "—" },
             { label: "Build Number", value: gameBuild?.buildNumber ?? "—" },
-            { label: "Minimum Requirements", value: gameBuild?.minAndroid ?? "—" },
+            { label: "Windows Requirement", value: gameBuild?.minWindows ?? "—" },
             { label: "Release Date", value: gameBuild ? formatDate(gameBuild.releasedAt) : "—" },
           ].map((item) => (
             <article

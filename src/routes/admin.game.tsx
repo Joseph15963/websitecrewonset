@@ -152,8 +152,8 @@ function GamePage() {
     () => gameBuildStore.get()[0] ?? {
       version: "",
       buildNumber: "",
-      minAndroid: "",
-      apkFileName: "",
+      minWindows: "",
+      installerFileName: "",
       downloadUrl: "",
       releaseNotes: "",
       releasedAt: new Date().toISOString(),
@@ -329,9 +329,9 @@ function GamePage() {
               {[
                 ["Version", `v${currentBuild.version}`],
                 ["Build Number", currentBuild.buildNumber],
-                ["Minimum Android", currentBuild.minAndroid],
-                ["Release Date", buildDate],
-                ["APK File", currentBuild.apkFileName],
+["Windows Requirement", currentBuild.minWindows],
+              ["Release Date", buildDate],
+              ["Installer File", currentBuild.installerFileName],
                 ["Download URL", currentBuild.downloadUrl],
               ].map(([label, value]) => (
                 <div key={label} className="min-w-0 rounded-md border border-white/[0.07] bg-[#101923] p-4">
@@ -918,8 +918,8 @@ function GamePage() {
                 {([
                   ["version", "Version", "0.9.5"],
                   ["buildNumber", "Build Number", "950"],
-                  ["minAndroid", "Minimum Android Version", "Android 9.0 (Pie)"],
-                  ["apkFileName", "APK File Name", "CrewOnSet-0.9.5.apk"],
+                  ["minWindows", "Minimum Windows Version", "Windows 10 64-bit"],
+                  ["installerFileName", "Windows Installer File Name", "CrewOnSet-0.9.5.exe"],
                 ] as const).map(([field, label, placeholder]) => (
                   <label key={field} className="block text-[10px] font-black uppercase tracking-wider !text-white/45">
                     {label}

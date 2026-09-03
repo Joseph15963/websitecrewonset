@@ -553,8 +553,8 @@ export const installStepsStore = createStore<InstallStep>("cos.installSteps", [
 export type GameBuild = {
   version: string;
   buildNumber: string;
-  minAndroid: string;
-  apkFileName: string;
+  minWindows: string;
+  installerFileName: string;
   downloadUrl: string;
   releaseNotes: string;
   releasedAt: string;
@@ -564,8 +564,8 @@ export const gameBuildStore = createStore<GameBuild>("cos.gameBuild", [
   {
     version: "0.9.4",
     buildNumber: "940",
-    minAndroid: "Android 9.0 (Pie)",
-    apkFileName: "CrewOnSet-0.9.4-playtest.apk",
+    minWindows: "Windows 10 64-bit",
+    installerFileName: "CrewOnSet-0.9.4-playtest.exe",
     downloadUrl: "https://drive.google.com/",
     releaseNotes:
       "New client shoots in Studio B, rebalanced lighting scoring, and fixes for co-op lobby desyncs.",

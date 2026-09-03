@@ -1771,11 +1771,6 @@ function PlayerProfile({
                 />
 
                 <ProfileDetail
-                  label="Current Role"
-                  value={player.role}
-                />
-
-                <ProfileDetail
                   label="Level"
                   value={`Level ${player.level}`}
                 />

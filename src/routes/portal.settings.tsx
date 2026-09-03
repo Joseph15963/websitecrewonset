@@ -37,6 +37,7 @@ import {
 } from "lucide-react";
 import {
   bugCategories,
+  adminNotificationsStore,
   bugReportsStore,
   playerReportsStore,
   playerReportTypes,
@@ -46,15 +47,13 @@ import {
 
 /** Accepted attachment MIME types for reports: images and PDF only. */
 const ACCEPTED_ATTACHMENT_TYPES = ["image/", "application/pdf"];
+const MAX_ATTACHMENT_BYTES = 5 * 1024 * 1024;
 
 /** Validates that a file is an image or PDF (ZIP and everything else rejected). */
 function isAllowedAttachment(file: File): boolean {
-  return ACCEPTED_ATTACHMENT_TYPES.some(
-    (type) =>
-      file.type === type ||
-      file.type.startsWith(type) ||
-      (type === "application/pdf" && file.name.toLowerCase().endsWith(".pdf")),
-  );
+  const isPdf = file.type === "application/pdf" || file.name.toLowerCase().endsWith(".pdf");
+  const isImage = file.type.startsWith("image/");
+  return (isImage || isPdf) && file.size <= MAX_ATTACHMENT_BYTES;
 }
 
 /** Demo player identity used for player-submitted bug reports. */
@@ -476,6 +475,12 @@ function SettingsPage() {
       setBugAttachment(null);
       return;
     }
+    if (file.size > MAX_ATTACHMENT_BYTES) {
+      setBugError("Attachments must be 5 MB or smaller.");
+      setBugAttachment(null);
+      event.target.value = "";
+      return;
+    }
     if (!isAllowedAttachment(file)) {
       setBugError("Only image or PDF files are allowed.");
       setBugAttachment(null);
@@ -573,6 +578,12 @@ function SettingsPage() {
       setPlayerReportAttachment(null);
       return;
     }
+    if (file.size > MAX_ATTACHMENT_BYTES) {
+      setPlayerReportError("Attachments must be 5 MB or smaller.");
+      setPlayerReportAttachment(null);
+      event.target.value = "";
+      return;
+    }
     if (!isAllowedAttachment(file)) {
       setPlayerReportError("Only image or PDF files are allowed.");
       setPlayerReportAttachment(null);
@@ -616,10 +627,12 @@ function SettingsPage() {
       }
     }
 
+    const reportId = uid("PRPT");
+    const submittedAt = new Date().toISOString();
     playerReportsStore.set([
       ...playerReportsStore.get(),
       {
-        id: uid("PRPT"),
+        id: reportId,
         reporterName: BUG_REPORT_PLAYER_NAME,
         reporterId: BUG_REPORT_PLAYER_ID,
         reportType: playerReportType,
@@ -628,8 +641,22 @@ function SettingsPage() {
         attachmentName: playerReportAttachment?.name,
         attachmentUrl: attachmentUrl || undefined,
         attachmentType: playerReportAttachment?.type,
-        submittedAt: new Date().toISOString(),
+        submittedAt,
         status: "New",
+      },
+    ]);
+    adminNotificationsStore.set([
+      ...adminNotificationsStore.get(),
+      {
+        id: `player-report-${reportId}`,
+        title: "New player report submitted",
+        body: `${reportId}: ${BUG_REPORT_PLAYER_NAME} reported ${playerReportUsername.trim()}.`,
+        kind: "player-report",
+        href: "/admin/player-reports",
+        entityId: reportId,
+        entityType: "player-report",
+        read: false,
+        createdAt: submittedAt,
       },
     ]);
 

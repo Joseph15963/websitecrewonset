@@ -76,9 +76,16 @@ function read<T>(key: string, fallback: T): T {
 function write<T>(key: string, value: T) {
   if (!isBrowser()) return;
   try {
-    window.localStorage.setItem(key, JSON.stringify(value));
+    const localValue = Array.isArray(value)
+      ? value.map((item) => {
+          if (!item || typeof item !== "object") return item;
+          const { attachmentUrl: _attachmentUrl, ...withoutAttachment } = item as Record<string, unknown>;
+          return withoutAttachment;
+        })
+      : value;
+    window.localStorage.setItem(key, JSON.stringify(localValue));
   } catch {
-    /* storage unavailable — demo data stays in memory */
+    /* storage unavailable — shared data stays in Supabase */
   }
   window.dispatchEvent(new CustomEvent(`cos:${key}`));
 }
@@ -734,6 +741,23 @@ export type PlayerReport = {
 export const playerReportTypes = ["Trolling", "Negative Attitude", "Verbal Abuse", "Other"];
 
 export const playerReportsStore = createStore<PlayerReport>("cos.playerReports", []);
+
+export type AdminNotification = {
+  id: string;
+  title: string;
+  body: string;
+  kind: "player-report" | "application" | "system";
+  href: string;
+  entityId?: string;
+  entityType?: string;
+  read: boolean;
+  createdAt: string;
+};
+
+export const adminNotificationsStore = createStore<AdminNotification>(
+  "cos.adminNotifications",
+  [],
+);
 
 /* --------------------------------------------------------- equipped loadout */
 

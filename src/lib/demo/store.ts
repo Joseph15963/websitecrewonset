@@ -8,7 +8,58 @@
 
 import { useEffect, useState } from "react";
 
+import { getSupabaseClient } from "@/lib/supabase";
+
 /* ---------------------------------------------------------------- utilities */
+
+const sharedTables: Record<string, string> = {
+  "cos.playerReports": "cos_player_reports",
+  "cos.adminNotifications": "cos_admin_notifications",
+  "cos.applications": "cos_partnership_applications",
+};
+
+function toDatabaseRow(item: Record<string, unknown>) {
+  return Object.fromEntries(
+    Object.entries(item).map(([key, value]) => [
+      key.replace(/[A-Z]/g, (letter) => `_${letter.toLowerCase()}`),
+      value,
+    ]),
+  );
+}
+
+function fromDatabaseRow<T>(row: Record<string, unknown>): T {
+  return Object.fromEntries(
+    Object.entries(row)
+      .filter(([key]) => !["created_at"].includes(key))
+      .map(([key, value]) => [
+        key.replace(/_([a-z])/g, (_, letter: string) => letter.toUpperCase()),
+        value,
+      ]),
+  ) as T;
+}
+
+async function syncSharedTable<T>(key: string, items: T[]) {
+  const table = sharedTables[key];
+  const supabase = getSupabaseClient();
+  if (!table || !supabase) return;
+  const { error } = await supabase.from(table).upsert(
+    items.map((item) => toDatabaseRow(item as Record<string, unknown>)),
+    { onConflict: "id" },
+  );
+  if (error) console.error("[v0] Shared store write failed", error);
+}
+
+async function loadSharedTable<T>(key: string) {
+  const table = sharedTables[key];
+  const supabase = getSupabaseClient();
+  if (!table || !supabase) return null;
+  const { data, error } = await supabase.from(table).select("*").order("created_at", { ascending: false });
+  if (error) {
+    console.error("[v0] Shared store read failed", error);
+    return null;
+  }
+  return (data ?? []).map((row) => fromDatabaseRow<T>(row as Record<string, unknown>));
+}
 
 const isBrowser = () => typeof window !== "undefined";
 
@@ -51,11 +102,16 @@ export function createStore<T>(key: string, seed: T[]) {
     const [items, setItems] = useState<T[]>(seed);
 
     useEffect(() => {
+      let active = true;
       setItems(get());
+      void loadSharedTable<T>(key).then((remoteItems) => {
+        if (active && remoteItems && remoteItems.length > 0) setItems(remoteItems);
+      });
       const sync = () => setItems(get());
       window.addEventListener(event, sync);
       window.addEventListener("storage", sync);
       return () => {
+        active = false;
         window.removeEventListener(event, sync);
         window.removeEventListener("storage", sync);
       };
@@ -66,6 +122,7 @@ export function createStore<T>(key: string, seed: T[]) {
       (next: T[]) => {
         setItems(next);
         set(next);
+        void syncSharedTable(key, next);
       },
     ];
   }

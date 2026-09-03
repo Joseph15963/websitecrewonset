@@ -30,7 +30,7 @@ function TransactionsPage() {
     return topUps.filter(
       (row) =>
         row.playerName.toLowerCase().includes(search) ||
-        row.playerId.toLowerCase().includes(search)
+        row.playerId.toLowerCase().includes(search),
     );
   }, [query]);
 
@@ -38,9 +38,7 @@ function TransactionsPage() {
     const search = query.trim().toLowerCase();
     if (!search) return null;
     const first = topUps.find(
-      (row) =>
-        row.playerName.toLowerCase() === search ||
-        row.playerId.toLowerCase() === search
+      (row) => row.playerName.toLowerCase() === search || row.playerId.toLowerCase() === search,
     );
     return first ?? (matches.length > 0 ? matches[0] : null);
   }, [query, matches]);
@@ -53,9 +51,24 @@ function TransactionsPage() {
   const completed = topUps.filter((r) => r.status === "Completed").length;
 
   const summaries = [
-    { label: "Total C-Coin Revenue", value: formatMoney(total), icon: Coins, color: "bg-[#d9a514] text-[#101923]" },
-    { label: "Completed Top-Ups", value: completed.toLocaleString(), icon: ReceiptText, color: "bg-[#243241] text-white" },
-    { label: "Total Ledger Entries", value: topUps.length.toLocaleString(), icon: Wallet2, color: "bg-coral text-white" },
+    {
+      label: "Total C-Coin Revenue",
+      value: formatMoney(total),
+      icon: Coins,
+      color: "bg-[#d9a514] text-[#101923]",
+    },
+    {
+      label: "Completed Top-Ups",
+      value: completed.toLocaleString(),
+      icon: ReceiptText,
+      color: "bg-[#243241] text-white",
+    },
+    {
+      label: "Total Ledger Entries",
+      value: topUps.length.toLocaleString(),
+      icon: Wallet2,
+      color: "bg-coral text-white",
+    },
   ];
 
   return (
@@ -70,12 +83,17 @@ function TransactionsPage() {
 
       <section className="grid gap-4 md:grid-cols-3">
         {summaries.map((summary) => (
-          <article key={summary.label} className="rounded-lg border border-white/[0.06] bg-[#182330] p-5 shadow-xl">
+          <article
+            key={summary.label}
+            className="rounded-lg border border-white/[0.06] bg-[#182330] p-5 shadow-xl"
+          >
             <div className={`grid size-10 place-items-center rounded-md ${summary.color}`}>
               <summary.icon className="size-5" />
             </div>
             <p className="mt-5 text-3xl font-black tracking-tight !text-white">{summary.value}</p>
-            <p className="mt-1 text-xs font-bold uppercase tracking-wider !text-white/35">{summary.label}</p>
+            <p className="mt-1 text-xs font-bold uppercase tracking-wider !text-white/35">
+              {summary.label}
+            </p>
           </article>
         ))}
       </section>
@@ -93,7 +111,9 @@ function TransactionsPage() {
 
         {matchedPlayer && (
           <p className="mt-3 text-xs !text-white/45">
-            Showing top-up history for <span className="font-bold !text-white/80">{matchedPlayer.playerName}</span> ({matchedPlayer.playerId})
+            Showing top-up history for{" "}
+            <span className="font-bold !text-white/80">{matchedPlayer.playerName}</span> (
+            {matchedPlayer.playerId})
           </p>
         )}
       </section>
@@ -103,17 +123,32 @@ function TransactionsPage() {
           <table className="min-w-[720px] w-full border-collapse text-left">
             <thead>
               <tr className="border-b border-white/[0.08] bg-[#141e29]">
-                <th className="px-5 py-4 text-xs font-black uppercase tracking-wider !text-white/40">Date</th>
-                <th className="px-5 py-4 text-xs font-black uppercase tracking-wider !text-white/40">Time</th>
-                <th className="px-5 py-4 text-xs font-black uppercase tracking-wider !text-white/40">Player</th>
-                <th className="px-5 py-4 text-xs font-black uppercase tracking-wider !text-white/40">Bank Account</th>
-                <th className="px-5 py-4 text-xs font-black uppercase tracking-wider !text-white/40">Amount</th>
-                <th className="px-5 py-4 text-xs font-black uppercase tracking-wider !text-white/40">Status</th>
+                <th className="px-5 py-4 text-xs font-black uppercase tracking-wider !text-white/40">
+                  Date
+                </th>
+                <th className="px-5 py-4 text-xs font-black uppercase tracking-wider !text-white/40">
+                  Time
+                </th>
+                <th className="px-5 py-4 text-xs font-black uppercase tracking-wider !text-white/40">
+                  Player
+                </th>
+                <th className="px-5 py-4 text-xs font-black uppercase tracking-wider !text-white/40">
+                  Bank Account
+                </th>
+                <th className="px-5 py-4 text-xs font-black uppercase tracking-wider !text-white/40">
+                  Amount
+                </th>
+                <th className="px-5 py-4 text-xs font-black uppercase tracking-wider !text-white/40">
+                  Status
+                </th>
               </tr>
             </thead>
             <tbody>
               {rows.map((row) => (
-                <tr key={row.id} className="border-b border-white/[0.05] transition hover:bg-white/[0.025] last:border-0">
+                <tr
+                  key={row.id}
+                  className="border-b border-white/[0.05] transition hover:bg-white/[0.025] last:border-0"
+                >
                   <td className="px-5 py-4 text-sm !text-white/60">{row.date}</td>
                   <td className="px-5 py-4 text-sm !text-white/45">{row.time}</td>
                   <td className="px-5 py-4">
@@ -123,7 +158,9 @@ function TransactionsPage() {
                   <td className="px-5 py-4 font-mono text-xs !text-white/55">{row.bank}</td>
                   <td className="px-5 py-4 font-black !text-white">{formatMoney(row.amount)}</td>
                   <td className="px-5 py-4">
-                    <span className={`rounded px-2.5 py-1 text-[10px] font-black uppercase ${statusStyles[row.status]}`}>
+                    <span
+                      className={`rounded px-2.5 py-1 text-[10px] font-black uppercase ${statusStyles[row.status]}`}
+                    >
                       {row.status}
                     </span>
                   </td>
@@ -134,7 +171,9 @@ function TransactionsPage() {
                 <tr>
                   <td colSpan={6} className="py-16 text-center">
                     <p className="text-sm font-bold !text-white/40">No matching transactions</p>
-                    <p className="mt-1 text-xs !text-white/25">Try a different player name or player ID.</p>
+                    <p className="mt-1 text-xs !text-white/25">
+                      Try a different player name or player ID.
+                    </p>
                   </td>
                 </tr>
               )}

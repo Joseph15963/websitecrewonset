@@ -134,17 +134,32 @@ function BugReportsPage() {
           <table className="admin-table min-w-[880px] w-full border-collapse text-left">
             <thead>
               <tr className="border-b border-white/[0.08] bg-[#141e29]">
-                <th className="px-5 py-4 text-xs font-black uppercase tracking-wider !text-white/40">Player</th>
-                <th className="px-5 py-4 text-xs font-black uppercase tracking-wider !text-white/40">Category</th>
-                <th className="px-5 py-4 text-xs font-black uppercase tracking-wider !text-white/40">Description</th>
-                <th className="px-5 py-4 text-xs font-black uppercase tracking-wider !text-white/40">Submitted</th>
-                <th className="px-5 py-4 text-xs font-black uppercase tracking-wider !text-white/40">Status</th>
-                <th className="px-5 py-4 text-xs font-black uppercase tracking-wider !text-white/40">Actions</th>
+                <th className="px-5 py-4 text-xs font-black uppercase tracking-wider !text-white/40">
+                  Player
+                </th>
+                <th className="px-5 py-4 text-xs font-black uppercase tracking-wider !text-white/40">
+                  Category
+                </th>
+                <th className="px-5 py-4 text-xs font-black uppercase tracking-wider !text-white/40">
+                  Description
+                </th>
+                <th className="px-5 py-4 text-xs font-black uppercase tracking-wider !text-white/40">
+                  Submitted
+                </th>
+                <th className="px-5 py-4 text-xs font-black uppercase tracking-wider !text-white/40">
+                  Status
+                </th>
+                <th className="px-5 py-4 text-xs font-black uppercase tracking-wider !text-white/40">
+                  Actions
+                </th>
               </tr>
             </thead>
             <tbody>
               {filtered.map((bug) => (
-                <tr key={bug.id} className="border-b border-white/[0.05] transition hover:bg-white/[0.025] last:border-0">
+                <tr
+                  key={bug.id}
+                  className="border-b border-white/[0.05] transition hover:bg-white/[0.025] last:border-0"
+                >
                   <td className="px-5 py-4">
                     <p className="font-bold !text-white">{bug.playerName}</p>
                     <p className="mt-0.5 text-[10px] !text-white/30">{bug.playerId}</p>
@@ -153,7 +168,9 @@ function BugReportsPage() {
                   <td className="px-5 py-4 text-sm !text-white/50">
                     <p className="max-w-xs truncate">{bug.description}</p>
                   </td>
-                  <td className="px-5 py-4 text-xs !text-white/40">{formatDate(bug.submittedAt)}</td>
+                  <td className="px-5 py-4 text-xs !text-white/40">
+                    {formatDate(bug.submittedAt)}
+                  </td>
                   <td className="px-5 py-4">
                     <select
                       value={bug.status}
@@ -220,18 +237,52 @@ function BugReportsPage() {
               </button>
             </div>
             <p className="mt-3 text-xs font-black uppercase tracking-wide !text-white/35">Player</p>
-            <p className="text-sm !text-white/80">{viewBug.playerName} ({viewBug.playerId})</p>
-            <p className="mt-3 text-xs font-black uppercase tracking-wide !text-white/35">Category</p>
+            <p className="text-sm !text-white/80">
+              {viewBug.playerName} ({viewBug.playerId})
+            </p>
+            <p className="mt-3 text-xs font-black uppercase tracking-wide !text-white/35">
+              Category
+            </p>
             <p className="text-sm !text-white/80">{viewBug.category}</p>
-            <p className="mt-3 text-xs font-black uppercase tracking-wide !text-white/35">Submitted</p>
+            <p className="mt-3 text-xs font-black uppercase tracking-wide !text-white/35">
+              Submitted
+            </p>
             <p className="text-sm !text-white/80">{formatDate(viewBug.submittedAt)}</p>
-            <p className="mt-3 text-xs font-black uppercase tracking-wide !text-white/35">Description</p>
+            <p className="mt-3 text-xs font-black uppercase tracking-wide !text-white/35">
+              Description
+            </p>
             <p className="mt-1 whitespace-pre-wrap text-sm !text-white/70">{viewBug.description}</p>
-            {viewBug.attachmentUrl && (
-              <a href={viewBug.attachmentUrl} target="_blank" rel="noreferrer" className="mt-4 inline-flex items-center gap-2 rounded-md border border-coral/40 px-3 py-2 text-[10px] font-black uppercase text-coral hover:bg-coral hover:text-white">
-                View attached file
-              </a>
-            )}
+            {viewBug.attachmentUrl ? (
+              <div className="mt-5 rounded-lg border border-white/10 bg-black/20 p-3">
+                {viewBug.attachmentType?.startsWith("image/") ||
+                viewBug.attachmentUrl.startsWith("data:image/") ? (
+                  <img
+                    src={viewBug.attachmentUrl}
+                    alt={viewBug.attachmentName || "Bug report attachment"}
+                    className="max-h-72 w-full rounded object-contain"
+                  />
+                ) : (
+                  <iframe
+                    src={viewBug.attachmentUrl}
+                    title={viewBug.attachmentName || "Bug report PDF attachment"}
+                    className="h-72 w-full rounded bg-white"
+                  />
+                )}
+                <a
+                  href={viewBug.attachmentUrl}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="mt-3 inline-flex items-center gap-2 rounded-md border border-coral/40 px-3 py-2 text-[10px] font-black uppercase text-coral hover:bg-coral hover:text-white"
+                >
+                  Open attached file
+                </a>
+              </div>
+            ) : viewBug.attachmentName ? (
+              <p className="mt-4 rounded-md border border-white/10 bg-white/[.03] px-3 py-2 text-xs !text-white/40">
+                Attachment “{viewBug.attachmentName}” was submitted before file content was
+                retained.
+              </p>
+            ) : null}
           </div>
         </div>
       )}
@@ -248,7 +299,8 @@ function BugReportsPage() {
           >
             <h3 className="text-lg font-black uppercase text-white">Delete Bug Report?</h3>
             <p className="mt-3 text-sm text-white/50">
-              This permanently removes {deleteTarget.id} from the queue. This action cannot be undone in this demo session.
+              This permanently removes {deleteTarget.id} from the queue. This action cannot be
+              undone in this demo session.
             </p>
             <div className="mt-6 flex justify-end gap-2">
               <button

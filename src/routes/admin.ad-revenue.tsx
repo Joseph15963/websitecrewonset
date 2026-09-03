@@ -221,7 +221,7 @@ function AdRevenuePage() {
                     </span>
                     {ad ? (
                       <span className="text-[10px] font-bold uppercase tracking-wide !text-white/45">
-                        Ends {formatDate(ad.expiresAt)}
+                        {ad.status === "Done" ? `Ended ${formatDate(ad.endedAt ?? ad.expiresAt)}` : `Ends ${formatDate(ad.expiresAt)}`}
                       </span>
                     ) : (
                       <span className="text-[10px] font-bold uppercase tracking-wide !text-[#e1b42b]">

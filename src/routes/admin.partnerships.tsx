@@ -4,7 +4,10 @@ export const Route = createFileRoute("/admin/partnerships")({
   head: () => ({
     meta: [
       { title: "Partnerships & Ads — Crew On Set! Admin" },
-      { name: "description", content: "Review brand partnership applications and monitor active advertisements." },
+      {
+        name: "description",
+        content: "Review brand partnership applications and monitor active advertisements.",
+      },
     ],
   }),
   component: PartnershipsPage,
@@ -50,6 +53,7 @@ const adStatusStyles: Record<ActiveAd["status"], string> = {
   "On-going": "bg-[#2d9d8f]/15 text-[#4bc4b4]",
   Expiring: "bg-[#d9a514]/15 text-[#e1b42b]",
   Expired: "bg-coral/15 text-[#ff7663]",
+  Done: "bg-white/[.08] text-white/50",
 };
 
 function formatDate(iso: string) {
@@ -66,14 +70,12 @@ function PartnershipsPage() {
   const [statusFilter, setStatusFilter] = useState<"All" | PartnershipStatus>("All");
   const [emailConfirmation, setEmailConfirmation] = useState<string | null>(null);
 
-  const [ads] = adsStore.useStore();
+  const [ads, setAds] = adsStore.useStore();
   const [adStatusFilter, setAdStatusFilter] = useState<"All" | ActiveAd["status"]>("All");
 
   const filtered = useMemo(
     () =>
-      statusFilter === "All"
-        ? applications
-        : applications.filter((a) => a.status === statusFilter),
+      statusFilter === "All" ? applications : applications.filter((a) => a.status === statusFilter),
     [applications, statusFilter],
   );
 
@@ -96,21 +98,52 @@ function PartnershipsPage() {
   );
 
   const adSummaries = [
-    { label: "Total Ad Revenue", value: formatMoney(adTotals.revenue), icon: Wallet2, color: "bg-[#d9a514] text-[#101923]" },
-    { label: "Total Ad Clicks", value: adTotals.clicks.toLocaleString(), icon: MousePointerClick, color: "bg-coral text-white" },
-    { label: "Total Visits", value: adTotals.visits.toLocaleString(), icon: BarChart3, color: "bg-[#243241] text-white" },
+    {
+      label: "Total Ad Revenue",
+      value: formatMoney(adTotals.revenue),
+      icon: Wallet2,
+      color: "bg-[#d9a514] text-[#101923]",
+    },
+    {
+      label: "Total Ad Clicks",
+      value: adTotals.clicks.toLocaleString(),
+      icon: MousePointerClick,
+      color: "bg-coral text-white",
+    },
+    {
+      label: "Total Visits",
+      value: adTotals.visits.toLocaleString(),
+      icon: BarChart3,
+      color: "bg-[#243241] text-white",
+    },
   ];
 
-  const adStatusOptions: ("All" | ActiveAd["status"])[] = ["All", "On-going", "Expiring", "Expired"];
+  const adStatusOptions: ("All" | ActiveAd["status"])[] = [
+    "All",
+    "On-going",
+    "Expiring",
+    "Expired",
+    "Done",
+  ];
 
   function updateStatus(id: string, status: PartnershipStatus) {
     const next = applications.map((a) => (a.id === id ? { ...a, status } : a));
     setApplications(next);
+    const app = applications.find((a) => a.id === id);
+    const matchedAd = app && ads.find((ad) => ad.brand === app.brand && ad.exactModel === app.exactModel);
+    if (matchedAd && (status === "On-going" || status === "Done")) {
+      setAds(ads.map((ad) => ad.id === matchedAd.id ? {
+        ...ad,
+        status,
+        endedAt: status === "Done" ? new Date().toISOString() : undefined,
+      } : ad));
+    }
     if (selected?.id === id) setSelected({ ...selected, status });
 
-    const app = applications.find((a) => a.id === id);
     if (app) {
-      setEmailConfirmation(`Automated status email sent to ${app.email} — status set to "${status}".`);
+      setEmailConfirmation(
+        `Automated status email sent to ${app.email} — status set to "${status}".`,
+      );
       window.setTimeout(() => setEmailConfirmation(null), 4500);
     }
   }
@@ -124,10 +157,16 @@ function PartnershipsPage() {
           Review brand proposals and monitor live advertisements in one place.
         </p>
         <nav className="mt-4 flex flex-wrap gap-3 text-[11px] font-black uppercase tracking-wide">
-          <a href="#partnership-applications" className="rounded-md border border-white/10 px-3 py-1.5 !text-white/50 transition hover:border-coral hover:!text-white">
+          <a
+            href="#partnership-applications"
+            className="rounded-md border border-white/10 px-3 py-1.5 !text-white/50 transition hover:border-coral hover:!text-white"
+          >
             Partnership Applications
           </a>
-          <a href="#active-advertisements" className="rounded-md border border-white/10 px-3 py-1.5 !text-white/50 transition hover:border-coral hover:!text-white">
+          <a
+            href="#active-advertisements"
+            className="rounded-md border border-white/10 px-3 py-1.5 !text-white/50 transition hover:border-coral hover:!text-white"
+          >
             Active Advertisements
           </a>
         </nav>
@@ -146,7 +185,9 @@ function PartnershipsPage() {
             <button
               onClick={() => setStatusFilter("All")}
               className={`rounded-md border px-3 py-2 text-[10px] font-black uppercase transition ${
-                statusFilter === "All" ? "border-coral bg-coral text-white" : "border-white/10 text-white/50 hover:border-white/25"
+                statusFilter === "All"
+                  ? "border-coral bg-coral text-white"
+                  : "border-white/10 text-white/50 hover:border-white/25"
               }`}
             >
               All
@@ -156,7 +197,9 @@ function PartnershipsPage() {
                 key={s}
                 onClick={() => setStatusFilter(s)}
                 className={`rounded-md border px-3 py-2 text-[10px] font-black uppercase transition ${
-                  statusFilter === s ? "border-coral bg-coral text-white" : "border-white/10 text-white/50 hover:border-white/25"
+                  statusFilter === s
+                    ? "border-coral bg-coral text-white"
+                    : "border-white/10 text-white/50 hover:border-white/25"
                 }`}
               >
                 {s}
@@ -177,26 +220,47 @@ function PartnershipsPage() {
             <table className="admin-table w-full min-w-[820px] text-left">
               <thead>
                 <tr className="border-b border-white/[0.08] bg-[#141e29]">
-                  <th className="px-5 py-4 text-xs font-black uppercase tracking-wider !text-white/40">Brand</th>
-                  <th className="px-5 py-4 text-xs font-black uppercase tracking-wider !text-white/40">Product Type</th>
-                  <th className="px-5 py-4 text-xs font-black uppercase tracking-wider !text-white/40">Budget</th>
-                  <th className="px-5 py-4 text-xs font-black uppercase tracking-wider !text-white/40">Submitted</th>
-                  <th className="px-5 py-4 text-xs font-black uppercase tracking-wider !text-white/40">Status</th>
-                  <th className="px-5 py-4 text-right text-xs font-black uppercase tracking-wider !text-white/40">Action</th>
+                  <th className="px-5 py-4 text-xs font-black uppercase tracking-wider !text-white/40">
+                    Brand
+                  </th>
+                  <th className="px-5 py-4 text-xs font-black uppercase tracking-wider !text-white/40">
+                    Product Type
+                  </th>
+                  <th className="px-5 py-4 text-xs font-black uppercase tracking-wider !text-white/40">
+                    Budget
+                  </th>
+                  <th className="px-5 py-4 text-xs font-black uppercase tracking-wider !text-white/40">
+                    Submitted
+                  </th>
+                  <th className="px-5 py-4 text-xs font-black uppercase tracking-wider !text-white/40">
+                    Status
+                  </th>
+                  <th className="px-5 py-4 text-right text-xs font-black uppercase tracking-wider !text-white/40">
+                    Action
+                  </th>
                 </tr>
               </thead>
               <tbody>
                 {filtered.map((app) => (
-                  <tr key={app.id} className="border-b border-white/[0.05] transition hover:bg-white/[0.025] last:border-0">
+                  <tr
+                    key={app.id}
+                    className="border-b border-white/[0.05] transition hover:bg-white/[0.025] last:border-0"
+                  >
                     <td className="px-5 py-4">
                       <p className="font-black !text-white">{app.brand}</p>
                       <p className="text-[10px] !text-white/35">{app.id}</p>
                     </td>
                     <td className="px-5 py-4 text-sm !text-white/55">{app.productType}</td>
-                    <td className="px-5 py-4 text-sm font-bold !text-white/70">{formatMoney(app.budget)}</td>
-                    <td className="px-5 py-4 text-sm !text-white/50">{formatDate(app.submittedAt)}</td>
+                    <td className="px-5 py-4 text-sm font-bold !text-white/70">
+                      {formatMoney(app.budget)}
+                    </td>
+                    <td className="px-5 py-4 text-sm !text-white/50">
+                      {formatDate(app.submittedAt)}
+                    </td>
                     <td className="px-5 py-4">
-                      <span className={`rounded px-2.5 py-1 text-[10px] font-black uppercase ${statusStyles[app.status]}`}>
+                      <span
+                        className={`rounded px-2.5 py-1 text-[10px] font-black uppercase ${statusStyles[app.status]}`}
+                      >
                         {app.status}
                       </span>
                     </td>
@@ -240,7 +304,9 @@ function PartnershipsPage() {
                 key={s}
                 onClick={() => setAdStatusFilter(s)}
                 className={`rounded-md border px-3 py-2 text-[10px] font-black uppercase transition ${
-                  adStatusFilter === s ? "border-coral bg-coral text-white" : "border-white/10 text-white/50 hover:border-white/25"
+                  adStatusFilter === s
+                    ? "border-coral bg-coral text-white"
+                    : "border-white/10 text-white/50 hover:border-white/25"
                 }`}
               >
                 {s}
@@ -251,12 +317,17 @@ function PartnershipsPage() {
 
         <div className="grid gap-4 sm:grid-cols-3">
           {adSummaries.map((summary) => (
-            <article key={summary.label} className="rounded-lg border border-white/[0.06] bg-[#182330] p-5 shadow-xl">
+            <article
+              key={summary.label}
+              className="rounded-lg border border-white/[0.06] bg-[#182330] p-5 shadow-xl"
+            >
               <div className={`grid size-10 place-items-center rounded-md ${summary.color}`}>
                 <summary.icon className="size-5" />
               </div>
               <p className="mt-5 text-3xl font-black tracking-tight !text-white">{summary.value}</p>
-              <p className="mt-1 text-xs font-bold uppercase tracking-wider !text-white/35">{summary.label}</p>
+              <p className="mt-1 text-xs font-bold uppercase tracking-wider !text-white/35">
+                {summary.label}
+              </p>
             </article>
           ))}
         </div>
@@ -266,18 +337,35 @@ function PartnershipsPage() {
             <table className="admin-table w-full min-w-[900px] text-left">
               <thead>
                 <tr className="border-b border-white/[0.08] bg-[#141e29]">
-                  <th className="px-5 py-4 text-xs font-black uppercase tracking-wider !text-white/40">Brand</th>
-                  <th className="px-5 py-4 text-xs font-black uppercase tracking-wider !text-white/40">Exact Model</th>
-                  <th className="px-5 py-4 text-xs font-black uppercase tracking-wider !text-white/40">Start Date</th>
-                  <th className="px-5 py-4 text-xs font-black uppercase tracking-wider !text-white/40">Expiration Date</th>
-                  <th className="px-5 py-4 text-xs font-black uppercase tracking-wider !text-white/40">Status</th>
-                  <th className="px-5 py-4 text-xs font-black uppercase tracking-wider !text-white/40">Revenue</th>
-                  <th className="px-5 py-4 text-right text-xs font-black uppercase tracking-wider !text-white/40">Action</th>
+                  <th className="px-5 py-4 text-xs font-black uppercase tracking-wider !text-white/40">
+                    Brand
+                  </th>
+                  <th className="px-5 py-4 text-xs font-black uppercase tracking-wider !text-white/40">
+                    Exact Model
+                  </th>
+                  <th className="px-5 py-4 text-xs font-black uppercase tracking-wider !text-white/40">
+                    Start Date
+                  </th>
+                  <th className="px-5 py-4 text-xs font-black uppercase tracking-wider !text-white/40">
+                    Expiration Date
+                  </th>
+                  <th className="px-5 py-4 text-xs font-black uppercase tracking-wider !text-white/40">
+                    Status
+                  </th>
+                  <th className="px-5 py-4 text-xs font-black uppercase tracking-wider !text-white/40">
+                    Revenue
+                  </th>
+                  <th className="px-5 py-4 text-right text-xs font-black uppercase tracking-wider !text-white/40">
+                    Action
+                  </th>
                 </tr>
               </thead>
               <tbody>
                 {filteredAds.map((ad) => (
-                  <tr key={ad.id} className="border-b border-white/[0.05] transition hover:bg-white/[0.025] last:border-0">
+                  <tr
+                    key={ad.id}
+                    className="border-b border-white/[0.05] transition hover:bg-white/[0.025] last:border-0"
+                  >
                     <td className="px-5 py-4">
                       <p className="font-black !text-white">{ad.brand}</p>
                       <p className="text-[10px] !text-white/35">{ad.id}</p>
@@ -286,11 +374,15 @@ function PartnershipsPage() {
                     <td className="px-5 py-4 text-sm !text-white/50">{formatDate(ad.startDate)}</td>
                     <td className="px-5 py-4 text-sm !text-white/50">{formatDate(ad.expiresAt)}</td>
                     <td className="px-5 py-4">
-                      <span className={`rounded px-2.5 py-1 text-[10px] font-black uppercase ${adStatusStyles[ad.status]}`}>
+                      <span
+                        className={`rounded px-2.5 py-1 text-[10px] font-black uppercase ${adStatusStyles[ad.status]}`}
+                      >
                         {ad.status}
                       </span>
                     </td>
-                    <td className="px-5 py-4 text-sm font-bold !text-white/70">{formatMoney(ad.revenue)}</td>
+                    <td className="px-5 py-4 text-sm font-bold !text-white/70">
+                      {formatMoney(ad.revenue)}
+                    </td>
                     <td className="px-5 py-4 text-right">
                       <Link
                         href={`/admin/ads/${ad.id}`}
@@ -334,9 +426,13 @@ function PartnershipsPage() {
             </button>
 
             <div className="border-b border-white/[.06] bg-[#0d121b] px-6 py-6">
-              <p className="text-[10px] font-black uppercase tracking-[.2em] !text-coral">{selected.id}</p>
+              <p className="text-[10px] font-black uppercase tracking-[.2em] !text-coral">
+                {selected.id}
+              </p>
               <h2 className="mt-1 text-2xl font-black uppercase !text-white">{selected.brand}</h2>
-              <span className={`mt-2 inline-block rounded px-2.5 py-1 text-[10px] font-black uppercase ${statusStyles[selected.status]}`}>
+              <span
+                className={`mt-2 inline-block rounded px-2.5 py-1 text-[10px] font-black uppercase ${statusStyles[selected.status]}`}
+              >
                 {selected.status}
               </span>
             </div>
@@ -347,10 +443,14 @@ function PartnershipsPage() {
                   <dt className="flex items-center gap-2 text-[9px] font-black uppercase tracking-wide !text-white/30">
                     <HandCoins className="size-3.5" /> Product Type
                   </dt>
-                  <dd className="mt-1.5 text-sm font-bold !text-white/80">{selected.productType}</dd>
+                  <dd className="mt-1.5 text-sm font-bold !text-white/80">
+                    {selected.productType}
+                  </dd>
                 </div>
                 <div>
-                  <dt className="text-[9px] font-black uppercase tracking-wide !text-white/30">Exact Model</dt>
+                  <dt className="text-[9px] font-black uppercase tracking-wide !text-white/30">
+                    Exact Model
+                  </dt>
                   <dd className="mt-1.5 text-sm font-bold !text-white/80">{selected.exactModel}</dd>
                 </div>
                 <div className="sm:col-span-2">
@@ -368,11 +468,21 @@ function PartnershipsPage() {
                     <FileText className="size-3.5" /> File
                   </dt>
                   <dd className="mt-1.5 flex flex-wrap items-center gap-3 text-sm font-bold !text-white/80">
-                    {selected.fileName}
+                    {selected.fileName || "No attachment"}
                     {selected.attachmentUrl && (
-                      <a href={selected.attachmentUrl} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1.5 rounded-md border border-coral/40 px-2.5 py-1 text-[10px] uppercase text-coral hover:bg-coral hover:text-white">
-                        <Eye className="size-3.5" /> View attached file
+                      <a
+                        href={selected.attachmentUrl}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="inline-flex items-center gap-1.5 rounded-md border border-coral/40 px-2.5 py-1 text-[10px] uppercase text-coral hover:bg-coral hover:text-white"
+                      >
+                        <Eye className="size-3.5" /> Open attached file
                       </a>
+                    )}
+                    {!selected.attachmentUrl && selected.fileName && (
+                      <span className="text-xs font-normal !text-white/35">
+                        Legacy filename only
+                      </span>
                     )}
                   </dd>
                 </div>
@@ -380,13 +490,17 @@ function PartnershipsPage() {
                   <dt className="flex items-center gap-2 text-[9px] font-black uppercase tracking-wide !text-white/30">
                     <Mail className="size-3.5" /> Email
                   </dt>
-                  <dd className="mt-1.5 break-all text-sm font-bold !text-white/80">{selected.email}</dd>
+                  <dd className="mt-1.5 break-all text-sm font-bold !text-white/80">
+                    {selected.email}
+                  </dd>
                 </div>
                 <div>
                   <dt className="flex items-center gap-2 text-[9px] font-black uppercase tracking-wide !text-white/30">
                     <Banknote className="size-3.5" /> Proposed Budget
                   </dt>
-                  <dd className="mt-1.5 text-sm font-bold !text-white/80">{formatMoney(selected.budget)}</dd>
+                  <dd className="mt-1.5 text-sm font-bold !text-white/80">
+                    {formatMoney(selected.budget)}
+                  </dd>
                 </div>
                 <div>
                   <dt className="flex items-center gap-2 text-[9px] font-black uppercase tracking-wide !text-white/30">
@@ -397,13 +511,19 @@ function PartnershipsPage() {
                   </dd>
                 </div>
                 <div>
-                  <dt className="text-[9px] font-black uppercase tracking-wide !text-white/30">Submission Date</dt>
-                  <dd className="mt-1.5 text-sm font-bold !text-white/80">{formatDate(selected.submittedAt)}</dd>
+                  <dt className="text-[9px] font-black uppercase tracking-wide !text-white/30">
+                    Submission Date
+                  </dt>
+                  <dd className="mt-1.5 text-sm font-bold !text-white/80">
+                    {formatDate(selected.submittedAt)}
+                  </dd>
                 </div>
               </dl>
 
               <div className="mt-6 border-t border-white/[.06] pt-5">
-                <p className="text-[9px] font-black uppercase tracking-wide !text-white/30">Update Status</p>
+                <p className="text-[9px] font-black uppercase tracking-wide !text-white/30">
+                  Update Status
+                </p>
                 <select
                   value={selected.status}
                   onChange={(e) => updateStatus(selected.id, e.target.value as PartnershipStatus)}
@@ -417,8 +537,9 @@ function PartnershipsPage() {
                 </select>
 
                 <p className="mt-3 text-[11px] leading-relaxed !text-white/40">
-                  Changing this status automatically triggers a status-update email to the brand contact
-                  (simulated in this demo environment) so they stay informed without manual follow-up.
+                  Changing this status automatically triggers a status-update email to the brand
+                  contact (simulated in this demo environment) so they stay informed without manual
+                  follow-up.
                 </p>
               </div>
             </div>

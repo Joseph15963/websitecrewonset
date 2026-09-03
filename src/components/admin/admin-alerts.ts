@@ -9,10 +9,7 @@ export type AdminAlert = {
   href: string;
 };
 
-export function buildAlerts(
-  applications: PartnershipApplication[],
-  ads: ActiveAd[],
-): AdminAlert[] {
+export function buildAlerts(applications: PartnershipApplication[], ads: ActiveAd[]): AdminAlert[] {
   const alerts: AdminAlert[] = [];
 
   applications

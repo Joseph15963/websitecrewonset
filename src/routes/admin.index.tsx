@@ -110,7 +110,7 @@ function AdminDashboardPage() {
 
   const playerActivity = useMemo(
     () => activity.filter((entry) => entry.kind === "player").slice(0, 2),
-    [activity]
+    [activity],
   );
 
   const recentActivity = useMemo(() => activity.slice(0, 6), [activity]);
@@ -127,13 +127,9 @@ function AdminDashboardPage() {
     <div className="admin-page h-full overflow-y-auto bg-[#101923] text-white">
       {/* PAGE HEADER */}
       <header className="mb-8">
-        <p className="text-xs font-black tracking-[.18em] !text-coral">
-          CONTROL ROOM
-        </p>
+        <p className="text-xs font-black tracking-[.18em] !text-coral">CONTROL ROOM</p>
 
-        <h1 className="admin-heading mt-2 !text-white">
-          Dashboard
-        </h1>
+        <h1 className="admin-heading mt-2 !text-white">Dashboard</h1>
 
         <p className="admin-kicker !text-white/45">
           Studio performance and player activity at a glance.
@@ -159,9 +155,7 @@ function AdminDashboardPage() {
               </span>
             </div>
 
-            <p className="mt-6 text-3xl font-black tracking-tight !text-white">
-              {stat.value}
-            </p>
+            <p className="mt-6 text-3xl font-black tracking-tight !text-white">{stat.value}</p>
 
             <p className="mt-1 text-xs font-bold uppercase tracking-wider !text-white/35">
               {stat.label}
@@ -182,9 +176,7 @@ function AdminDashboardPage() {
             </span>
           </div>
 
-          <p className="mt-6 text-3xl font-black tracking-tight !text-white">
-            Operational
-          </p>
+          <p className="mt-6 text-3xl font-black tracking-tight !text-white">Operational</p>
 
           <p className="mt-1 flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider !text-white/35">
             <Activity className="size-3" />
@@ -241,7 +233,9 @@ function AdminDashboardPage() {
           <p className="mt-5 text-3xl font-black tracking-tight !text-white">
             {contentTotals?.galleryItems ?? 0}
           </p>
-          <p className="mt-1 text-xs font-bold uppercase tracking-wider !text-white/35">Gallery Items</p>
+          <p className="mt-1 text-xs font-bold uppercase tracking-wider !text-white/35">
+            Gallery Items
+          </p>
         </article>
 
         <article className="rounded-lg border border-white/[0.06] bg-[#182330] p-5 shadow-xl">
@@ -256,7 +250,9 @@ function AdminDashboardPage() {
               View Inbox →
             </Link>
           </div>
-          <p className="mt-5 text-3xl font-black tracking-tight !text-white">{messageCounts.total}</p>
+          <p className="mt-5 text-3xl font-black tracking-tight !text-white">
+            {messageCounts.total}
+          </p>
           <p className="mt-1 text-xs font-bold uppercase tracking-wider !text-white/35">Messages</p>
         </article>
 
@@ -275,7 +271,9 @@ function AdminDashboardPage() {
           <p className="mt-5 text-lg font-black tracking-tight !text-white">
             v{gameBuild?.version ?? "—"} · Build {gameBuild?.buildNumber ?? "—"}
           </p>
-          <p className="mt-1 text-xs font-bold uppercase tracking-wider !text-white/35">Current Game Build</p>
+          <p className="mt-1 text-xs font-bold uppercase tracking-wider !text-white/35">
+            Current Game Build
+          </p>
         </article>
       </section>
 
@@ -288,14 +286,23 @@ function AdminDashboardPage() {
         <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
           {[
             { label: "Published News", value: contentTotals?.publishedNews ?? 0, icon: BadgeCheck },
-            { label: "Draft News / Articles", value: contentTotals?.draftNews ?? 0, icon: FileText },
+            {
+              label: "Draft News / Articles",
+              value: contentTotals?.draftNews ?? 0,
+              icon: FileText,
+            },
             { label: "Gallery Items", value: contentTotals?.galleryItems ?? 0, icon: Images },
             { label: "FAQ Entries", value: contentTotals?.faqEntries ?? 0, icon: BookOpen },
           ].map((item) => (
-            <article key={item.label} className="rounded-lg border border-white/[0.06] bg-[#182330] p-5 shadow-xl">
+            <article
+              key={item.label}
+              className="rounded-lg border border-white/[0.06] bg-[#182330] p-5 shadow-xl"
+            >
               <item.icon className="size-5 !text-white/40" />
               <p className="mt-4 text-2xl font-black tracking-tight !text-white">{item.value}</p>
-              <p className="mt-1 text-xs font-bold uppercase tracking-wider !text-white/35">{item.label}</p>
+              <p className="mt-1 text-xs font-bold uppercase tracking-wider !text-white/35">
+                {item.label}
+              </p>
             </article>
           ))}
         </div>
@@ -314,9 +321,14 @@ function AdminDashboardPage() {
             { label: "Resolved", value: messageCounts.resolved },
             { label: "Total", value: messageCounts.total },
           ].map((item) => (
-            <article key={item.label} className="rounded-lg border border-white/[0.06] bg-[#182330] p-5 shadow-xl">
+            <article
+              key={item.label}
+              className="rounded-lg border border-white/[0.06] bg-[#182330] p-5 shadow-xl"
+            >
               <p className="text-2xl font-black tracking-tight !text-white">{item.value}</p>
-              <p className="mt-1 text-xs font-bold uppercase tracking-wider !text-white/35">{item.label}</p>
+              <p className="mt-1 text-xs font-bold uppercase tracking-wider !text-white/35">
+                {item.label}
+              </p>
             </article>
           ))}
         </div>
@@ -340,12 +352,17 @@ function AdminDashboardPage() {
           {[
             { label: "Current Version", value: gameBuild?.version ?? "—" },
             { label: "Build Number", value: gameBuild?.buildNumber ?? "—" },
-            { label: "Minimum Requirements", value: gameBuild?.minAndroid ?? "—" },
+            { label: "Windows Requirement", value: gameBuild?.minWindows ?? "—" },
             { label: "Release Date", value: gameBuild ? formatDate(gameBuild.releasedAt) : "—" },
           ].map((item) => (
-            <article key={item.label} className="rounded-lg border border-white/[0.06] bg-[#182330] p-5 shadow-xl">
+            <article
+              key={item.label}
+              className="rounded-lg border border-white/[0.06] bg-[#182330] p-5 shadow-xl"
+            >
               <p className="truncate text-lg font-black tracking-tight !text-white">{item.value}</p>
-              <p className="mt-1 text-xs font-bold uppercase tracking-wider !text-white/35">{item.label}</p>
+              <p className="mt-1 text-xs font-bold uppercase tracking-wider !text-white/35">
+                {item.label}
+              </p>
             </article>
           ))}
         </div>
@@ -375,7 +392,9 @@ function AdminDashboardPage() {
                   <p className="truncate text-sm font-bold !text-white">{entry.label}</p>
                   <p className="truncate text-xs !text-white/40">{entry.detail}</p>
                 </div>
-                <span className="shrink-0 text-[11px] !text-white/30">{formatDate(entry.createdAt)}</span>
+                <span className="shrink-0 text-[11px] !text-white/30">
+                  {formatDate(entry.createdAt)}
+                </span>
               </li>
             ))}
           </ul>
@@ -402,20 +421,35 @@ function AdminDashboardPage() {
             <table className="admin-table min-w-[640px] w-full border-collapse text-left">
               <thead>
                 <tr className="border-b border-white/[0.08] bg-[#141e29]">
-                  <th className="px-5 py-4 text-xs font-black uppercase tracking-wider !text-white/40">Subject</th>
-                  <th className="px-5 py-4 text-xs font-black uppercase tracking-wider !text-white/40">Sender</th>
-                  <th className="px-5 py-4 text-xs font-black uppercase tracking-wider !text-white/40">Date</th>
-                  <th className="px-5 py-4 text-xs font-black uppercase tracking-wider !text-white/40">Status</th>
+                  <th className="px-5 py-4 text-xs font-black uppercase tracking-wider !text-white/40">
+                    Subject
+                  </th>
+                  <th className="px-5 py-4 text-xs font-black uppercase tracking-wider !text-white/40">
+                    Sender
+                  </th>
+                  <th className="px-5 py-4 text-xs font-black uppercase tracking-wider !text-white/40">
+                    Date
+                  </th>
+                  <th className="px-5 py-4 text-xs font-black uppercase tracking-wider !text-white/40">
+                    Status
+                  </th>
                 </tr>
               </thead>
               <tbody>
                 {recentMessages.map((message) => (
-                  <tr key={message.id} className="border-b border-white/[0.05] transition hover:bg-white/[0.025] last:border-0">
+                  <tr
+                    key={message.id}
+                    className="border-b border-white/[0.05] transition hover:bg-white/[0.025] last:border-0"
+                  >
                     <td className="px-5 py-4 text-sm font-bold !text-white">{message.subject}</td>
                     <td className="px-5 py-4 text-sm !text-white/60">{message.sender}</td>
-                    <td className="px-5 py-4 text-xs !text-white/40">{formatDate(message.createdAt)}</td>
+                    <td className="px-5 py-4 text-xs !text-white/40">
+                      {formatDate(message.createdAt)}
+                    </td>
                     <td className="px-5 py-4">
-                      <span className={`rounded px-2.5 py-1 text-[10px] font-black uppercase ${messageStatusStyles[message.status]}`}>
+                      <span
+                        className={`rounded px-2.5 py-1 text-[10px] font-black uppercase ${messageStatusStyles[message.status]}`}
+                      >
                         {message.status}
                       </span>
                     </td>

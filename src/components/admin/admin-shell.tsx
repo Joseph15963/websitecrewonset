@@ -16,6 +16,7 @@ import {
   Gamepad2,
   HandCoins,
   LayoutDashboard,
+  LineChart,
   LogOut,
   Menu,
   Settings,
@@ -44,6 +45,7 @@ const navigation = [
   { label: "Bug Reports", href: "/admin/bugs", icon: Bug },
   { label: "Transactions", href: "/admin/transactions", icon: Banknote },
   { label: "Partnerships & Ads", href: "/admin/partnerships", icon: HandCoins },
+  { label: "Ad Revenue", href: "/admin/ad-revenue", icon: LineChart },
   { label: "Notifications", href: "/admin/notifications", icon: Bell },
   { label: "Settings", href: "/admin/settings", icon: Settings },
 ];

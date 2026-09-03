@@ -13,7 +13,8 @@ export const Route = createFileRoute("/admin/notifications")({
 });
 
 import { useMemo } from "react";
-import { CheckCheck, FileText, Megaphone, ServerCog } from "lucide-react";
+import { CheckCheck, ChevronRight, FileText, Megaphone, ServerCog } from "lucide-react";
+import { useRouter } from "@/components/next-compat/navigation";
 import { adsStore, alertReadStore, applicationsStore } from "@/lib/demo/store";
 import { buildAlerts, type AdminAlert } from "@/components/admin/admin-alerts";
 
@@ -27,9 +28,17 @@ function NotificationsPage() {
   const [applications] = applicationsStore.useStore();
   const [ads] = adsStore.useStore();
   const [readIds, setReadIds] = alertReadStore.useStore();
+  const router = useRouter();
 
   const alerts = useMemo(() => buildAlerts(applications, ads), [applications, ads]);
   const unreadCount = alerts.filter((alert) => !readIds.includes(alert.id)).length;
+
+  function openAlert(alert: AdminAlert) {
+    if (!readIds.includes(alert.id)) {
+      setReadIds([...readIds, alert.id]);
+    }
+    router.push(alert.href);
+  }
 
   return (
     <div className="admin-page h-full overflow-y-auto bg-[#101923] text-white">
@@ -72,7 +81,16 @@ function NotificationsPage() {
           return (
             <article
               key={alert.id}
-              className={`flex items-start gap-4 rounded-lg border bg-[#182330] p-5 shadow-xl ${
+              role="button"
+              tabIndex={0}
+              onClick={() => openAlert(alert)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter" || e.key === " ") {
+                  e.preventDefault();
+                  openAlert(alert);
+                }
+              }}
+              className={`group flex cursor-pointer items-start gap-4 rounded-lg border bg-[#182330] p-5 shadow-xl transition hover:bg-[#1c2836] focus:outline-none focus:ring-2 focus:ring-coral/50 ${
                 unread ? "border-coral/30" : "border-white/[0.06]"
               }`}
             >
@@ -90,15 +108,21 @@ function NotificationsPage() {
                 </div>
                 <p className="mt-1 text-sm leading-relaxed !text-white/50">{alert.body}</p>
               </div>
-              {unread && (
-                <button
-                  type="button"
-                  onClick={() => setReadIds([...readIds, alert.id])}
-                  className="shrink-0 text-[10px] font-black uppercase tracking-wide !text-white/40 transition hover:!text-coral"
-                >
-                  Mark read
-                </button>
-              )}
+              <div className="flex shrink-0 items-center gap-3">
+                {unread && (
+                  <button
+                    type="button"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setReadIds([...readIds, alert.id]);
+                    }}
+                    className="text-[10px] font-black uppercase tracking-wide !text-white/40 transition hover:!text-coral"
+                  >
+                    Mark read
+                  </button>
+                )}
+                <ChevronRight className="size-4 !text-white/25 transition group-hover:!text-coral" />
+              </div>
             </article>
           );
         })}

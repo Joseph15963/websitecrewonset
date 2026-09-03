@@ -5,6 +5,8 @@ export type AdminAlert = {
   title: string;
   body: string;
   kind: "application" | "ad" | "system";
+  /** In-app destination this alert links to when clicked. */
+  href: string;
 };
 
 export function buildAlerts(
@@ -22,6 +24,7 @@ export function buildAlerts(
         title: "New partnership application",
         body: `${application.brand} submitted a proposal awaiting review.`,
         kind: "application",
+        href: "/admin/partnerships",
       });
     });
 
@@ -33,6 +36,7 @@ export function buildAlerts(
         title: ad.status === "Expired" ? "Advertisement expired" : "Advertisement expiring soon",
         body: `${ad.brand} — ${ad.exactModel} (${ad.status}).`,
         kind: "ad",
+        href: `/admin/ads/${ad.id}`,
       });
     });
 
@@ -41,6 +45,7 @@ export function buildAlerts(
     title: "Server status: Operational",
     body: "All studio servers reporting healthy uptime — 99.98% (30d).",
     kind: "system",
+    href: "/admin",
   });
 
   return alerts;

@@ -20,6 +20,7 @@ import {
   FileSignature,
   MapPin,
   MegaphoneOff,
+  MonitorPlay,
   MousePointerClick,
   Users,
 } from "lucide-react";
@@ -199,7 +200,7 @@ function AdDetailPage() {
         </div>
       </section>
 
-      <section className="mt-4 grid gap-4 sm:grid-cols-3">
+      <section className="mt-4 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
         <article className="rounded-lg border border-white/[0.06] bg-[#182330] p-5 shadow-xl">
           <div className="grid size-10 place-items-center rounded-md bg-[#d9a514] text-[#101923]">
             <Banknote className="size-5" />
@@ -222,6 +223,14 @@ function AdDetailPage() {
           </div>
           <p className="mt-5 text-3xl font-black tracking-tight !text-white">{ad.visits.toLocaleString()}</p>
           <p className="mt-1 text-xs font-bold uppercase tracking-wider !text-white/35">Visits</p>
+        </article>
+
+        <article className="rounded-lg border border-white/[0.06] bg-[#182330] p-5 shadow-xl">
+          <div className="grid size-10 place-items-center rounded-md bg-[#2d9d8f] text-white">
+            <MonitorPlay className="size-5" />
+          </div>
+          <p className="mt-5 text-3xl font-black tracking-tight !text-white">{ad.impressions.toLocaleString()}</p>
+          <p className="mt-1 text-xs font-bold uppercase tracking-wider !text-white/35">Ad Displays / Impressions</p>
         </article>
       </section>
     </div>

@@ -24,7 +24,6 @@ import {
   FileText,
   Gamepad2,
   Images,
-  Inbox,
   MailWarning,
   MessageSquare,
   ServerCog,
@@ -32,13 +31,7 @@ import {
   Users,
 } from "lucide-react";
 import { useMemo } from "react";
-import {
-  adminActivityStore,
-  contentStatsStore,
-  gameBuildStore,
-  messagesStore,
-  type MessageStatus,
-} from "@/lib/demo/store";
+import { adminActivityStore, contentStatsStore, gameBuildStore, messagesStore } from "@/lib/demo/store";
 
 const stats = [
   {
@@ -70,12 +63,6 @@ const stats = [
     color: "bg-[#243241]",
   },
 ];
-
-const messageStatusStyles: Record<MessageStatus, string> = {
-  Unread: "bg-coral/15 text-[#ff7663]",
-  "In Progress": "bg-[#d9a514]/15 text-[#e1b42b]",
-  Resolved: "bg-[#2d9d8f]/15 text-[#4bc4b4]",
-};
 
 const activityKindStyles: Record<string, string> = {
   player: "bg-coral/15 text-[#ff7663]",
@@ -114,8 +101,6 @@ function AdminDashboardPage() {
   );
 
   const recentActivity = useMemo(() => activity.slice(0, 6), [activity]);
-  const recentMessages = useMemo(() => messages.slice(0, 5), [messages]);
-
   const messageCounts = useMemo(() => {
     const unread = messages.filter((m) => m.status === "Unread").length;
     const inProgress = messages.filter((m) => m.status === "In Progress").length;
@@ -401,72 +386,6 @@ function AdminDashboardPage() {
         </div>
       </section>
 
-      {/* INBOX */}
-      <section className="mb-8 mt-8">
-        <div className="flex items-center justify-between">
-          <h2 className="mb-3 flex items-center gap-2 text-sm font-black uppercase tracking-wider !text-white/60">
-            <Inbox className="size-4 !text-coral" />
-            Inbox
-          </h2>
-          <Link
-            href="/admin"
-            className="mb-3 text-[11px] font-black uppercase tracking-wide !text-coral hover:!text-white"
-          >
-            View Inbox →
-          </Link>
-        </div>
-
-        <div className="admin-table-wrap overflow-hidden rounded-lg border border-white/[0.06] bg-[#182330] shadow-xl">
-          <div className="overflow-x-auto">
-            <table className="admin-table min-w-[640px] w-full border-collapse text-left">
-              <thead>
-                <tr className="border-b border-white/[0.08] bg-[#141e29]">
-                  <th className="px-5 py-4 text-xs font-black uppercase tracking-wider !text-white/40">
-                    Subject
-                  </th>
-                  <th className="px-5 py-4 text-xs font-black uppercase tracking-wider !text-white/40">
-                    Sender
-                  </th>
-                  <th className="px-5 py-4 text-xs font-black uppercase tracking-wider !text-white/40">
-                    Date
-                  </th>
-                  <th className="px-5 py-4 text-xs font-black uppercase tracking-wider !text-white/40">
-                    Status
-                  </th>
-                </tr>
-              </thead>
-              <tbody>
-                {recentMessages.map((message) => (
-                  <tr
-                    key={message.id}
-                    className="border-b border-white/[0.05] transition hover:bg-white/[0.025] last:border-0"
-                  >
-                    <td className="px-5 py-4 text-sm font-bold !text-white">{message.subject}</td>
-                    <td className="px-5 py-4 text-sm !text-white/60">{message.sender}</td>
-                    <td className="px-5 py-4 text-xs !text-white/40">
-                      {formatDate(message.createdAt)}
-                    </td>
-                    <td className="px-5 py-4">
-                      <span
-                        className={`rounded px-2.5 py-1 text-[10px] font-black uppercase ${messageStatusStyles[message.status]}`}
-                      >
-                        {message.status}
-                      </span>
-                    </td>
-                  </tr>
-                ))}
-                {recentMessages.length === 0 && (
-                  <tr>
-                    <td colSpan={4} className="py-12 text-center text-sm !text-white/40">
-                      No messages yet.
-                    </td>
-                  </tr>
-                )}
-              </tbody>
-            </table>
-          </div>
-        </div>
-      </section>
     </div>
   );
 }

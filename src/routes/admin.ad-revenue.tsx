@@ -40,13 +40,11 @@ function formatDate(iso: string) {
   });
 }
 
-/** Match an approved application to its live advertisement using brand + exact model. */
+/** Resolve ads by their stable source application ID, with legacy fallback. */
 function findAdForApplication(app: PartnershipApplication, ads: ActiveAd[]) {
-  return (
+  return ads.find((ad) => ad.applicationId === app.id) ??
     ads.find((ad) => ad.brand === app.brand && ad.exactModel === app.exactModel) ??
-    ads.find((ad) => ad.brand === app.brand) ??
-    null
-  );
+    null;
 }
 
 function AdRevenuePage() {

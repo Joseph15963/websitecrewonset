@@ -91,17 +91,15 @@ function seededPick<T>(list: readonly T[], seed: number) {
 }
 
 export function getPlayerAccountInfo(id: number): PlayerAccountInfo {
-  const platforms = ["Windows PC", "macOS", "Steam Deck"];
   const devices = ["Desktop — RTX 3060", "Laptop — Intel i7", "Desktop — RX 6700 XT"];
-  const methods = ["Email & Password", "Google SSO", "Steam Account"];
 
   return {
     crewId: `COS-${String(id).padStart(4, "0")}`,
-    platform: seededPick(platforms, id),
+    platform: "Windows",
     device: seededPick(devices, id),
     lastLogin: "Aug 09, 2026 — 21:14",
     lastIp: `203.0.113.${(id * 7) % 255}`,
-    loginMethod: seededPick(methods, id),
+    loginMethod: "Google",
     twoFactor: id % 3 === 0 ? "Enabled" : "Disabled",
   };
 }

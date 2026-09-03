@@ -409,6 +409,9 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
           collapsed ? "md:ml-20" : "md:ml-64"
         }`}
       >
+        <div className="hidden h-16 items-center justify-end border-b border-white/[0.06] bg-navy px-6 md:flex">
+          {notificationBell}
+        </div>
         {children}
       </main>
     </div>

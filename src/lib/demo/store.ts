@@ -257,6 +257,8 @@ export const applicationsStore = createStore<PartnershipApplication>(
 
 export type ActiveAd = {
   id: string;
+  /** Stable source application relationship; avoids fragile brand matching. */
+  applicationId?: string;
   brand: string;
   exactModel: string;
   productType: string;
@@ -278,6 +280,7 @@ export type ActiveAd = {
 const seedAds: ActiveAd[] = [
   {
     id: "AD-3301",
+    applicationId: "APP-4818",
     brand: "Cafe Kalye",
     exactModel: "Kalye Cold Brew 500ml",
     productType: "Food & Beverage",
@@ -293,6 +296,7 @@ const seedAds: ActiveAd[] = [
   },
   {
     id: "AD-3288",
+    applicationId: "APP-4802",
     brand: "Vantage Apparel",
     exactModel: "Vantage Crew Jacket V2",
     productType: "Apparel",
@@ -308,6 +312,7 @@ const seedAds: ActiveAd[] = [
   },
   {
     id: "AD-3274",
+    applicationId: "APP-4821",
     brand: "Northline Optics",
     exactModel: "Northline NL-70 Cine Prime",
     productType: "Camera Gear",
@@ -323,6 +328,7 @@ const seedAds: ActiveAd[] = [
   },
   {
     id: "AD-3255",
+    applicationId: "APP-4776",
     brand: "Bolt Energy",
     exactModel: "Bolt Zero 330ml",
     productType: "Food & Beverage",

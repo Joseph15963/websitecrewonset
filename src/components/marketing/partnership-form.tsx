@@ -17,6 +17,7 @@ export function PartnershipForm() {
     event.preventDefault();
     const data = new FormData(event.currentTarget);
 
+    const brandName = String(data.get("brandName") ?? "").trim();
     const productType = String(data.get("productType") ?? "");
     const exactModel = String(data.get("exactModel") ?? "").trim();
     const link = String(data.get("link") ?? "").trim();
@@ -26,7 +27,7 @@ export function PartnershipForm() {
     const email = String(data.get("email") ?? "").trim();
     const description = String(data.get("description") ?? "").trim();
 
-    if (!productType || !exactModel || !email) {
+    if (!brandName || !productType || !exactModel || !email) {
       setError("Please fill in all required fields.");
       return;
     }
@@ -56,7 +57,12 @@ export function PartnershipForm() {
       }
     }
     if (file) {
-      const isAllowed = file.type.startsWith("image/") || file.type === "application/pdf";
+      const isPdf = file.type === "application/pdf" || file.name.toLowerCase().endsWith(".pdf");
+      const isAllowed = file.type.startsWith("image/") || isPdf;
+      if (file.size > 5 * 1024 * 1024) {
+        setError("Attachments must be 5 MB or smaller.");
+        return;
+      }
       if (!isAllowed) {
         setError("Attachments must be an image or a PDF file.");
         return;
@@ -77,7 +83,7 @@ export function PartnershipForm() {
 
     const application: PartnershipApplication = {
       id: uid("APP"),
-      brand: exactModel,
+      brand: brandName,
       productType,
       exactModel,
       link,
@@ -133,6 +139,16 @@ export function PartnershipForm() {
       </div>
 
       <div className="mt-7 grid gap-4 sm:grid-cols-2">
+        <label className="form-label">
+          BRAND NAME
+          <input
+            className="form-input"
+            name="brandName"
+            required
+            placeholder="Your company or brand"
+          />
+        </label>
+
         <label className="form-label">
           PRODUCT TYPE
           <select className="form-input" name="productType" required defaultValue="">

@@ -46,7 +46,6 @@ const navigation = [
   { label: "Transactions", href: "/admin/transactions", icon: Banknote },
   { label: "Partnerships & Ads", href: "/admin/partnerships", icon: HandCoins },
   { label: "Ad Revenue", href: "/admin/ad-revenue", icon: LineChart },
-  { label: "Notifications", href: "/admin/notifications", icon: Bell },
   { label: "Settings", href: "/admin/settings", icon: Settings },
 ];
 
@@ -58,8 +57,42 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
   const [identityHover, setIdentityHover] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [logoutConfirmOpen, setLogoutConfirmOpen] = useState(false);
+  const [notificationsOpen, setNotificationsOpen] = useState(false);
   const [account] = adminAccountStore.useStore();
-  const { unread } = useUnreadAlertsCount();
+  const [applications] = applicationsStore.useStore();
+  const [ads] = adsStore.useStore();
+  const alerts = useMemo(() => buildAlerts(applications, ads), [applications, ads]);
+  const [readIds, setReadIds] = alertReadStore.useStore();
+  const unread = alerts.filter((alert) => !readIds.includes(alert.id)).length;
+
+  function openAlert(id: string, href: string) {
+    if (!readIds.includes(id)) setReadIds([...readIds, id]);
+    setNotificationsOpen(false);
+    router.push(href);
+  }
+
+  const notificationBell = (
+    <div className="relative">
+      <button
+        type="button"
+        onClick={() => setNotificationsOpen((current) => !current)}
+        aria-label={`Notifications${unread ? `, ${unread} unread` : ""}`}
+        aria-expanded={notificationsOpen}
+        className="relative grid size-10 place-items-center rounded-md border border-white/10 text-white/60 transition hover:border-white/25 hover:text-white"
+      >
+        <Bell className="size-5" />
+        {unread > 0 && <span className="absolute -right-1 -top-1 grid min-w-[17px] place-items-center rounded-full bg-coral px-1 text-[9px] font-black leading-[17px] text-white">{unread > 9 ? "9+" : unread}</span>}
+      </button>
+      {notificationsOpen && (
+        <div className="absolute right-0 top-12 z-50 w-[min(22rem,calc(100vw-2rem))] rounded-lg border border-white/10 bg-[#151c28] p-2 shadow-2xl">
+          <div className="flex items-center justify-between px-3 py-2"><p className="text-xs font-black uppercase tracking-wide text-white">Admin Notifications</p><span className="text-[10px] text-white/40">{unread} unread</span></div>
+          <div className="max-h-80 overflow-y-auto">
+            {alerts.map((alert) => <button key={alert.id} type="button" onClick={() => openAlert(alert.id, alert.href)} className={`block w-full rounded-md px-3 py-3 text-left transition hover:bg-white/[.06] ${readIds.includes(alert.id) ? "opacity-55" : ""}`}><p className="text-xs font-black text-white">{alert.title}</p><p className="mt-1 text-[11px] leading-relaxed text-white/50">{alert.body}</p></button>)}
+          </div>
+        </div>
+      )}
+    </div>
+  );
 
   useEffect(() => {
     const stored = window.localStorage.getItem("cos.admin.sidebar.collapsed");
@@ -113,7 +146,7 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
       <nav className="min-h-0 flex-1 space-y-0.5 overflow-hidden px-3 py-3" aria-label="Admin navigation">
         {navigation.map((item) => {
           const active = item.href === "/admin" ? pathname === item.href : pathname.startsWith(item.href);
-          const showBadge = item.href === "/admin/notifications" && unread > 0;
+          const showBadge = false;
 
           return (
             <Link
@@ -280,7 +313,7 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
           />
         </div>
 
-        <span className="size-10" aria-hidden />
+        {notificationBell}
       </header>
 
       {/* MOBILE SIDEBAR */}

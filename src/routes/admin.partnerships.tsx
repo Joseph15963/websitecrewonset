@@ -367,7 +367,14 @@ function PartnershipsPage() {
                   <dt className="flex items-center gap-2 text-[9px] font-black uppercase tracking-wide !text-white/30">
                     <FileText className="size-3.5" /> File
                   </dt>
-                  <dd className="mt-1.5 text-sm font-bold !text-white/80">{selected.fileName}</dd>
+                  <dd className="mt-1.5 flex flex-wrap items-center gap-3 text-sm font-bold !text-white/80">
+                    {selected.fileName}
+                    {selected.attachmentUrl && (
+                      <a href={selected.attachmentUrl} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1.5 rounded-md border border-coral/40 px-2.5 py-1 text-[10px] uppercase text-coral hover:bg-coral hover:text-white">
+                        <Eye className="size-3.5" /> View attached file
+                      </a>
+                    )}
+                  </dd>
                 </div>
                 <div>
                   <dt className="flex items-center gap-2 text-[9px] font-black uppercase tracking-wide !text-white/30">

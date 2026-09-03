@@ -238,7 +238,7 @@ function PlayerDashboardPage() {
             </div>
 
             <Link
-              href="/portal/achievements"
+              href="/portal/almanac"
               className="text-xs font-black text-coral transition hover:text-white"
             >
               VIEW ALL →
@@ -352,7 +352,7 @@ function PlayerDashboardPage() {
             <UserPlus className="size-4" /> Manage Friends
           </Link>
           <Link
-            href="/portal/achievements"
+            href="/portal/almanac"
             className="inline-flex items-center gap-2 rounded-md border border-white/10 bg-[#121d32] px-4 py-2.5 text-xs font-bold text-white/70 transition hover:border-coral/40 hover:text-white"
           >
             <Award className="size-4" /> View Achievements

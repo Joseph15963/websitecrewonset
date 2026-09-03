@@ -11,8 +11,13 @@ export const Route = createFileRoute("/admin/player-reports")({
 });
 
 import { useMemo, useState } from "react";
-import { Eye, FileText, Search, UserRound, X } from "lucide-react";
-import { playerReportsStore, type PlayerReport, type PlayerReportStatus } from "@/lib/demo/store";
+import { Eye, FileText, Search, Trash2, UserRound, X } from "lucide-react";
+import {
+  logAdminActivity,
+  playerReportsStore,
+  type PlayerReport,
+  type PlayerReportStatus,
+} from "@/lib/demo/store";
 
 const statuses: PlayerReportStatus[] = ["New", "Investigating", "Resolved"];
 const statusStyles: Record<PlayerReportStatus, string> = {
@@ -39,6 +44,7 @@ function PlayerReportsRouteComponent() {
   const [query, setQuery] = useState("");
   const [status, setStatus] = useState<"All Statuses" | PlayerReportStatus>("All Statuses");
   const [selected, setSelected] = useState<PlayerReport | null>(null);
+  const [deleteTarget, setDeleteTarget] = useState<PlayerReport | null>(null);
   const filtered = useMemo(() => {
     const search = query.trim().toLowerCase();
     return reports.filter(
@@ -54,6 +60,17 @@ function PlayerReportsRouteComponent() {
   function updateStatus(report: PlayerReport, next: PlayerReportStatus) {
     setReports(reports.map((item) => (item.id === report.id ? { ...item, status: next } : item)));
     if (selected?.id === report.id) setSelected({ ...report, status: next });
+  }
+
+  function deleteReport(report: PlayerReport) {
+    setReports(reports.filter((item) => item.id !== report.id));
+    setSelected((current) => (current?.id === report.id ? null : current));
+    setDeleteTarget(null);
+    logAdminActivity({
+      kind: "bug",
+      label: "Player report deleted",
+      detail: `${report.id} was removed from the queue.`,
+    });
   }
 
   return (
@@ -140,13 +157,22 @@ function PlayerReportsRouteComponent() {
                     </select>
                   </td>
                   <td className="px-5 py-4">
-                    <button
-                      onClick={() => setSelected(report)}
-                      aria-label={`View ${report.id}`}
-                      className="grid size-8 place-items-center rounded-md border border-white/10 !text-white/60 hover:border-coral hover:!text-white"
-                    >
-                      <Eye className="size-4" />
-                    </button>
+                    <div className="flex items-center gap-2">
+                      <button
+                        onClick={() => setSelected(report)}
+                        aria-label={`View ${report.id}`}
+                        className="grid size-8 place-items-center rounded-md border border-white/10 !text-white/60 hover:border-coral hover:!text-white"
+                      >
+                        <Eye className="size-4" />
+                      </button>
+                      <button
+                        onClick={() => setDeleteTarget(report)}
+                        aria-label={`Delete ${report.id}`}
+                        className="grid size-8 place-items-center rounded-md border border-white/10 !text-white/60 hover:border-coral hover:!text-coral"
+                      >
+                        <Trash2 className="size-4" />
+                      </button>
+                    </div>
                   </td>
                 </tr>
               ))}
@@ -232,6 +258,38 @@ function PlayerReportsRouteComponent() {
                 Attachment “{selected.attachmentName}” has no retained file content.
               </p>
             ) : null}
+          </div>
+        </div>
+      )}
+      {deleteTarget && (
+        <div
+          className="fixed inset-0 z-[110] flex items-center justify-center bg-black/70 p-4 backdrop-blur-sm"
+          onClick={() => setDeleteTarget(null)}
+        >
+          <div
+            className="w-full max-w-sm rounded-xl border border-[#ff6248]/40 bg-[#151c28] p-6 shadow-2xl"
+            onClick={(event) => event.stopPropagation()}
+          >
+            <h2 className="text-lg font-black uppercase text-white">Delete Player Report?</h2>
+            <p className="mt-3 text-sm text-white/50">
+              This permanently removes {deleteTarget.id} from the queue. This action cannot be undone.
+            </p>
+            <div className="mt-6 flex justify-end gap-2">
+              <button
+                type="button"
+                onClick={() => setDeleteTarget(null)}
+                className="rounded-md border border-white/10 px-4 py-2 text-xs font-bold text-white/60 hover:text-white"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={() => deleteReport(deleteTarget)}
+                className="rounded-md bg-[#ff6248] px-4 py-2 text-xs font-black uppercase text-white hover:bg-[#e5533b]"
+              >
+                Confirm Delete
+              </button>
+            </div>
           </div>
         </div>
       )}

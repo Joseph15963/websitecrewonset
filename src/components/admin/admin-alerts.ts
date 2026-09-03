@@ -1,4 +1,9 @@
-import type { ActiveAd, PartnershipApplication } from "@/lib/demo/store";
+import type {
+  ActiveAd,
+  BugReport,
+  PartnershipApplication,
+  PlayerReport,
+} from "@/lib/demo/store";
 
 export type AdminAlert = {
   id: string;
@@ -9,7 +14,12 @@ export type AdminAlert = {
   href: string;
 };
 
-export function buildAlerts(applications: PartnershipApplication[], ads: ActiveAd[]): AdminAlert[] {
+export function buildAlerts(
+  applications: PartnershipApplication[],
+  ads: ActiveAd[],
+  bugs: BugReport[] = [],
+  playerReports: PlayerReport[] = [],
+): AdminAlert[] {
   const alerts: AdminAlert[] = [];
 
   applications
@@ -24,6 +34,26 @@ export function buildAlerts(applications: PartnershipApplication[], ads: ActiveA
         href: "/admin/partnerships",
       });
     });
+
+  bugs.forEach((bug) => {
+    alerts.push({
+      id: `bug-${bug.id}`,
+      title: "New bug report submitted",
+      body: `${bug.id} from ${bug.playerName}: ${bug.description}`,
+      kind: "system",
+      href: "/admin/bugs",
+    });
+  });
+
+  playerReports.forEach((report) => {
+    alerts.push({
+      id: `player-report-${report.id}`,
+      title: "New player report submitted",
+      body: `${report.id}: ${report.reporterName} reported ${report.reportedUsername}.`,
+      kind: "system",
+      href: "/admin/player-reports",
+    });
+  });
 
   ads
     .filter((ad) => ad.status === "Expiring" || ad.status === "Expired")

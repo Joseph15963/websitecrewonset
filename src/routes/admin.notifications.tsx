@@ -15,7 +15,13 @@ export const Route = createFileRoute("/admin/notifications")({
 import { useMemo } from "react";
 import { CheckCheck, ChevronRight, FileText, Megaphone, ServerCog } from "lucide-react";
 import { useRouter } from "@/components/next-compat/navigation";
-import { adsStore, alertReadStore, applicationsStore } from "@/lib/demo/store";
+import {
+  adsStore,
+  alertReadStore,
+  applicationsStore,
+  bugReportsStore,
+  playerReportsStore,
+} from "@/lib/demo/store";
 import { buildAlerts, type AdminAlert } from "@/components/admin/admin-alerts";
 
 const iconByKind: Record<AdminAlert["kind"], typeof FileText> = {
@@ -27,10 +33,15 @@ const iconByKind: Record<AdminAlert["kind"], typeof FileText> = {
 function NotificationsPage() {
   const [applications] = applicationsStore.useStore();
   const [ads] = adsStore.useStore();
+  const [bugs] = bugReportsStore.useStore();
+  const [playerReports] = playerReportsStore.useStore();
   const [readIds, setReadIds] = alertReadStore.useStore();
   const router = useRouter();
 
-  const alerts = useMemo(() => buildAlerts(applications, ads), [applications, ads]);
+  const alerts = useMemo(
+    () => buildAlerts(applications, ads, bugs, playerReports),
+    [applications, ads, bugs, playerReports],
+  );
   const unreadCount = alerts.filter((alert) => !readIds.includes(alert.id)).length;
 
   function openAlert(alert: AdminAlert) {

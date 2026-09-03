@@ -7,7 +7,7 @@ export const Route = createFileRoute("/admin")({
   beforeLoad: async () => {
     const session = await getCrewSession();
     if (!session.isAdmin) {
-      throw redirect({ to: "/login" });
+      throw redirect({ to: "/admin/login" });
     }
   },
   component: AdminLayout,

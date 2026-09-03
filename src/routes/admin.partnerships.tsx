@@ -53,6 +53,7 @@ const adStatusStyles: Record<ActiveAd["status"], string> = {
   "On-going": "bg-[#2d9d8f]/15 text-[#4bc4b4]",
   Expiring: "bg-[#d9a514]/15 text-[#e1b42b]",
   Expired: "bg-coral/15 text-[#ff7663]",
+  Done: "bg-white/[.08] text-white/50",
 };
 
 function formatDate(iso: string) {
@@ -69,7 +70,7 @@ function PartnershipsPage() {
   const [statusFilter, setStatusFilter] = useState<"All" | PartnershipStatus>("All");
   const [emailConfirmation, setEmailConfirmation] = useState<string | null>(null);
 
-  const [ads] = adsStore.useStore();
+  const [ads, setAds] = adsStore.useStore();
   const [adStatusFilter, setAdStatusFilter] = useState<"All" | ActiveAd["status"]>("All");
 
   const filtered = useMemo(
@@ -122,14 +123,23 @@ function PartnershipsPage() {
     "On-going",
     "Expiring",
     "Expired",
+    "Done",
   ];
 
   function updateStatus(id: string, status: PartnershipStatus) {
     const next = applications.map((a) => (a.id === id ? { ...a, status } : a));
     setApplications(next);
+    const app = applications.find((a) => a.id === id);
+    const matchedAd = app && ads.find((ad) => ad.brand === app.brand && ad.exactModel === app.exactModel);
+    if (matchedAd && (status === "On-going" || status === "Done")) {
+      setAds(ads.map((ad) => ad.id === matchedAd.id ? {
+        ...ad,
+        status,
+        endedAt: status === "Done" ? new Date().toISOString() : undefined,
+      } : ad));
+    }
     if (selected?.id === id) setSelected({ ...selected, status });
 
-    const app = applications.find((a) => a.id === id);
     if (app) {
       setEmailConfirmation(
         `Automated status email sent to ${app.email} — status set to "${status}".`,

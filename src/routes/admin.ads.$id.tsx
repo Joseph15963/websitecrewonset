@@ -30,6 +30,7 @@ const statusStyles: Record<ActiveAd["status"], string> = {
   "On-going": "bg-[#2d9d8f]/15 text-[#4bc4b4]",
   Expiring: "bg-[#d9a514]/15 text-[#e1b42b]",
   Expired: "bg-coral/15 text-[#ff7663]",
+  Done: "bg-white/[.08] text-white/50",
 };
 
 function formatDate(iso: string) {
@@ -112,7 +113,8 @@ function AdDetailPage() {
 
   const remainingMs = now === null ? null : new Date(ad.expiresAt).getTime() - now;
   const countdown = remainingMs === null ? null : splitCountdown(remainingMs);
-  const isExpired = ad.status === "Expired" || (remainingMs !== null && remainingMs <= 0);
+  const isDone = ad.status === "Done";
+  const isExpired = !isDone && (ad.status === "Expired" || (remainingMs !== null && remainingMs <= 0));
 
   return (
     <div className="admin-page h-full overflow-y-auto bg-[#101923] text-white">
@@ -156,8 +158,8 @@ function AdDetailPage() {
               <p className="mt-1.5 text-sm font-bold !text-white/80">{formatDate(ad.startDate)}</p>
             </div>
             <div>
-              <p className="text-[9px] font-black uppercase tracking-wide !text-white/30">Expiration Date</p>
-              <p className="mt-1.5 text-sm font-bold !text-white/80">{formatDate(ad.expiresAt)}</p>
+              <p className="text-[9px] font-black uppercase tracking-wide !text-white/30">{isDone ? "Ended Date / Time" : "Expiration Date"}</p>
+              <p className="mt-1.5 text-sm font-bold !text-white/80">{formatDate(isDone && ad.endedAt ? ad.endedAt : ad.expiresAt)}</p>
             </div>
             <div>
               <p className="flex items-center gap-1.5 text-[9px] font-black uppercase tracking-wide !text-white/30">

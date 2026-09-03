@@ -164,6 +164,8 @@ export type PartnershipApplication = {
   exactModel: string;
   link: string;
   fileName: string;
+  attachmentUrl?: string;
+  attachmentType?: string;
   budget: number;
   duration: number;
   durationUnit: "Days" | "Months";
@@ -262,7 +264,9 @@ export type ActiveAd = {
   startDate: string;
   /** ISO timestamp the live countdown ticks down to. */
   expiresAt: string;
-  status: "On-going" | "Expiring" | "Expired";
+  status: "On-going" | "Expiring" | "Expired" | "Done";
+  /** Set when an administrator finishes an advertisement early. */
+  endedAt?: string;
   revenue: number;
   clicks: number;
   visits: number;

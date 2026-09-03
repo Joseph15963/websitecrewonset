@@ -43,6 +43,18 @@ export function PartnershipForm() {
       setError("Please enter a valid advertisement duration.");
       return;
     }
+    if (link) {
+      const normalizedLink = /^https?:\/\//i.test(link) ? link : `https://${link}`;
+      try {
+        const parsed = new URL(normalizedLink);
+        if (!parsed.hostname.includes(".") || !/^[a-z0-9.-]+$/i.test(parsed.hostname)) {
+          throw new Error("Invalid hostname");
+        }
+      } catch {
+        setError("Please enter a valid domain or URL.");
+        return;
+      }
+    }
     if (file) {
       const isAllowed = file.type.startsWith("image/") || file.type === "application/pdf";
       if (!isAllowed) {
@@ -151,8 +163,8 @@ export function PartnershipForm() {
           <input
             className="form-input"
             name="link"
-            type="url"
-            placeholder="https://www.yourbrand.com/product"
+            inputMode="url"
+            placeholder="yourbrand.com/product"
           />
         </label>
 

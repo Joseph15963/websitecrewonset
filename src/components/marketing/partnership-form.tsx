@@ -129,7 +129,7 @@ export function PartnershipForm() {
         </label>
 
         <label className="form-label">
-          PROPOSED BUDGET (USD)
+          PROPOSED BUDGET (₱ PHP)
           <input className="form-input" name="budget" type="number" min={1} step={1} required placeholder="10000" />
         </label>
 

@@ -14,14 +14,14 @@ export const players = [
 ] as const;
 
 export const transactions = [
-  { id: "TX-10482", player: "FramePerfect", playerId: "#0001", type: "C-Coin Purchase", item: "1,000 C-Coins", amount: "$9.99", status: "Completed", date: "Aug 09, 2026" },
-  { id: "TX-10481", player: "BoomBuddy", playerId: "#0002", type: "Store Purchase", item: "Director Jacket", amount: "$6.50", status: "Completed", date: "Aug 09, 2026" },
-  { id: "TX-10480", player: "LightLeak", playerId: "#0003", type: "C-Coin Purchase", item: "500 C-Coins", amount: "$4.99", status: "Pending", date: "Aug 08, 2026" },
-  { id: "TX-10479", player: "DollyDash", playerId: "#0004", type: "Store Purchase", item: "Golden Slate", amount: "$8.00", status: "Completed", date: "Aug 08, 2026" },
-  { id: "TX-10478", player: "FinalTake", playerId: "#0005", type: "C-Coin Purchase", item: "2,500 C-Coins", amount: "$19.99", status: "Failed", date: "Aug 07, 2026" },
-  { id: "TX-10477", player: "PropMaster", playerId: "#0006", type: "Store Purchase", item: "Prop Pack 02", amount: "$5.25", status: "Completed", date: "Aug 07, 2026" },
-  { id: "TX-10476", player: "SlateRunner", playerId: "#0008", type: "C-Coin Purchase", item: "1,000 C-Coins", amount: "$9.99", status: "Pending", date: "Aug 06, 2026" },
-  { id: "TX-10475", player: "ColorGrade", playerId: "#0009", type: "Store Purchase", item: "Neon Light Kit", amount: "$7.75", status: "Failed", date: "Aug 06, 2026" },
+  { id: "TX-10482", player: "FramePerfect", playerId: "#0001", type: "C-Coin Purchase", item: "1,000 C-Coins", amount: "₱9.99", status: "Completed", date: "Aug 09, 2026" },
+  { id: "TX-10481", player: "BoomBuddy", playerId: "#0002", type: "Store Purchase", item: "Director Jacket", amount: "₱6.50", status: "Completed", date: "Aug 09, 2026" },
+  { id: "TX-10480", player: "LightLeak", playerId: "#0003", type: "C-Coin Purchase", item: "500 C-Coins", amount: "₱4.99", status: "Pending", date: "Aug 08, 2026" },
+  { id: "TX-10479", player: "DollyDash", playerId: "#0004", type: "Store Purchase", item: "Golden Slate", amount: "₱8.00", status: "Completed", date: "Aug 08, 2026" },
+  { id: "TX-10478", player: "FinalTake", playerId: "#0005", type: "C-Coin Purchase", item: "2,500 C-Coins", amount: "₱19.99", status: "Failed", date: "Aug 07, 2026" },
+  { id: "TX-10477", player: "PropMaster", playerId: "#0006", type: "Store Purchase", item: "Prop Pack 02", amount: "₱5.25", status: "Completed", date: "Aug 07, 2026" },
+  { id: "TX-10476", player: "SlateRunner", playerId: "#0008", type: "C-Coin Purchase", item: "1,000 C-Coins", amount: "₱9.99", status: "Pending", date: "Aug 06, 2026" },
+  { id: "TX-10475", player: "ColorGrade", playerId: "#0009", type: "Store Purchase", item: "Neon Light Kit", amount: "₱7.75", status: "Failed", date: "Aug 06, 2026" },
 ] as const;
 
 export const releases = [

@@ -174,7 +174,7 @@ function SettingsPage() {
 
   const [playerReportOpen, setPlayerReportOpen] = useState(false);
   const [playerReportType, setPlayerReportType] = useState("");
-  const [playerReportEmail, setPlayerReportEmail] = useState("");
+  const [playerReportUsername, setPlayerReportUsername] = useState("");
   const [playerReportDescription, setPlayerReportDescription] = useState("");
   const [playerReportAttachment, setPlayerReportAttachment] =
     useState<File | null>(null);
@@ -645,7 +645,7 @@ function SettingsPage() {
 
   const openPlayerReport = () => {
     setPlayerReportType("");
-    setPlayerReportEmail("");
+    setPlayerReportUsername("");
     setPlayerReportDescription("");
     setPlayerReportAttachment(null);
     setPlayerReportError("");
@@ -656,7 +656,7 @@ function SettingsPage() {
   const closePlayerReport = () => {
     setPlayerReportOpen(false);
     setPlayerReportType("");
-    setPlayerReportEmail("");
+    setPlayerReportUsername("");
     setPlayerReportDescription("");
     setPlayerReportAttachment(null);
     setPlayerReportError("");
@@ -689,8 +689,8 @@ function SettingsPage() {
       return;
     }
 
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(playerReportEmail.trim())) {
-      setPlayerReportError("Please enter a valid email address.");
+    if (!playerReportUsername.trim()) {
+      setPlayerReportError("Please enter the username of the player you are reporting.");
       return;
     }
 
@@ -715,7 +715,7 @@ function SettingsPage() {
         reporterId: BUG_REPORT_PLAYER_ID,
         reportType: playerReportType,
         description: playerReportDescription.trim(),
-        email: playerReportEmail.trim(),
+        reportedUsername: playerReportUsername.trim(),
         attachmentName: playerReportAttachment?.name,
         submittedAt: new Date().toISOString(),
         status: "New",
@@ -723,7 +723,7 @@ function SettingsPage() {
     ]);
 
     setPlayerReportType("");
-    setPlayerReportEmail("");
+    setPlayerReportUsername("");
     setPlayerReportDescription("");
     setPlayerReportAttachment(null);
     setPlayerReportSubmitted(true);
@@ -1758,15 +1758,15 @@ function SettingsPage() {
                   </label>
 
                   <label className="block text-[10px] font-black uppercase tracking-wider text-white/35">
-                    Email
+                    Reported Player Username
 
                     <input
-                      type="email"
-                      value={playerReportEmail}
+                      type="text"
+                      value={playerReportUsername}
                       onChange={(event) =>
-                        setPlayerReportEmail(event.target.value)
+                        setPlayerReportUsername(event.target.value)
                       }
-                      placeholder="you@example.com"
+                      placeholder="Enter the username of the player"
                       className="mt-2 w-full rounded-md border border-white/10 bg-[#0d121c] px-3 py-3 text-sm font-bold text-white outline-none placeholder:text-white/15 focus:border-coral"
                     />
                   </label>

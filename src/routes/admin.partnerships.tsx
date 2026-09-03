@@ -128,9 +128,17 @@ function PartnershipsPage() {
   ];
 
   function updateStatus(id: string, status: PartnershipStatus) {
+    const app = applications.find((a) => a.id === id);
+    const previousStatus = app?.status;
+    const statusChangedToOngoing = status === "On-going" && previousStatus !== "On-going";
+    const transitionStartedAt = new Date().toISOString();
+    const transitionExpiresAt = app
+      ? new Date(
+          Date.now() + app.duration * (app.durationUnit === "Months" ? 30 : 1) * 86400000,
+        ).toISOString()
+      : "";
     const next = applications.map((a) => (a.id === id ? { ...a, status } : a));
     setApplications(next);
-    const app = applications.find((a) => a.id === id);
     const matchedAd =
       app &&
       (ads.find((ad) => ad.applicationId === app.id) ??
@@ -146,10 +154,8 @@ function PartnershipsPage() {
           contract:
             app.description ||
             `${app.duration} ${app.durationUnit.toLowerCase()} partnership placement.`,
-          startDate: new Date().toISOString(),
-          expiresAt: new Date(
-            Date.now() + app.duration * (app.durationUnit === "Months" ? 30 : 1) * 86400000,
-          ).toISOString(),
+          startDate: transitionStartedAt,
+          expiresAt: transitionExpiresAt,
           status: "On-going",
           revenue: app.budget,
           clicks: 0,
@@ -160,14 +166,7 @@ function PartnershipsPage() {
         ...ads,
       ]);
     } else if (matchedAd && (status === "On-going" || status === "Done")) {
-      const expiresAt =
-        status === "On-going"
-          ? matchedAd.expiresAt && new Date(matchedAd.expiresAt).getTime() > Date.now()
-            ? matchedAd.expiresAt
-            : new Date(
-                Date.now() + app.duration * (app.durationUnit === "Months" ? 30 : 1) * 86400000,
-              ).toISOString()
-          : matchedAd.expiresAt;
+      const expiresAt = statusChangedToOngoing ? transitionExpiresAt : matchedAd.expiresAt;
       setAds(
         ads.map((ad) =>
           ad.id === matchedAd.id
@@ -175,6 +174,7 @@ function PartnershipsPage() {
                 ...ad,
                 applicationId: app.id,
                 status,
+                startDate: statusChangedToOngoing ? transitionStartedAt : ad.startDate,
                 expiresAt,
                 endedAt: status === "Done" ? new Date().toISOString() : undefined,
               }

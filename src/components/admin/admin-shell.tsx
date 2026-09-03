@@ -35,7 +35,12 @@ import { useEffect, useMemo, useState } from "react";
 function useUnreadAlertsCount() {
   const [applications] = applicationsStore.useStore();
   const [ads] = adsStore.useStore();
-  const alerts = useMemo(() => buildAlerts(applications, ads), [applications, ads]);
+  const [bugs] = bugReportsStore.useStore();
+  const [playerReports] = playerReportsStore.useStore();
+  const alerts = useMemo(
+    () => buildAlerts(applications, ads, bugs, playerReports),
+    [applications, ads, bugs, playerReports],
+  );
   const [readIds] = alertReadStore.useStore();
 
   return {

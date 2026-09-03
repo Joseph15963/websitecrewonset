@@ -1,5 +1,5 @@
-import Link from "@/components/next-compat/link";
 import { useEffect, useRef, useState } from "react";
+import { useRouter } from "@/components/next-compat/navigation";
 import {
   Bell,
   Megaphone,
@@ -8,7 +8,6 @@ import {
   ShoppingBag,
   Settings2,
   CheckCheck,
-  X,
 } from "lucide-react";
 import {
   notificationsStore,
@@ -22,6 +21,19 @@ const iconByKind: Record<PlayerNotification["kind"], typeof Bell> = {
   shop: ShoppingBag,
   system: Settings2,
 };
+
+/** Fallback in-app destination per notification kind when no explicit href is set. */
+const hrefByKind: Record<PlayerNotification["kind"], string> = {
+  announcement: "/portal",
+  achievement: "/portal/achievements",
+  friend: "/portal/friends",
+  shop: "/portal/shop",
+  system: "/portal",
+};
+
+function notificationHref(notification: PlayerNotification) {
+  return notification.href ?? hrefByKind[notification.kind];
+}
 
 function relativeTime(iso: string) {
   const diffMs = Date.now() - new Date(iso).getTime();
@@ -38,8 +50,8 @@ function relativeTime(iso: string) {
 export function NotificationBell({ dark = true }: { dark?: boolean }) {
   const [notifications, setNotifications] = notificationsStore.useStore();
   const [open, setOpen] = useState(false);
-  const [detail, setDetail] = useState<PlayerNotification | null>(null);
   const ref = useRef<HTMLDivElement>(null);
+  const router = useRouter();
 
   useEffect(() => {
     function onClickOutside(event: MouseEvent) {
@@ -122,8 +134,8 @@ export function NotificationBell({ dark = true }: { dark?: boolean }) {
                   key={notification.id}
                   onClick={() => {
                     markRead(notification.id);
-                    setDetail(notification);
                     setOpen(false);
+                    router.push(notificationHref(notification));
                   }}
                   className={`flex w-full gap-3 border-b border-navy/5 px-4 py-3 text-left transition hover:bg-navy/[.03] ${
                     notification.read ? "opacity-70" : ""

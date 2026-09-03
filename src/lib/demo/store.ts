@@ -88,6 +88,8 @@ export type PlayerNotification = {
   createdAt: string;
   kind: "announcement" | "achievement" | "friend" | "shop" | "system";
   read: boolean;
+  /** In-app destination this notification links to when clicked. */
+  href?: string;
   /** Targeting metadata, used by the admin announcement composer. */
   target?: {
     kind: NotificationTargetKind;
@@ -104,6 +106,7 @@ const seedNotifications: PlayerNotification[] = [
     createdAt: "2026-08-27T09:12:00.000Z",
     kind: "announcement",
     read: false,
+    href: "/portal/shop",
     target: { kind: "all" },
   },
   {
@@ -113,6 +116,7 @@ const seedNotifications: PlayerNotification[] = [
     createdAt: "2026-08-26T18:40:00.000Z",
     kind: "achievement",
     read: false,
+    href: "/portal/achievements",
   },
   {
     id: "ntf-1003",
@@ -121,6 +125,7 @@ const seedNotifications: PlayerNotification[] = [
     createdAt: "2026-08-25T14:05:00.000Z",
     kind: "friend",
     read: true,
+    href: "/portal/friends",
   },
   {
     id: "ntf-1004",
@@ -129,6 +134,7 @@ const seedNotifications: PlayerNotification[] = [
     createdAt: "2026-08-23T07:30:00.000Z",
     kind: "shop",
     read: true,
+    href: "/portal/shop",
   },
   {
     id: "ntf-1005",
@@ -137,6 +143,7 @@ const seedNotifications: PlayerNotification[] = [
     createdAt: "2026-08-21T11:00:00.000Z",
     kind: "system",
     read: true,
+    href: "/portal",
     target: { kind: "all" },
   },
 ];
@@ -264,6 +271,8 @@ export type ActiveAd = {
   revenue: number;
   clicks: number;
   visits: number;
+  /** Ad displays / impressions served for this placement. */
+  impressions: number;
   placement: string;
 };
 
@@ -280,6 +289,7 @@ const seedAds: ActiveAd[] = [
     revenue: 12500,
     clicks: 18420,
     visits: 96310,
+    impressions: 412800,
     placement: "Studio B — craft table props",
   },
   {
@@ -294,6 +304,7 @@ const seedAds: ActiveAd[] = [
     revenue: 26000,
     clicks: 33110,
     visits: 148900,
+    impressions: 689200,
     placement: "Wardrobe — crew outfit skins",
   },
   {
@@ -308,6 +319,7 @@ const seedAds: ActiveAd[] = [
     revenue: 48000,
     clicks: 51200,
     visits: 202450,
+    impressions: 934100,
     placement: "Equipment truck — lens wall",
   },
   {
@@ -322,6 +334,7 @@ const seedAds: ActiveAd[] = [
     revenue: 4200,
     clicks: 6110,
     visits: 28740,
+    impressions: 124500,
     placement: "Backlot — vending machines",
   },
 ];

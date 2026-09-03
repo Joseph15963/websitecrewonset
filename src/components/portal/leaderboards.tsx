@@ -55,42 +55,6 @@ const globalLeaders: Leader[] = [
   },
 ];
 
-const roleLeaders: Leader[] = [
-  {
-    name: "FRAMEPERFECT",
-    level: 42,
-    score: 1284920,
-    xp: 9820,
-    productions: 126,
-    rating: 98,
-    legendary: true,
-  },
-  {
-    name: "CAMERA_PRO",
-    level: 27,
-    score: 984250,
-    xp: 7020,
-    productions: 87,
-    rating: 94,
-  },
-  {
-    name: "BOOMBUDDY",
-    level: 39,
-    score: 1120480,
-    xp: 9140,
-    productions: 118,
-    rating: 96,
-  },
-  {
-    name: "LIGHTLEAK",
-    level: 29,
-    score: 887420,
-    xp: 7410,
-    productions: 95,
-    rating: 92,
-  },
-];
-
 const friendLeaders: Leader[] = [
   {
     name: "CAMERA_PRO",
@@ -129,9 +93,7 @@ export function Leaderboards() {
   const currentLeaders = useMemo(() => {
     let data: Leader[];
 
-    if (leaderTab === "Roles") {
-      data = roleLeaders;
-    } else if (leaderTab === "Friends") {
+    if (leaderTab === "Friends") {
       data = friendLeaders;
     } else {
       data = globalLeaders;
@@ -167,7 +129,7 @@ export function Leaderboards() {
 
           <div className="mt-3 flex gap-5">
 
-            {["Global", "Roles", "Friends"].map((tab) => (
+            {["Global", "Friends"].map((tab) => (
               <button
                 key={tab}
                 type="button"

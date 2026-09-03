@@ -2,7 +2,6 @@ import Image from "@/components/next-compat/image";
 import Link from "@/components/next-compat/link";
 import { usePathname, useRouter } from "@/components/next-compat/navigation";
 import {
-  Award,
   BookOpen,
   ChevronDown,
   LayoutDashboard,
@@ -21,7 +20,6 @@ const navigation = [
   { label: "Dashboard", href: "/portal", icon: LayoutDashboard },
   { label: "Profile", href: "/portal/profile", icon: UserCircle },
   { label: "Almanac", href: "/portal/almanac", icon: BookOpen },
-  { label: "Achievements", href: "/portal/achievements", icon: Award },
   { label: "Friends", href: "/portal/friends", icon: Users },
   { label: "Shop", href: "/portal/shop", icon: ShoppingBag },
   { label: "Settings", href: "/portal/settings", icon: Settings },

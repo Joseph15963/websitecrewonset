@@ -21,6 +21,7 @@ import { Route as SignupRouteImport } from './routes/signup'
 import { Route as StoryRouteImport } from './routes/story'
 import { Route as TeamRouteImport } from './routes/team'
 import { Route as AdminIndexRouteImport } from './routes/admin.index'
+import { Route as AdminAdRevenueRouteImport } from './routes/admin.ad-revenue'
 import { Route as AdminAlmanacRouteImport } from './routes/admin.almanac'
 import { Route as AdminBugsRouteImport } from './routes/admin.bugs'
 import { Route as AdminGameRouteImport } from './routes/admin.game'
@@ -98,6 +99,11 @@ const TeamRoute = TeamRouteImport.update({
 const AdminIndexRoute = AdminIndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminAdRevenueRoute = AdminAdRevenueRouteImport.update({
+  id: '/ad-revenue',
+  path: '/ad-revenue',
   getParentRoute: () => AdminRoute,
 } as any)
 const AdminAlmanacRoute = AdminAlmanacRouteImport.update({
@@ -203,6 +209,7 @@ export interface FileRoutesByFullPath {
   '/signup': typeof SignupRoute
   '/story': typeof StoryRoute
   '/team': typeof TeamRoute
+  '/admin/ad-revenue': typeof AdminAdRevenueRoute
   '/admin/almanac': typeof AdminAlmanacRoute
   '/admin/bugs': typeof AdminBugsRoute
   '/admin/game': typeof AdminGameRoute
@@ -233,6 +240,7 @@ export interface FileRoutesByTo {
   '/signup': typeof SignupRoute
   '/story': typeof StoryRoute
   '/team': typeof TeamRoute
+  '/admin/ad-revenue': typeof AdminAdRevenueRoute
   '/admin/almanac': typeof AdminAlmanacRoute
   '/admin/bugs': typeof AdminBugsRoute
   '/admin/game': typeof AdminGameRoute
@@ -266,6 +274,7 @@ export interface FileRoutesById {
   '/signup': typeof SignupRoute
   '/story': typeof StoryRoute
   '/team': typeof TeamRoute
+  '/admin/ad-revenue': typeof AdminAdRevenueRoute
   '/admin/almanac': typeof AdminAlmanacRoute
   '/admin/bugs': typeof AdminBugsRoute
   '/admin/game': typeof AdminGameRoute
@@ -300,6 +309,7 @@ export interface FileRouteTypes {
     | '/signup'
     | '/story'
     | '/team'
+    | '/admin/ad-revenue'
     | '/admin/almanac'
     | '/admin/bugs'
     | '/admin/game'
@@ -330,6 +340,7 @@ export interface FileRouteTypes {
     | '/signup'
     | '/story'
     | '/team'
+    | '/admin/ad-revenue'
     | '/admin/almanac'
     | '/admin/bugs'
     | '/admin/game'
@@ -362,6 +373,7 @@ export interface FileRouteTypes {
     | '/signup'
     | '/story'
     | '/team'
+    | '/admin/ad-revenue'
     | '/admin/almanac'
     | '/admin/bugs'
     | '/admin/game'
@@ -483,6 +495,13 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/admin/'
       preLoaderRoute: typeof AdminIndexRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/ad-revenue': {
+      id: '/admin/ad-revenue'
+      path: '/ad-revenue'
+      fullPath: '/admin/ad-revenue'
+      preLoaderRoute: typeof AdminAdRevenueRouteImport
       parentRoute: typeof AdminRoute
     }
     '/admin/almanac': {
@@ -615,6 +634,7 @@ declare module '@tanstack/react-router' {
 }
 
 interface AdminRouteChildren {
+  AdminAdRevenueRoute: typeof AdminAdRevenueRoute
   AdminAlmanacRoute: typeof AdminAlmanacRoute
   AdminBugsRoute: typeof AdminBugsRoute
   AdminGameRoute: typeof AdminGameRoute
@@ -628,6 +648,7 @@ interface AdminRouteChildren {
 }
 
 const AdminRouteChildren: AdminRouteChildren = {
+  AdminAdRevenueRoute: AdminAdRevenueRoute,
   AdminAlmanacRoute: AdminAlmanacRoute,
   AdminBugsRoute: AdminBugsRoute,
   AdminGameRoute: AdminGameRoute,

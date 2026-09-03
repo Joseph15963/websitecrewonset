@@ -166,62 +166,6 @@ export function NotificationBell({ dark = true }: { dark?: boolean }) {
           </div>
         </div>
       )}
-
-      {/* DETAIL POPUP */}
-      {detail && (
-        <div className="fixed inset-0 z-[120] flex items-center justify-center bg-navy/75 p-4 backdrop-blur-sm sm:p-6">
-          <button
-            className="absolute inset-0"
-            aria-label="Close notification"
-            onClick={() => setDetail(null)}
-          />
-          <section className="relative flex max-h-[88vh] w-full max-w-2xl flex-col overflow-hidden rounded-2xl border border-navy/10 bg-white text-navy shadow-2xl">
-            <header className="flex items-start gap-4 border-b border-navy/10 px-5 py-4 sm:px-7 sm:py-5">
-              <span className="grid size-11 shrink-0 place-items-center rounded-full bg-navy/5 text-coral">
-                {(() => {
-                  const Icon = iconByKind[detail.kind];
-                  return <Icon className="size-5" />;
-                })()}
-              </span>
-              <div className="min-w-0 flex-1">
-                <p className="text-[10px] font-black uppercase tracking-[.16em] text-coral">
-                  {detail.kind}
-                </p>
-                <h2 className="mt-1 text-xl font-black uppercase leading-tight sm:text-2xl">
-                  {detail.title}
-                </h2>
-                <p className="mt-1 text-[11px] font-bold uppercase tracking-wide text-navy/35">
-                  {new Date(detail.createdAt).toLocaleString()} · {relativeTime(detail.createdAt)}
-                </p>
-              </div>
-              <button
-                type="button"
-                onClick={() => setDetail(null)}
-                aria-label="Close notification"
-                className="shrink-0 rounded-md p-1 text-navy/40 transition hover:bg-navy/5 hover:text-navy"
-              >
-                <X className="size-5" />
-              </button>
-            </header>
-
-            <div className="flex-1 overflow-y-auto px-5 py-5 sm:px-7 sm:py-6">
-              <p className="whitespace-pre-line text-sm leading-relaxed text-navy/70 sm:text-base">
-                {detail.body}
-              </p>
-            </div>
-
-            <footer className="border-t border-navy/10 px-5 py-4 text-right sm:px-7">
-              <button
-                type="button"
-                onClick={() => setDetail(null)}
-                className="rounded-md bg-coral px-5 py-2.5 text-xs font-black uppercase tracking-wide text-white transition hover:opacity-90"
-              >
-                Close
-              </button>
-            </footer>
-          </section>
-        </div>
-      )}
     </div>
   );
 }

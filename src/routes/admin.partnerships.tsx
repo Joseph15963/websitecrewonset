@@ -131,31 +131,56 @@ function PartnershipsPage() {
     const next = applications.map((a) => (a.id === id ? { ...a, status } : a));
     setApplications(next);
     const app = applications.find((a) => a.id === id);
-    const matchedAd = app && (ads.find((ad) => ad.applicationId === app.id) ?? ads.find((ad) => ad.brand === app.brand && ad.exactModel === app.exactModel));
+    const matchedAd =
+      app &&
+      (ads.find((ad) => ad.applicationId === app.id) ??
+        ads.find((ad) => ad.brand === app.brand && ad.exactModel === app.exactModel));
     if (app && status === "On-going" && !matchedAd) {
-      setAds([{
-        id: uid("AD"),
-        applicationId: app.id,
-        brand: app.brand,
-        exactModel: app.exactModel,
-        productType: app.productType,
-        contract: app.description || `${app.duration} ${app.durationUnit.toLowerCase()} partnership placement.`,
-        startDate: new Date().toISOString(),
-        expiresAt: new Date(Date.now() + app.duration * (app.durationUnit === "Months" ? 30 : 1) * 86400000).toISOString(),
-        status: "On-going",
-        revenue: app.budget,
-        clicks: 0,
-        visits: 0,
-        impressions: 0,
-        placement: "Pending placement",
-      }, ...ads]);
+      setAds([
+        {
+          id: uid("AD"),
+          applicationId: app.id,
+          brand: app.brand,
+          exactModel: app.exactModel,
+          productType: app.productType,
+          contract:
+            app.description ||
+            `${app.duration} ${app.durationUnit.toLowerCase()} partnership placement.`,
+          startDate: new Date().toISOString(),
+          expiresAt: new Date(
+            Date.now() + app.duration * (app.durationUnit === "Months" ? 30 : 1) * 86400000,
+          ).toISOString(),
+          status: "On-going",
+          revenue: app.budget,
+          clicks: 0,
+          visits: 0,
+          impressions: 0,
+          placement: "Pending placement",
+        },
+        ...ads,
+      ]);
     } else if (matchedAd && (status === "On-going" || status === "Done")) {
-      setAds(ads.map((ad) => ad.id === matchedAd.id ? {
-        ...ad,
-        applicationId: app?.id ?? ad.applicationId,
-        status,
-        endedAt: status === "Done" ? new Date().toISOString() : ad.endedAt,
-      } : ad));
+      const expiresAt =
+        status === "On-going"
+          ? matchedAd.expiresAt && new Date(matchedAd.expiresAt).getTime() > Date.now()
+            ? matchedAd.expiresAt
+            : new Date(
+                Date.now() + app.duration * (app.durationUnit === "Months" ? 30 : 1) * 86400000,
+              ).toISOString()
+          : matchedAd.expiresAt;
+      setAds(
+        ads.map((ad) =>
+          ad.id === matchedAd.id
+            ? {
+                ...ad,
+                applicationId: app.id,
+                status,
+                expiresAt,
+                endedAt: status === "Done" ? new Date().toISOString() : undefined,
+              }
+            : ad,
+        ),
+      );
     }
     if (selected?.id === id) setSelected({ ...selected, status });
 
@@ -490,17 +515,33 @@ function PartnershipsPage() {
                     {selected.fileName || "No attachment"}
                     {selected.attachmentUrl ? (
                       <div className="mt-3 space-y-3">
-                        {selected.attachmentType?.startsWith("image/") || selected.attachmentUrl.startsWith("data:image/") ? (
-                          <img src={selected.attachmentUrl} alt={selected.fileName || "Application attachment"} className="max-h-64 w-full rounded-md object-contain" />
+                        {selected.attachmentType?.startsWith("image/") ||
+                        selected.attachmentUrl.startsWith("data:image/") ? (
+                          <img
+                            src={selected.attachmentUrl}
+                            alt={selected.fileName || "Application attachment"}
+                            className="max-h-64 w-full rounded-md object-contain"
+                          />
                         ) : (
-                          <iframe src={selected.attachmentUrl} title={selected.fileName || "Application PDF"} className="h-64 w-full rounded-md bg-white" />
+                          <iframe
+                            src={selected.attachmentUrl}
+                            title={selected.fileName || "Application PDF"}
+                            className="h-64 w-full rounded-md bg-white"
+                          />
                         )}
-                        <a href={selected.attachmentUrl} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1.5 rounded-md border border-coral/40 px-2.5 py-1 text-[10px] uppercase text-coral hover:bg-coral hover:text-white">
+                        <a
+                          href={selected.attachmentUrl}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="inline-flex items-center gap-1.5 rounded-md border border-coral/40 px-2.5 py-1 text-[10px] uppercase text-coral hover:bg-coral hover:text-white"
+                        >
                           <Eye className="size-3.5" /> Open attached file
                         </a>
                       </div>
                     ) : selected.fileName ? (
-                      <span className="ml-2 text-xs font-normal !text-white/35">Legacy filename only</span>
+                      <span className="ml-2 text-xs font-normal !text-white/35">
+                        Legacy filename only
+                      </span>
                     ) : null}
                   </dd>
                 </div>

@@ -338,7 +338,7 @@ export function formatCoins(value: number) {
 }
 
 export function formatMoney(value: number) {
-  return `$${value.toLocaleString("en-US")}`;
+  return `₱${value.toLocaleString("en-US")}`;
 }
 
 /* ------------------------------------------------- system requirements (admin) */
@@ -598,8 +598,8 @@ export type PlayerReport = {
   reportType: string;
   description: string;
   submittedAt: string;
-  /** Contact email supplied by the reporting player. */
-  email?: string;
+  /** Username of the player being reported. */
+  reportedUsername: string;
   /** File name of an optional image/PDF attachment. */
   attachmentName?: string;
   /** Admin-only triage state. Never shown in the player portal. */

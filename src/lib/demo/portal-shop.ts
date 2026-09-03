@@ -41,10 +41,10 @@ export type CoinPackage = {
 };
 
 export const coinPackages: CoinPackage[] = [
-  { id: "pack-500", coins: 500, priceLabel: "$4.99" },
-  { id: "pack-1200", coins: 1200, bonus: 150, priceLabel: "$9.99" },
-  { id: "pack-2600", coins: 2600, bonus: 500, priceLabel: "$19.99" },
-  { id: "pack-6000", coins: 6000, bonus: 1500, priceLabel: "$39.99" },
+  { id: "pack-500", coins: 500, priceLabel: "₱4.99" },
+  { id: "pack-1200", coins: 1200, bonus: 150, priceLabel: "₱9.99" },
+  { id: "pack-2600", coins: 2600, bonus: 500, priceLabel: "₱19.99" },
+  { id: "pack-6000", coins: 6000, bonus: 1500, priceLabel: "₱39.99" },
 ];
 
 export type PaymentMethodId = "card" | "gcash" | "unionbank" | "paypal";

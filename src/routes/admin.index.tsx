@@ -64,7 +64,7 @@ const stats = [
   },
   {
     label: "Total Revenue",
-    value: "$184,260",
+    value: "₱184,260",
     change: "+14.1%",
     icon: CircleDollarSign,
     color: "bg-[#243241]",

@@ -552,6 +552,8 @@ export type BugReport = {
   email?: string;
   /** File name of an optional image/PDF attachment. */
   attachmentName?: string;
+  /** Existing URL/data for the optional attachment, when available. */
+  attachmentUrl?: string;
   /** Admin-only triage state. Never shown in the player portal. */
   status: BugStatus;
 };
@@ -615,6 +617,8 @@ export type PlayerReport = {
   reportedUsername: string;
   /** File name of an optional image/PDF attachment. */
   attachmentName?: string;
+  /** Existing URL/data for the optional attachment, when available. */
+  attachmentUrl?: string;
   /** Admin-only triage state. Never shown in the player portal. */
   status: PlayerReportStatus;
 };

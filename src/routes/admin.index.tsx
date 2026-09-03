@@ -250,7 +250,7 @@ function AdminDashboardPage() {
               <MessageSquare className="size-5" />
             </div>
             <Link
-              href="/admin/notifications"
+              href="/admin"
               className="text-[11px] font-black uppercase tracking-wide !text-coral hover:!text-white"
             >
               View Inbox →
@@ -390,7 +390,7 @@ function AdminDashboardPage() {
             Inbox
           </h2>
           <Link
-            href="/admin/notifications"
+            href="/admin"
             className="mb-3 text-[11px] font-black uppercase tracking-wide !text-coral hover:!text-white"
           >
             View Inbox →

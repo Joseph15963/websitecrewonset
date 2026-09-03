@@ -2638,6 +2638,7 @@ function PlayersPage() {
 
                       <button
                         type="button"
+                        onClick={() => { window.location.href = `mailto:${selectedPlayer.email}`; }}
                         className="flex items-center gap-2 rounded-lg border border-white/[.08] bg-white/[.03] px-4 py-3 text-[10px] font-black uppercase text-white/50 hover:text-white"
                       >
 

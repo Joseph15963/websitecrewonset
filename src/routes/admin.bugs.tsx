@@ -227,6 +227,11 @@ function BugReportsPage() {
             <p className="text-sm !text-white/80">{formatDate(viewBug.submittedAt)}</p>
             <p className="mt-3 text-xs font-black uppercase tracking-wide !text-white/35">Description</p>
             <p className="mt-1 whitespace-pre-wrap text-sm !text-white/70">{viewBug.description}</p>
+            {viewBug.attachmentUrl && (
+              <a href={viewBug.attachmentUrl} target="_blank" rel="noreferrer" className="mt-4 inline-flex items-center gap-2 rounded-md border border-coral/40 px-3 py-2 text-[10px] font-black uppercase text-coral hover:bg-coral hover:text-white">
+                View attached file
+              </a>
+            )}
           </div>
         </div>
       )}

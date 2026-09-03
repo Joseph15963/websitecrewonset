@@ -2,7 +2,10 @@ import Image from "@/components/next-compat/image";
 import Link from "@/components/next-compat/link";
 import { usePathname } from "@/components/next-compat/navigation";
 import { useEffect, useRef, useState } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { ChevronDown, LogIn, Menu, UserPlus, X } from "lucide-react";
+
+import { getCrewSession } from "@/lib/session.functions";
 
 const navItems = [
   { label: "HOME", href: "/" },
@@ -18,6 +21,12 @@ export function SiteNavbar() {
   const [crewMenuOpen, setCrewMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const crewMenuRef = useRef<HTMLDivElement>(null);
+  const { data: session } = useQuery({
+    queryKey: ["crew-session"],
+    queryFn: () => getCrewSession(),
+  });
+  const portalHref = session?.isAdmin ? "/admin" : "/portal";
+  const isAuthenticated = session?.isAdmin || session?.isPlayer;
 
   useEffect(() => {
     const handleScroll = () => setScrolled(window.scrollY > 40);
@@ -55,13 +64,21 @@ export function SiteNavbar() {
           })}
         </nav>
         <div ref={crewMenuRef} className="relative hidden lg:block">
-          <button type="button" onClick={() => setCrewMenuOpen((open) => !open)} className="inline-flex items-center gap-2 rounded-md border border-white/20 bg-coral px-5 py-2.5 text-sm font-black tracking-wide text-white transition hover:bg-coral-dark focus:outline-none focus:ring-2 focus:ring-yellow/70" aria-expanded={crewMenuOpen} aria-haspopup="menu">
-            JOIN THE CREW <ChevronDown className={`size-4 transition-transform duration-300 ${crewMenuOpen ? "rotate-180" : ""}`} />
-          </button>
-          <div className={`absolute right-0 top-[calc(100%+10px)] w-52 origin-top-right overflow-hidden rounded-md border border-white/10 bg-navy/95 p-2 shadow-2xl backdrop-blur-xl transition-all duration-200 ${crewMenuOpen ? "visible translate-y-0 scale-100 opacity-100" : "invisible -translate-y-2 scale-95 opacity-0"}`} role="menu">
-            <Link href="/login" className="crew-menu-item" role="menuitem"><LogIn /> LOGIN</Link>
-            <Link href="/signup" className="crew-menu-item" role="menuitem"><UserPlus /> SIGN UP</Link>
-          </div>
+          {isAuthenticated ? (
+            <Link href={portalHref} className="inline-flex items-center rounded-md border border-white/20 bg-coral px-5 py-2.5 text-sm font-black tracking-wide text-white transition hover:bg-coral-dark focus:outline-none focus:ring-2 focus:ring-yellow/70">
+              MY PORTAL
+            </Link>
+          ) : (
+            <>
+              <button type="button" onClick={() => setCrewMenuOpen((open) => !open)} className="inline-flex items-center gap-2 rounded-md border border-white/20 bg-coral px-5 py-2.5 text-sm font-black tracking-wide text-white transition hover:bg-coral-dark focus:outline-none focus:ring-2 focus:ring-yellow/70" aria-expanded={crewMenuOpen} aria-haspopup="menu">
+                JOIN THE CREW <ChevronDown className={`size-4 transition-transform duration-300 ${crewMenuOpen ? "rotate-180" : ""}`} />
+              </button>
+              <div className={`absolute right-0 top-[calc(100%+10px)] w-52 origin-top-right overflow-hidden rounded-md border border-white/10 bg-navy/95 p-2 shadow-2xl backdrop-blur-xl transition-all duration-200 ${crewMenuOpen ? "visible translate-y-0 scale-100 opacity-100" : "invisible -translate-y-2 scale-95 opacity-0"}`} role="menu">
+                <Link href="/login" className="crew-menu-item" role="menuitem"><LogIn /> LOGIN</Link>
+                <Link href="/signup" className="crew-menu-item" role="menuitem"><UserPlus /> SIGN UP</Link>
+              </div>
+            </>
+          )}
         </div>
         <button className="grid size-10 place-items-center rounded-md border border-white/15 bg-white/10 text-white lg:hidden" onClick={() => setMenuOpen((open) => !open)} aria-label="Toggle navigation" aria-expanded={menuOpen}>
           {menuOpen ? <X /> : <Menu />}
@@ -69,9 +86,15 @@ export function SiteNavbar() {
       </div>
       <nav className={`mx-3 mt-2 overflow-hidden rounded-lg border border-white/10 bg-navy/95 px-3 shadow-2xl backdrop-blur-xl transition-all duration-300 lg:hidden ${menuOpen ? "max-h-[460px] py-3 opacity-100" : "pointer-events-none max-h-0 py-0 opacity-0"}`} aria-label="Mobile navigation">
         {navItems.map((item) => <Link key={item.href} href={item.href} onClick={() => setMenuOpen(false)} className={`block rounded-md px-4 py-3 text-sm font-black tracking-wider ${pathname === item.href ? "bg-white/10 text-yellow" : "text-white"}`}>{item.label}</Link>)}
-        <div className="mt-2 grid grid-cols-2 gap-2 border-t border-white/10 pt-3">
-          <Link href="/login" className="mobile-crew-link"><LogIn /> LOGIN</Link>
-          <Link href="/signup" className="mobile-crew-link bg-coral"><UserPlus /> SIGN UP</Link>
+        <div className="mt-2 border-t border-white/10 pt-3">
+          {isAuthenticated ? (
+            <Link href={portalHref} onClick={() => setMenuOpen(false)} className="mobile-crew-link bg-coral">MY PORTAL</Link>
+          ) : (
+            <div className="grid grid-cols-2 gap-2">
+              <Link href="/login" className="mobile-crew-link"><LogIn /> LOGIN</Link>
+              <Link href="/signup" className="mobile-crew-link bg-coral"><UserPlus /> SIGN UP</Link>
+            </div>
+          )}
         </div>
       </nav>
     </header>

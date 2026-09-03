@@ -15,6 +15,7 @@ export const Route = createFileRoute("/admin_/login")({
   beforeLoad: async () => {
     const session = await getCrewSession();
     if (session.isAdmin) throw redirect({ to: "/admin" });
+    if (session.isPlayer) throw redirect({ to: "/portal" });
   },
   component: AdminLoginPage,
 });

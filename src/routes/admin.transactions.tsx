@@ -12,6 +12,7 @@ export const Route = createFileRoute("/admin/transactions")({
 
 import { useMemo, useState } from "react";
 import { Coins, ReceiptText, Search, Wallet2 } from "lucide-react";
+import { formatMoney } from "@/lib/demo/store";
 import { topUps } from "@/lib/admin-demo-data";
 
 const statusStyles: Record<string, string> = {
@@ -52,7 +53,7 @@ function TransactionsPage() {
   const completed = topUps.filter((r) => r.status === "Completed").length;
 
   const summaries = [
-    { label: "Total C-Coin Revenue", value: `$${total.toLocaleString()}`, icon: Coins, color: "bg-[#d9a514] text-[#101923]" },
+    { label: "Total C-Coin Revenue", value: formatMoney(total), icon: Coins, color: "bg-[#d9a514] text-[#101923]" },
     { label: "Completed Top-Ups", value: completed.toLocaleString(), icon: ReceiptText, color: "bg-[#243241] text-white" },
     { label: "Total Ledger Entries", value: topUps.length.toLocaleString(), icon: Wallet2, color: "bg-coral text-white" },
   ];
@@ -120,7 +121,7 @@ function TransactionsPage() {
                     <p className="mt-0.5 text-[10px] !text-white/30">{row.playerId}</p>
                   </td>
                   <td className="px-5 py-4 font-mono text-xs !text-white/55">{row.bank}</td>
-                  <td className="px-5 py-4 font-black !text-white">${row.amount.toFixed(2)}</td>
+                  <td className="px-5 py-4 font-black !text-white">{formatMoney(row.amount)}</td>
                   <td className="px-5 py-4">
                     <span className={`rounded px-2.5 py-1 text-[10px] font-black uppercase ${statusStyles[row.status]}`}>
                       {row.status}

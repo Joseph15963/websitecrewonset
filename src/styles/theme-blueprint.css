@@ -135,6 +135,31 @@ html[data-display-theme="dark"] {
 .portal-theme footer { background-color: var(--blueprint-accent); color: var(--blueprint-paper-soft); }
 .portal-theme .divide-white\/10 > * + * { border-color: var(--ink-line); }
 
+/* Contrast pass: navy chrome always carries warm white text; paper cards carry ink. */
+.portal-theme header.sticky {
+  background-color: var(--blueprint-accent) !important;
+  color: #f8f4ea !important;
+  border-color: rgba(255,255,255,0.18) !important;
+}
+.portal-theme header.sticky nav a:not(.bg-yellow) { color: #cbd5e1 !important; }
+.portal-theme header.sticky nav a:not(.bg-yellow):hover { color: #ffffff !important; }
+.portal-theme header.sticky nav a.bg-yellow { color: var(--blueprint-ink) !important; }
+.portal-theme header.sticky .text-navy,
+.portal-theme header.sticky [class*="text-navy/"] { color: #f8f4ea !important; }
+.portal-theme header.sticky .text-navy\/50 { color: #cbd5e1 !important; }
+.portal-theme .profile-info { color: var(--blueprint-ink); }
+.portal-theme .profile-info .text-white { color: var(--blueprint-ink); }
+.portal-theme .profile-info [class*="text-white/"] { color: rgba(20,33,61,0.72); }
+.portal-theme .profile-info [class*="border-white/"] { border-color: var(--ink-line); }
+.portal-theme .profile-info [class*="bg-white/"] { background-color: rgba(20,33,61,0.06); }
+.portal-theme .profile-info { background: var(--blueprint-paper-soft); border: 2px solid var(--blueprint-ink); box-shadow: 6px 6px 0 rgba(20,33,61,0.16); }
+.portal-theme.portal-dark .profile-info { background: #f8f4e8; color: #14213d; }
+.portal-theme.portal-dark .profile-info .text-white,
+.portal-theme.portal-dark .profile-info [class*="text-white/"] { color: #14213d; }
+.portal-theme.portal-dark .profile-info [class*="text-white/"] { color: #334155; }
+.portal-theme ::placeholder { color: #64748b; }
+.portal-theme.portal-dark ::placeholder { color: #cbd5e1; }
+
 /* Inputs on paper. */
 .portal-theme :is(input, select, textarea):not([type="checkbox"]):not([type="radio"]) {
   color: var(--blueprint-ink);

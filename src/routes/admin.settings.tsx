@@ -16,6 +16,7 @@ import { FormEvent, useState } from "react";
 import { Eye, EyeOff, KeyRound, Link2, Mail, Pencil, Plus, Settings as SettingsIcon, Trash2, X } from "lucide-react";
 import { toast } from "sonner";
 import { adminAccountStore, socialLinksStore, uid, type AdminAccount, type SocialLink } from "@/lib/demo/store";
+import { EMAIL_ERROR, isValidEmail } from "@/lib/validation";
 
 function PasswordField({
   label,
@@ -341,8 +342,8 @@ function SettingsPage() {
     event.preventDefault();
     setEmailError("");
 
-    if (!/^\S+@\S+\.\S+$/.test(email.trim())) {
-      setEmailError("Enter a valid email address.");
+    if (!isValidEmail(email)) {
+      setEmailError(EMAIL_ERROR);
       return;
     }
 

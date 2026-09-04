@@ -1,6 +1,7 @@
 import { FormEvent, useState } from "react";
 import { CheckCircle2, FileImage, Send } from "lucide-react";
 
+import { EMAIL_ERROR, isValidEmail } from "@/lib/validation";
 import {
   applicationsStore,
   readAttachmentAsDataUrl,
@@ -24,16 +25,16 @@ export function PartnershipForm() {
     const budget = Number(data.get("budget"));
     const duration = Number(data.get("duration"));
     const durationUnit = String(data.get("durationUnit") ?? "Days") as "Days" | "Months";
-    const email = String(data.get("email") ?? "").trim();
+    const rawEmail = String(data.get("email") ?? "");
+    const email = rawEmail.trim();
     const description = String(data.get("description") ?? "").trim();
 
     if (!brandName || !productType || !exactModel || !email) {
       setError("Please fill in all required fields.");
       return;
     }
-    const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailPattern.test(email)) {
-      setError("Please enter a valid email address.");
+    if (!isValidEmail(rawEmail)) {
+      setError(EMAIL_ERROR);
       return;
     }
     if (!Number.isFinite(budget) || budget <= 0) {

@@ -1,3 +1,14 @@
+export const EMAIL_ERROR = "Please enter a valid email address.";
+
+const emailPattern = /^[A-Za-z0-9.!#$%&'*+/=?^_`{|}~-]+@[A-Za-z0-9-]+(?:\.[A-Za-z0-9-]+)+$/;
+
+export function isValidEmail(value: string) {
+  const normalized = value.trim();
+  if (normalized !== value || normalized.includes("..")) return false;
+  const [localPart, domain] = normalized.split("@");
+  return Boolean(localPart && domain && emailPattern.test(normalized));
+}
+
 export const USERNAME_ERROR = "Username must be 3–20 characters, start with a letter, and contain only letters, numbers, or underscores.";
 export const PASSWORD_ERROR = "Password must be 8–64 characters with uppercase, lowercase, a number, a special character, and no spaces.";
 

@@ -19,6 +19,7 @@ import {
   type PaymentMethodId,
 } from "@/lib/demo/portal-shop";
 import { walletStore, formatCoins, notificationsStore, uid } from "@/lib/demo/store";
+import { EMAIL_ERROR, isValidEmail } from "@/lib/validation";
 
 const methodIcons: Record<PaymentMethodId, typeof CreditCard> = {
   card: CreditCard,
@@ -90,8 +91,8 @@ export default function CheckoutPage({ onBack }: CheckoutPageProps) {
       return;
     }
 
-    if (!email.trim() || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-      setError("Please enter a valid email address.");
+    if (!isValidEmail(email)) {
+      setError(EMAIL_ERROR);
       return;
     }
 

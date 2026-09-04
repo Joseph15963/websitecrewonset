@@ -3,7 +3,7 @@ import Link from "@/components/next-compat/link";
 import { FormEvent, useState } from "react";
 import { useRouter } from "@/components/next-compat/navigation";
 import { ArrowLeft, Eye, EyeOff, KeyRound, LoaderCircle, Send, UserPlus, X } from "lucide-react";
-import { PASSWORD_ERROR, USERNAME_ERROR, isValidPassword, isValidUsername } from "@/lib/validation";
+import { EMAIL_ERROR, PASSWORD_ERROR, USERNAME_ERROR, isValidEmail, isValidPassword, isValidUsername } from "@/lib/validation";
 
 type CrewAccessPageProps = {
   mode: "login" | "signup";
@@ -44,6 +44,10 @@ export function CrewAccessPage({ mode, scope = "player" }: CrewAccessPageProps) 
       const name = String(data.get("name") ?? "");
       const email = String(data.get("email") ?? "");
       const password = String(data.get("password") ?? "");
+      if (!isValidEmail(email)) {
+        setError(EMAIL_ERROR);
+        return;
+      }
       const confirmation = String(data.get("passwordConfirmation") ?? "");
       if (!isValidPassword(password)) {
         setError(PASSWORD_ERROR);
@@ -217,8 +221,8 @@ function ForgotPasswordModal({ onClose }: { onClose: () => void }) {
 
   function handleEmailSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    if (!email) {
-      setError("Please enter your email address.");
+    if (!isValidEmail(email)) {
+      setError(EMAIL_ERROR);
       return;
     }
     setError("");

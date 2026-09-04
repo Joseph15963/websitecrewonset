@@ -84,9 +84,9 @@ export function PlayerShell({ children }: { children: React.ReactNode }) {
                   key={item.href}
                   href={item.href}
                   className={`flex items-center gap-2 whitespace-nowrap rounded-md px-3 py-2 text-xs font-bold uppercase tracking-wide transition ${
-                    active
-                      ? "bg-yellow text-navy"
-                      : "text-navy/65 hover:bg-navy/5 hover:text-navy"
+                      active
+                      ? "bg-coral text-[#fffdf7] shadow-sm hover:bg-coral"
+                      : "text-[#b8c4d6] hover:bg-white/10 hover:text-[#fffdf7]"
                   }`}
                 >
                   <item.icon className="size-4" />
@@ -105,7 +105,7 @@ export function PlayerShell({ children }: { children: React.ReactNode }) {
               <button
                 type="button"
                 onClick={() => setAccountOpen((v) => !v)}
-                className="flex items-center gap-3 rounded-lg border border-navy/10 bg-white/60 py-2 pl-2 pr-3 text-navy shadow-sm transition hover:bg-white"
+                className="flex items-center gap-3 rounded-lg border border-white/20 bg-white/10 py-2 pl-2 pr-3 text-[#fffdf7] shadow-sm transition hover:bg-white/15"
               >
                 <span className="relative size-8 shrink-0 overflow-hidden rounded-full border-2 border-yellow">
                   <Image
@@ -116,10 +116,10 @@ export function PlayerShell({ children }: { children: React.ReactNode }) {
                   />
                 </span>
                 <span className="text-left leading-tight">
-                  <span className="block text-xs font-bold text-navy">CAMERA_PRO</span>
-                  <span className="block text-[10px] text-navy/50">Level 27</span>
+                  <span className="block text-xs font-bold text-[#fffdf7]">CAMERA_PRO</span>
+                  <span className="block text-[10px] text-[#b8c4d6]">Level 27</span>
                 </span>
-                <ChevronDown className="size-3.5 text-navy/50" />
+                <ChevronDown className="size-3.5 text-[#b8c4d6]" />
               </button>
 
               {accountOpen && (
@@ -220,7 +220,7 @@ export function PlayerShell({ children }: { children: React.ReactNode }) {
                   href={item.href}
                   onClick={() => setMobileOpen(false)}
                   className={`flex items-center gap-3 rounded-md px-4 py-3 text-sm font-bold transition ${
-                    active ? "bg-yellow text-navy" : "text-white/60 hover:bg-white/[.07] hover:text-white"
+                    active ? "bg-coral text-[#fffdf7] shadow-sm" : "text-[#b8c4d6] hover:bg-white/[.07] hover:text-[#fffdf7]"
                   }`}
                 >
                   <item.icon className="size-5" />

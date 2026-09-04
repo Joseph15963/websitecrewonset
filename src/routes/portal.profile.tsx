@@ -281,17 +281,12 @@ if (!isValidEmail(draftEmail)) {
           </div>
         )}
 
-        {/* =========================================================
-            PROFILE CARD
-        ========================================================= */}
-
-        <section className="mt-7 overflow-hidden rounded-2xl border border-white/[0.07] bg-[#151c29] shadow-2xl shadow-black/20">
-
-          {/* =======================================================
+          <section className="profile-surface mt-7 overflow-hidden rounded-2xl border border-white/[0.07] bg-[#151c29] shadow-2xl shadow-black/20">
+          {/* =========================================================
               PROFILE INFORMATION
-          ======================================================= */}
+          ========================================================= */}
 
-          <div className="p-6 sm:p-8 lg:p-10">
+          <div className="profile-info p-6 sm:p-8 lg:p-10">
 
             {/* PROFILE HEADER */}
 

@@ -26,6 +26,7 @@ import {
   Youtube,
 } from "lucide-react";
 import { ChangeEvent, useEffect, useRef, useState } from "react";
+import { EMAIL_ERROR, isValidEmail } from "@/lib/validation";
 import {
   formatCoins,
   formatTransactionDate,
@@ -177,8 +178,8 @@ function CrewProfilePage() {
       return;
     }
 
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(draftEmail.trim())) {
-      setFieldError("Please enter a valid email address.");
+if (!isValidEmail(draftEmail)) {
+    setFieldError(EMAIL_ERROR);
       return;
     }
 

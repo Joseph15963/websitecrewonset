@@ -35,7 +35,7 @@ import {
   UserCircle,
   X,
 } from "lucide-react";
-import { USERNAME_ERROR, PASSWORD_ERROR, isValidPassword, isValidUsername } from "@/lib/validation";
+import { EMAIL_ERROR, USERNAME_ERROR, PASSWORD_ERROR, isValidEmail, isValidPassword, isValidUsername } from "@/lib/validation";
 import {
   bugCategories,
   adminNotificationsStore,
@@ -294,8 +294,8 @@ function SettingsPage() {
       return;
     }
 
-    if (field === "Email" && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)) {
-      showMessage("Please enter a valid email address.", "error");
+    if (field === "Email" && !isValidEmail(draftValue)) {
+      showMessage(EMAIL_ERROR, "error");
       return;
     }
 
@@ -504,8 +504,8 @@ function SettingsPage() {
       return;
     }
 
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(bugEmail.trim())) {
-      setBugError("Please enter a valid email address.");
+    if (!isValidEmail(bugEmail)) {
+      setBugError(EMAIL_ERROR);
       return;
     }
 

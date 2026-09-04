@@ -79,8 +79,9 @@ export function PartnershipForm() {
     if (file) {
       try {
         attachmentUrl = await readAttachmentAsDataUrl(file, "partnerships");
-      } catch {
-        setError("Attachment upload failed. Please try again.");
+      } catch (error) {
+        const message = error instanceof Error ? error.message : String(error);
+        setError(`Attachment upload failed: ${message}`);
         return;
       }
     }

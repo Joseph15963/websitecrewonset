@@ -520,8 +520,9 @@ function SettingsPage() {
     if (bugAttachment) {
       try {
         attachmentUrl = await readAttachmentAsDataUrl(bugAttachment, "bug-reports");
-      } catch {
-        setBugError("Attachment upload failed. Please try again.");
+      } catch (error) {
+        const message = error instanceof Error ? error.message : String(error);
+        setBugError(`Attachment upload failed: ${message}`);
         return;
       }
     }
@@ -623,8 +624,9 @@ function SettingsPage() {
     if (playerReportAttachment) {
       try {
         attachmentUrl = await readAttachmentAsDataUrl(playerReportAttachment, "player-reports");
-      } catch {
-        setPlayerReportError("Attachment upload failed. Please try again.");
+      } catch (error) {
+        const message = error instanceof Error ? error.message : String(error);
+        setPlayerReportError(`Attachment upload failed: ${message}`);
         return;
       }
     }

@@ -26,6 +26,7 @@ import {
   Mail,
   MailCheck,
   Megaphone,
+  Trash2,
   MousePointerClick,
   Wallet2,
   X,
@@ -70,24 +71,25 @@ function PartnershipsPage() {
   const [selected, setSelected] = useState<PartnershipApplication | null>(null);
   const [statusFilter, setStatusFilter] = useState<"All" | PartnershipStatus>("All");
   const [emailConfirmation, setEmailConfirmation] = useState<string | null>(null);
+  const [deleteTarget, setDeleteTarget] = useState<PartnershipApplication | null>(null);
 
   const [ads, setAds] = adsStore.useStore();
   const [adStatusFilter, setAdStatusFilter] = useState<"All" | ActiveAd["status"]>("All");
 
   const filtered = useMemo(
     () =>
-      statusFilter === "All" ? applications : applications.filter((a) => a.status === statusFilter),
+      (statusFilter === "All" ? applications : applications.filter((a) => a.status === statusFilter)).filter((a) => !a.archived),
     [applications, statusFilter],
   );
 
   const filteredAds = useMemo(
-    () => (adStatusFilter === "All" ? ads : ads.filter((a) => a.status === adStatusFilter)),
+    () => (adStatusFilter === "All" ? ads : ads.filter((a) => a.status === adStatusFilter)).filter((a) => !a.archived),
     [ads, adStatusFilter],
   );
 
   const adTotals = useMemo(
     () =>
-      ads.reduce(
+      ads.filter((ad) => !ad.archived).reduce(
         (acc, ad) => ({
           revenue: acc.revenue + ad.revenue,
           clicks: acc.clicks + ad.clicks,
@@ -126,6 +128,15 @@ function PartnershipsPage() {
     "Expired",
     "Done",
   ];
+
+  function deleteApplication(app: PartnershipApplication) {
+    const archivedAt = new Date().toISOString();
+    const nextStatus: PartnershipStatus = app.status === "Approved" || app.status === "On-going" ? "Done" : app.status;
+    setApplications(applications.map((item) => item.id === app.id ? { ...item, status: nextStatus, archived: true, archivedAt } : item));
+    setAds(ads.map((ad) => ad.applicationId === app.id ? { ...ad, status: "Done", endedAt: ad.endedAt ?? archivedAt, archived: true, archivedAt } : ad));
+    setSelected((current) => current?.id === app.id ? null : current);
+    setDeleteTarget(null);
+  }
 
   function updateStatus(id: string, status: PartnershipStatus) {
     const app = applications.find((a) => a.id === id);
@@ -316,6 +327,15 @@ function PartnershipsPage() {
                         <Eye className="size-3.5" />
                         See Info
                       </button>
+                      <button
+                        onClick={() => setDeleteTarget(app)}
+                        title="Delete application"
+                        aria-label={`Delete ${app.brand} application`}
+                        className="ml-2 inline-flex items-center gap-2 rounded-md border border-coral/40 bg-coral/10 px-3 py-2 text-[10px] font-black uppercase text-coral transition hover:bg-coral hover:text-white"
+                      >
+                        <Trash2 className="size-3.5" />
+                        Delete
+                      </button>
                     </td>
                   </tr>
                 ))}
@@ -452,6 +472,29 @@ function PartnershipsPage() {
           </div>
         </div>
       </section>
+
+      {deleteTarget && (
+        <div className="fixed inset-0 z-[120] flex items-center justify-center bg-black/70 p-4 backdrop-blur-sm" onClick={() => setDeleteTarget(null)}>
+          <div className="w-full max-w-lg rounded-xl border border-coral/40 bg-[#151c28] p-6 shadow-2xl" onClick={(event) => event.stopPropagation()}>
+            <h3 className="text-lg font-black uppercase !text-white">
+              {deleteTarget.status === "On-going" ? "Delete On-going Advertisement?" : deleteTarget.status === "Approved" ? "Delete Approved Application?" : "Delete Partnership Application?"}
+            </h3>
+            <p className="mt-3 text-sm leading-relaxed !text-white/55">
+              {deleteTarget.status === "On-going"
+                ? "Warning: This advertisement is currently On-going. Deleting it will immediately end the advertisement and stop its countdown. It will be removed from the Partnerships & Ads management list, but its historical record will remain in Advertisement Revenue."
+                : deleteTarget.status === "Approved"
+                  ? "Warning: This application is currently Approved. Deleting it will remove it from the active Partnerships & Ads management list. Its historical advertisement record will remain in Advertisement Revenue."
+                  : deleteTarget.status === "Pending"
+                    ? "Are you sure you want to remove this pending partnership application?"
+                    : "This will remove the application from the Partnership Applications management list. Historical records will be preserved."}
+            </p>
+            <div className="mt-6 flex justify-end gap-2">
+              <button onClick={() => setDeleteTarget(null)} className="rounded-md border border-white/10 px-4 py-2 text-xs font-bold uppercase !text-white/60 hover:!text-white">Cancel</button>
+              <button onClick={() => deleteApplication(deleteTarget)} className="rounded-md bg-coral px-4 py-2 text-xs font-black uppercase text-white hover:bg-coral/90">Confirm Delete</button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {selected && (
         <div

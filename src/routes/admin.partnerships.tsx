@@ -72,6 +72,8 @@ function PartnershipsPage() {
   const [statusFilter, setStatusFilter] = useState<"All" | PartnershipStatus>("All");
   const [emailConfirmation, setEmailConfirmation] = useState<string | null>(null);
   const [deleteTarget, setDeleteTarget] = useState<PartnershipApplication | null>(null);
+  const [selectedApplicationIds, setSelectedApplicationIds] = useState<string[]>([]);
+  const [selectedAdIds, setSelectedAdIds] = useState<string[]>([]);
 
   const [ads, setAds] = adsStore.useStore();
   const [adStatusFilter, setAdStatusFilter] = useState<"All" | ActiveAd["status"]>("All");
@@ -136,6 +138,17 @@ function PartnershipsPage() {
     setAds(ads.map((ad) => ad.applicationId === app.id ? { ...ad, status: "Done", endedAt: ad.endedAt ?? archivedAt, archived: true, archivedAt } : ad));
     setSelected((current) => current?.id === app.id ? null : current);
     setDeleteTarget(null);
+  }
+
+  function archiveSelected() {
+    const total = selectedApplicationIds.length + selectedAdIds.length;
+    if (!window.confirm(`Delete ${total} selected management record${total === 1 ? "" : "s"}? Active advertisements will be ended and historical revenue will be preserved.`)) return;
+    const archivedAt = new Date().toISOString();
+    const appIds = new Set(selectedApplicationIds);
+    const adIds = new Set(selectedAdIds);
+    setApplications(applications.map((item) => appIds.has(item.id) ? { ...item, status: item.status === "Approved" || item.status === "On-going" ? "Done" : item.status, archived: true, archivedAt } : item));
+    setAds(ads.map((item) => appIds.has(item.applicationId ?? "") || adIds.has(item.id) ? { ...item, status: "Done", endedAt: item.endedAt ?? archivedAt, archived: true, archivedAt } : item));
+    setSelectedApplicationIds([]); setSelectedAdIds([]);
   }
 
   function updateStatus(id: string, status: PartnershipStatus) {
@@ -270,6 +283,10 @@ function PartnershipsPage() {
           </div>
         )}
 
+        <div className="mb-3 flex items-center justify-between rounded-lg border border-white/[0.06] bg-[#182330] px-4 py-3">
+          <label className="flex items-center gap-3 text-xs font-bold uppercase !text-white/60"><input type="checkbox" checked={filtered.length > 0 && selectedApplicationIds.length === filtered.length} onChange={(event) => setSelectedApplicationIds(event.target.checked ? filtered.map((item) => item.id) : [])} /> Select all <span className="!text-coral">{selectedApplicationIds.length} selected</span></label>
+          <button disabled={!selectedApplicationIds.length} onClick={archiveSelected} className="inline-flex items-center gap-2 rounded-md bg-coral px-3 py-2 text-[10px] font-black uppercase text-white disabled:opacity-30"><Trash2 className="size-3.5" /> Delete selected</button>
+        </div>
         <div className="admin-table-wrap overflow-hidden rounded-lg border border-white/[0.06] bg-[#182330] shadow-xl">
           <div className="admin-table-wrap overflow-x-auto">
             <table className="admin-table w-full min-w-[820px] text-left">
@@ -302,8 +319,8 @@ function PartnershipsPage() {
                     className="border-b border-white/[0.05] transition hover:bg-white/[0.025] last:border-0"
                   >
                     <td className="px-5 py-4">
-                      <p className="font-black !text-white">{app.brand}</p>
-                      <p className="text-[10px] !text-white/35">{app.id}</p>
+                      <div className="flex items-center gap-3"><input type="checkbox" checked={selectedApplicationIds.includes(app.id)} onChange={(event) => setSelectedApplicationIds((current) => event.target.checked ? [...current, app.id] : current.filter((id) => id !== app.id))} aria-label={`Select ${app.brand} application`} /><div><p className="font-black !text-white">{app.brand}</p>
+                      <p className="text-[10px] !text-white/35">{app.id}</p></div></div>
                     </td>
                     <td className="px-5 py-4 text-sm !text-white/55">{app.productType}</td>
                     <td className="px-5 py-4 text-sm font-bold !text-white/70">
@@ -396,6 +413,7 @@ function PartnershipsPage() {
           ))}
         </div>
 
+        <div className="mb-3 mt-6 flex items-center justify-between rounded-lg border border-white/[0.06] bg-[#182330] px-4 py-3"><label className="flex items-center gap-3 text-xs font-bold uppercase !text-white/60"><input type="checkbox" checked={filteredAds.length > 0 && selectedAdIds.length === filteredAds.length} onChange={(event) => setSelectedAdIds(event.target.checked ? filteredAds.map((item) => item.id) : [])} /> Select all <span className="!text-coral">{selectedAdIds.length} selected</span></label><button disabled={!selectedAdIds.length} onClick={archiveSelected} className="inline-flex items-center gap-2 rounded-md bg-coral px-3 py-2 text-[10px] font-black uppercase text-white disabled:opacity-30"><Trash2 className="size-3.5" /> Delete selected</button></div>
         <div className="admin-table-wrap mt-6 overflow-hidden rounded-lg border border-white/[0.06] bg-[#182330] shadow-xl">
           <div className="admin-table-wrap overflow-x-auto">
             <table className="admin-table w-full min-w-[900px] text-left">
@@ -431,8 +449,8 @@ function PartnershipsPage() {
                     className="border-b border-white/[0.05] transition hover:bg-white/[0.025] last:border-0"
                   >
                     <td className="px-5 py-4">
-                      <p className="font-black !text-white">{ad.brand}</p>
-                      <p className="text-[10px] !text-white/35">{ad.id}</p>
+                      <div className="flex items-center gap-3"><input type="checkbox" checked={selectedAdIds.includes(ad.id)} onChange={(event) => setSelectedAdIds((current) => event.target.checked ? [...current, ad.id] : current.filter((id) => id !== ad.id))} aria-label={`Select ${ad.brand} advertisement`} /><div><p className="font-black !text-white">{ad.brand}</p>
+                      <p className="text-[10px] !text-white/35">{ad.id}</p></div></div>
                     </td>
                     <td className="px-5 py-4 text-sm !text-white/55">{ad.exactModel}</td>
                     <td className="px-5 py-4 text-sm !text-white/50">{formatDate(ad.startDate)}</td>

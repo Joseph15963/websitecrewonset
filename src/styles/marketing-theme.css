@@ -4,31 +4,28 @@
 }
 
 .marketing-theme main {
-  background: rgba(7, 11, 19, 0.78);
+  background: var(--blueprint-paper);
 }
 
 .marketing-theme .bg-cream,
 .marketing-theme .bg-white {
-  background-color: #101722;
+  background-color: var(--blueprint-paper-soft);
 }
 
-.marketing-theme .text-navy {
-  color: #f8f1df;
-}
-
+.marketing-theme .text-navy,
 .marketing-theme [class*="text-navy/"] {
-  color: rgba(248, 241, 223, 0.62);
+  color: var(--blueprint-ink);
 }
 
 .marketing-theme [class*="border-navy/"] {
-  border-color: rgba(255, 255, 255, 0.11);
+  border-color: var(--blueprint-line);
 }
 
 .marketing-theme .role-card {
-  border-color: rgba(255, 255, 255, 0.1);
-  background: linear-gradient(145deg, #121b28, #0d141f);
-  color: #f8f1df;
-  box-shadow: 0 18px 50px rgba(0, 0, 0, 0.24);
+  border-color: var(--blueprint-line-strong);
+  background: var(--blueprint-paper-soft);
+  color: var(--blueprint-ink);
+  box-shadow: 0 18px 50px rgba(20, 33, 61, 0.14);
 }
 
 .marketing-theme .role-card:hover {
@@ -245,6 +242,32 @@
   .camera-focus-label { display: none; }
   .camera-viewfinder { inset: 12px; }
 }
+
+/* Shared light-mode chrome: public pages and player portal use the same paper-and-ink language. */
+.marketing-theme article.bg-white,
+.marketing-theme form.bg-white,
+.marketing-theme aside.bg-white,
+.marketing-theme .role-card {
+  background: var(--blueprint-paper-soft);
+  color: var(--blueprint-ink);
+  border-color: var(--blueprint-line-strong);
+}
+
+.marketing-theme .form-input {
+  background: #ffffff;
+  color: var(--blueprint-ink);
+  border-color: var(--blueprint-line-strong);
+}
+
+.marketing-theme .form-input::placeholder { color: rgba(20, 33, 61, 0.48); }
+
+html[data-display-theme="dark"] .marketing-theme {
+  background: var(--blueprint-paper);
+  color: var(--blueprint-ink);
+}
+
+html[data-display-theme="dark"] .marketing-theme main { background: var(--blueprint-paper); }
+
 
 @media (prefers-reduced-motion: reduce) {
   .hero-camera-image,

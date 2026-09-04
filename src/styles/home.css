@@ -1,7 +1,21 @@
 /* HOME PAGE */
 
 .home-hero {
-  background: #070b13;
+  background: var(--blueprint-accent);
+}
+
+.marketing-theme .story-button,
+.marketing-theme .team-button,
+.marketing-theme .contact-button {
+  background: var(--blueprint-accent);
+  color: var(--blueprint-paper-soft);
+  border: 1px solid var(--blueprint-accent);
+}
+
+.marketing-theme .story-button:hover,
+.marketing-theme .team-button:hover,
+.marketing-theme .contact-button:hover {
+  background: var(--blueprint-accent-hover);
 }
 
 .hero-overlay {

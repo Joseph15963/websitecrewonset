@@ -6,13 +6,29 @@
    ========================================================= */
 
 :root {
-  --blueprint-paper: #f4f1e6;
-  --blueprint-paper-soft: #faf8f1;
-  --blueprint-line: rgba(19, 27, 52, 0.055);
-  --blueprint-line-strong: rgba(19, 27, 52, 0.085);
-  --blueprint-ink: #131b34;
-  --charcoal: #23262b;
-  --charcoal-deep: #1a1c20;
+  --blueprint-paper: #f3efe4;
+  --blueprint-paper-soft: #fffdf7;
+  --blueprint-ink: #14213d;
+  --blueprint-accent: #14213d;
+  --blueprint-accent-hover: #20365f;
+  --blueprint-gold: #c18a16;
+  --blueprint-coral: #c84e3d;
+  --blueprint-line: rgba(20, 33, 61, 0.14);
+  --blueprint-line-strong: rgba(20, 33, 61, 0.22);
+  --charcoal: #14213d;
+  --charcoal-deep: #0c162b;
+}
+
+html[data-display-theme="dark"] {
+  --blueprint-paper: #101a2d;
+  --blueprint-paper-soft: #182641;
+  --blueprint-ink: #f7f3e8;
+  --blueprint-accent: #0b1426;
+  --blueprint-accent-hover: #1c3158;
+  --blueprint-gold: #f3c747;
+  --blueprint-coral: #f0705d;
+  --blueprint-line: rgba(255, 255, 255, 0.12);
+  --blueprint-line-strong: rgba(255, 255, 255, 0.2);
 }
 
 /* --- The drafting sheet ---------------------------------- */
@@ -107,7 +123,16 @@
 .portal-theme :is(.bg-white\/10, .bg-white\/5, .bg-white\/\[\.04\], .bg-white\/\[\.06\], .bg-white\/\[\.07\]) {
   background-color: var(--ink-wash);
 }
-.portal-theme .bg-navy { background-color: var(--blueprint-ink); }
+.portal-theme .bg-navy { background-color: var(--blueprint-accent); color: var(--blueprint-paper-soft); }
+.portal-theme header.sticky { background-color: var(--blueprint-accent) !important; border-color: rgba(255,255,255,0.16); color: var(--blueprint-paper-soft); }
+.portal-theme header.sticky .text-navy,
+.portal-theme header.sticky [class*="text-navy/"] { color: var(--blueprint-paper-soft); }
+.portal-theme header.sticky [class*="border-navy/"] { border-color: rgba(255,255,255,0.2); }
+.portal-theme button.bg-yellow,
+.portal-theme a.bg-yellow { background-color: var(--blueprint-accent); color: var(--blueprint-paper-soft); }
+.portal-theme button.bg-yellow:hover,
+.portal-theme a.bg-yellow:hover { background-color: var(--blueprint-accent-hover); }
+.portal-theme footer { background-color: var(--blueprint-accent); color: var(--blueprint-paper-soft); }
 .portal-theme .divide-white\/10 > * + * { border-color: var(--ink-line); }
 
 /* Inputs on paper. */

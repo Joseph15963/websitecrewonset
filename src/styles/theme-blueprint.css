@@ -18,17 +18,6 @@
 /* --- The drafting sheet ---------------------------------- */
 .blueprint-sheet {
   background-color: var(--blueprint-paper);
-  background-image:
-    linear-gradient(var(--blueprint-line) 1px, transparent 1px),
-    linear-gradient(90deg, var(--blueprint-line) 1px, transparent 1px),
-    linear-gradient(var(--blueprint-line-strong) 1px, transparent 1px),
-    linear-gradient(90deg, var(--blueprint-line-strong) 1px, transparent 1px);
-  background-size:
-    28px 28px,
-    28px 28px,
-    140px 140px,
-    140px 140px;
-  background-position: center top;
   color: var(--blueprint-ink);
 }
 
@@ -204,4 +193,17 @@
 
 .group:active .portal-switch {
   transform: scale(0.97);
+}
+
+.portal-theme.portal-dark {
+  --blueprint-paper: #1a1b1e;
+  --blueprint-paper-soft: #22242a;
+  --blueprint-ink: #eceef1;
+  --ink-strong: #f4f6f8;
+  --ink-soft: rgba(236, 238, 241, 0.65);
+  --ink-faint: rgba(236, 238, 241, 0.45);
+  --ink-line: rgba(255, 255, 255, 0.1);
+  --ink-wash: rgba(255, 255, 255, 0.05);
+  background-color: var(--blueprint-paper);
+  color: var(--blueprint-ink);
 }

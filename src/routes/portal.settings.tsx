@@ -36,6 +36,7 @@ import {
   X,
 } from "lucide-react";
 import { EMAIL_ERROR, USERNAME_ERROR, PASSWORD_ERROR, isValidEmail, isValidPassword, isValidUsername } from "@/lib/validation";
+import { DisplayThemeSwitcher } from "@/components/theme/display-theme-switcher";
 import {
   bugCategories,
   adminNotificationsStore,
@@ -1043,12 +1044,13 @@ function SettingsPage() {
                   </h2>
 
                   <p className="mt-2 text-sm text-white/40">
-                    Fine-tune the portal's look and feel. These preferences are saved to this
+                    Fine-tune the portal's look and feel.                     These preferences are saved to this
                     device.
                   </p>
                 </div>
 
-                <div className="space-y-3 p-7">
+                <div className="space-y-6 p-7">
+                  <DisplayThemeSwitcher />
                   <PreferenceRow
                     label="Compact Mode"
                     description="Reduce spacing to fit more information on screen."

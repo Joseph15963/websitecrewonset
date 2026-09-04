@@ -13,18 +13,6 @@
   color: #eceef1;
 }
 
-/* Faint scanline texture so the console reads as monitoring gear. */
-.admin-theme::before {
-  content: "";
-  position: fixed;
-  inset: 0;
-  z-index: 0;
-  pointer-events: none;
-  opacity: 0.5;
-  background-image: linear-gradient(rgba(255, 255, 255, 0.014) 1px, transparent 1px);
-  background-size: 100% 3px;
-}
-
 /* Re-map the migrated navy-tinted darks onto the neutral
    control-room palette without touching any markup. */
 .admin-theme .bg-\[\#101923\],
@@ -101,3 +89,19 @@
 .admin-theme .admin-input::placeholder {
   color: rgba(236, 238, 241, 0.35);
 }
+
+.admin-theme.admin-light {
+  --control-bg: var(--blueprint-paper);
+  --control-surface: var(--blueprint-paper-soft);
+  --control-surface-2: #ffffff;
+  --control-line: rgba(19, 27, 52, 0.12);
+  background-color: var(--control-bg);
+  color: var(--blueprint-ink);
+}
+
+.admin-theme.admin-light aside.bg-navy,
+.admin-theme.admin-light header.bg-navy { background-color: var(--blueprint-ink); }
+.admin-theme.admin-light .admin-heading { color: var(--blueprint-ink); }
+.admin-theme.admin-light .admin-kicker,
+.admin-theme.admin-light .admin-table td { color: rgba(19, 27, 52, 0.65); }
+.admin-theme.admin-light .admin-table tbody tr:hover { background-color: rgba(19, 27, 52, 0.04); }

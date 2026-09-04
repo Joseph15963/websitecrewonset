@@ -1,10 +1,6 @@
 .marketing-theme {
-  background-color: #070b13;
-  background-image:
-    linear-gradient(rgba(255, 255, 255, 0.025) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(255, 255, 255, 0.025) 1px, transparent 1px);
-  background-size: 72px 72px;
-  color: #f8f1df;
+  background-color: var(--blueprint-paper);
+  color: var(--blueprint-ink);
 }
 
 .marketing-theme main {

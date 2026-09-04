@@ -18,9 +18,16 @@ export function getSupabaseClient() {
     import.meta.env.SUPABASE_PUBLISHABLE_KEY ??
     import.meta.env.SUPABASE_ANON_KEY;
 
-  if (!url || !key) return null;
-  client = createClient(url, key);
-  return client;
+  if (!url || !key) {
+    const missing = !url ? "Supabase URL missing" : "Supabase anon key missing";
+    throw new Error(missing);
+  }
+  try {
+    client = createClient(url, key);
+    return client;
+  } catch {
+    throw new Error("Supabase client initialization failed");
+  }
 }
 
 export async function uploadAttachment(file: File, folder: string) {

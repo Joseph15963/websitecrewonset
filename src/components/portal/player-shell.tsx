@@ -15,6 +15,7 @@ import {
 } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { NotificationBell } from "@/components/portal/notification-bell";
+import { useDisplayTheme } from "@/components/theme/display-theme-switcher";
 
 const navigation = [
   { label: "Dashboard", href: "/portal", icon: LayoutDashboard },
@@ -29,6 +30,7 @@ export function PlayerShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const router = useRouter();
 
+  const displayTheme = useDisplayTheme();
   const [mobileOpen, setMobileOpen] = useState(false);
   const [confirmingSignOut, setConfirmingSignOut] = useState(false);
   const [accountOpen, setAccountOpen] = useState(false);
@@ -55,7 +57,7 @@ export function PlayerShell({ children }: { children: React.ReactNode }) {
   }
 
   return (
-    <div className="min-h-screen">
+    <div className={`blueprint-sheet portal-theme ${displayTheme === "dark" ? "portal-dark" : ""} min-h-screen`}>
       {/* TOP HEADER */}
       <header className="sticky top-0 z-40 border-b border-[#d9d5c8] bg-[#f4f1e8] text-navy shadow-lg">
         <div className="mx-auto flex h-20 max-w-[1600px] items-center justify-between gap-6 px-6 sm:px-8 lg:px-10">

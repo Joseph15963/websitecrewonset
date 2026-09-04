@@ -10,6 +10,7 @@ import {
   playerReportsStore,
 } from "@/lib/demo/store";
 import { buildAlerts } from "@/components/admin/admin-alerts";
+import { useDisplayTheme } from "@/components/theme/display-theme-switcher";
 import {
   Banknote,
   Bell,
@@ -65,6 +66,7 @@ const navigation = [
 export function AdminShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const router = useRouter();
+  const displayTheme = useDisplayTheme();
   const [mobileOpen, setMobileOpen] = useState(false);
   const [collapsed, setCollapsed] = useState(false);
   const [identityHover, setIdentityHover] = useState(false);
@@ -324,7 +326,7 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
   );
 
   return (
-    <div className="admin-theme relative h-dvh w-full overflow-hidden bg-[#1a1b1e] text-[#eceef1]">
+    <div className={`admin-theme relative h-dvh w-full overflow-hidden bg-[#1a1b1e] text-[#eceef1] ${displayTheme === "light" ? "admin-light" : ""}`}>
       <Toaster theme="dark" position="top-right" richColors />
 
       {/* DESKTOP SIDEBAR */}

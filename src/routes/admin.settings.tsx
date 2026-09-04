@@ -17,6 +17,7 @@ import { Eye, EyeOff, KeyRound, Link2, Mail, Pencil, Plus, Settings as SettingsI
 import { toast } from "sonner";
 import { adminAccountStore, socialLinksStore, uid, type AdminAccount, type SocialLink } from "@/lib/demo/store";
 import { EMAIL_ERROR, isValidEmail } from "@/lib/validation";
+import { DisplayThemeSwitcher } from "@/components/theme/display-theme-switcher";
 
 function PasswordField({
   label,
@@ -377,12 +378,14 @@ function SettingsPage() {
   }
 
   return (
-    <div className="admin-page h-full overflow-y-auto bg-[#101923] text-white">
-      <header className="mb-8">
+  <div className="admin-page h-full overflow-y-auto bg-[#101923] text-white">
+  <header className="mb-8">
         <p className="text-xs font-black tracking-[.18em] !text-coral">ACCOUNT</p>
         <h1 className="admin-heading mt-2 !text-white">Settings</h1>
         <p className="admin-kicker !text-white/45">Manage your administrator email and password.</p>
       </header>
+
+      <div className="mb-6 rounded-lg border border-white/[0.06] bg-[#182330] p-5"><DisplayThemeSwitcher admin /></div>
 
       <div className="grid gap-6 lg:grid-cols-2">
         {/* EMAIL */}

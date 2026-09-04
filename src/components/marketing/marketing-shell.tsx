@@ -3,7 +3,7 @@ import { SiteNavbar } from "@/components/marketing/site-navbar";
 
 export function MarketingShell({ children }: { children: React.ReactNode }) {
   return (
-    <div className="marketing-theme min-h-screen bg-[#070b13] text-[#f8f1df]">
+    <div className="marketing-theme blueprint-sheet min-h-screen">
       <SiteNavbar />
       <main>{children}</main>
       <SiteFooter />

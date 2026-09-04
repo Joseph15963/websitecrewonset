@@ -503,8 +503,14 @@ function PartnershipsPage() {
                   </dt>
                   <dd className="mt-1.5 break-all text-sm font-bold !text-[#7cb0ee]">
                     <a href={selected.link} target="_blank" rel="noreferrer">
-                      {selected.link}
-                    </a>
+                    {selected.link || "Not provided"}
+                  </a>
+                  </dd>
+                </div>
+                <div className="sm:col-span-2">
+                  <dt className="text-[9px] font-black uppercase tracking-wide !text-white/30">Partnership Details</dt>
+                  <dd className="mt-1.5 whitespace-pre-wrap text-sm leading-relaxed !text-white/75">
+                    {selected.description || "Not provided"}
                   </dd>
                 </div>
                 <div>
@@ -512,7 +518,7 @@ function PartnershipsPage() {
                     <FileText className="size-3.5" /> File
                   </dt>
                   <dd className="mt-1.5 text-sm font-bold !text-white/80">
-                    {selected.fileName || "No attachment"}
+                    {selected.fileName || "Not provided"}
                     {selected.attachmentUrl ? (
                       <div className="mt-3 space-y-3">
                         {selected.attachmentType?.startsWith("image/") ||

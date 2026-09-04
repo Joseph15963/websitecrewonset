@@ -3,6 +3,7 @@ import Link from "@/components/next-compat/link";
 import { FormEvent, useState } from "react";
 import { useRouter } from "@/components/next-compat/navigation";
 import { ArrowLeft, Eye, EyeOff, KeyRound, LoaderCircle, Send, UserPlus, X } from "lucide-react";
+import { PASSWORD_ERROR, USERNAME_ERROR, isValidPassword, isValidUsername } from "@/lib/validation";
 
 type CrewAccessPageProps = {
   mode: "login" | "signup";
@@ -44,6 +45,10 @@ export function CrewAccessPage({ mode, scope = "player" }: CrewAccessPageProps) 
       const email = String(data.get("email") ?? "");
       const password = String(data.get("password") ?? "");
       const confirmation = String(data.get("passwordConfirmation") ?? "");
+      if (!isValidPassword(password)) {
+        setError(PASSWORD_ERROR);
+        return;
+      }
       if (password !== confirmation) {
         setError("Passwords do not match.");
         return;
@@ -54,11 +59,20 @@ export function CrewAccessPage({ mode, scope = "player" }: CrewAccessPageProps) 
       return;
     }
 
+    const username = String(data.get("username") ?? "");
+    if (!isAdmin && !username.includes("@")) {
+      setError(USERNAME_ERROR);
+      return;
+    }
+    if (isAdmin && !isValidUsername(username)) {
+      setError(USERNAME_ERROR);
+      return;
+    }
     setError("");
     setLoading(true);
     try {
       const destination = await loginWithCredentials(
-        String(data.get("username") ?? ""),
+        username,
         String(data.get("password") ?? ""),
         scope,
       );
@@ -232,8 +246,8 @@ function ForgotPasswordModal({ onClose }: { onClose: () => void }) {
     const data = new FormData(event.currentTarget);
     const password = String(data.get("newPassword") ?? "");
     const confirm = String(data.get("confirmPassword") ?? "");
-    if (password.length < 6) {
-      setError("Password must be at least 6 characters.");
+    if (!isValidPassword(password)) {
+      setError(PASSWORD_ERROR);
       return;
     }
     if (password !== confirm) {

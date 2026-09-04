@@ -27,6 +27,7 @@ export function SiteNavbar() {
   });
   const portalHref = session?.isAdmin ? "/admin" : "/portal";
   const isAuthenticated = session?.isAdmin || session?.isPlayer;
+  const visibleNavItems = session?.isAdmin ? navItems.filter((item) => item.href !== "/contact") : navItems;
 
   useEffect(() => {
     const handleScroll = () => setScrolled(window.scrollY > 40);
@@ -49,7 +50,7 @@ export function SiteNavbar() {
           <Image src="/assets/crew-on-set-logo.png" alt="Crew On Set!" fill className="object-contain object-left" priority />
         </Link>
         <nav className="hidden items-center gap-7 lg:flex" aria-label="Main navigation">
-          {navItems.map((item) => {
+          {visibleNavItems.map((item) => {
             const active = pathname === item.href;
             return (
               <Link
@@ -85,7 +86,7 @@ export function SiteNavbar() {
         </button>
       </div>
       <nav className={`mx-3 mt-2 overflow-hidden rounded-lg border border-white/10 bg-navy/95 px-3 shadow-2xl backdrop-blur-xl transition-all duration-300 lg:hidden ${menuOpen ? "max-h-[460px] py-3 opacity-100" : "pointer-events-none max-h-0 py-0 opacity-0"}`} aria-label="Mobile navigation">
-        {navItems.map((item) => <Link key={item.href} href={item.href} onClick={() => setMenuOpen(false)} className={`block rounded-md px-4 py-3 text-sm font-black tracking-wider ${pathname === item.href ? "bg-white/10 text-yellow" : "text-white"}`}>{item.label}</Link>)}
+        {visibleNavItems.map((item) => <Link key={item.href} href={item.href} onClick={() => setMenuOpen(false)} className={`block rounded-md px-4 py-3 text-sm font-black tracking-wider ${pathname === item.href ? "bg-white/10 text-yellow" : "text-white"}`}>{item.label}</Link>)}
         <div className="mt-2 border-t border-white/10 pt-3">
           {isAuthenticated ? (
             <Link href={portalHref} onClick={() => setMenuOpen(false)} className="mobile-crew-link bg-coral">MY PORTAL</Link>

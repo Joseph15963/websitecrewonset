@@ -93,6 +93,24 @@ function write<T>(key: string, value: T) {
   window.dispatchEvent(new CustomEvent(`cos:${key}`));
 }
 
+function reconcileExpired<T>(key: string, items: T[], now = Date.now()) {
+  if (key !== "cos.ads" && key !== "cos.applications") return items;
+  let changed = false;
+  const next = items.map((item) => {
+    const record = item as T & { status?: string; expiresAt?: string; endedAt?: string };
+    if (record.status !== "Done" && record.expiresAt && new Date(record.expiresAt).getTime() <= now) {
+      changed = true;
+      return { ...record, status: "Done", endedAt: record.endedAt ?? new Date(record.expiresAt).toISOString() } as T;
+    }
+    return item;
+  });
+  if (changed) {
+    write(key, next);
+    void syncSharedTable(key, next);
+  }
+  return next;
+}
+
 /**
  * Hydration-safe demo collection. The server (and the first client render)
  * always sees `seed`; stored data is adopted in an effect.
@@ -113,9 +131,9 @@ export function createStore<T>(key: string, seed: T[]) {
 
     useEffect(() => {
       let active = true;
-      setItems(get());
+      setItems(reconcileExpired(key, get()));
       void loadSharedTable<T>(key).then((remoteItems) => {
-        if (active && remoteItems && remoteItems.length > 0) setItems(remoteItems);
+        if (active && remoteItems && remoteItems.length > 0) setItems(reconcileExpired(key, remoteItems));
       });
       const sync = () => setItems(get());
       window.addEventListener(event, sync);

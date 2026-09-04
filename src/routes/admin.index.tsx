@@ -32,6 +32,7 @@ import {
 } from "lucide-react";
 import { useMemo } from "react";
 import { adminActivityStore, contentStatsStore, gameBuildStore, messagesStore } from "@/lib/demo/store";
+import { sortNewestFirst } from "@/lib/validation";
 
 const stats = [
   {
@@ -100,7 +101,7 @@ function AdminDashboardPage() {
     [activity],
   );
 
-  const recentActivity = useMemo(() => activity.slice(0, 6), [activity]);
+  const recentActivity = useMemo(() => sortNewestFirst(activity, (entry) => entry.createdAt).slice(0, 6), [activity]);
   const messageCounts = useMemo(() => {
     const unread = messages.filter((m) => m.status === "Unread").length;
     const inProgress = messages.filter((m) => m.status === "In Progress").length;

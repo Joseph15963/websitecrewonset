@@ -35,6 +35,7 @@ import {
   UserCircle,
   X,
 } from "lucide-react";
+import { USERNAME_ERROR, PASSWORD_ERROR, isValidPassword, isValidUsername } from "@/lib/validation";
 import {
   bugCategories,
   adminNotificationsStore,
@@ -298,6 +299,11 @@ function SettingsPage() {
       return;
     }
 
+    if (field === "Username" && !isValidUsername(value)) {
+      showMessage(USERNAME_ERROR, "error");
+      return;
+    }
+
     if (field === "Username") {
       setAccount((prev) => ({
         ...prev,
@@ -380,8 +386,8 @@ function SettingsPage() {
       return;
     }
 
-    if (newPassword.length < 8) {
-      setPasswordError("Your new password must contain at least 8 characters.");
+    if (!isValidPassword(newPassword)) {
+      setPasswordError(PASSWORD_ERROR);
       return;
     }
 
@@ -390,15 +396,12 @@ function SettingsPage() {
       return;
     }
 
-    const savedPassword = localStorage.getItem("player-password");
-
-    if (savedPassword && currentPassword !== savedPassword) {
+    if (currentPassword !== DEMO_PASSWORD) {
       setPasswordError("Current password is incorrect.");
       return;
     }
 
-    localStorage.setItem("player-password", newPassword);
-
+    // The demo auth service owns password changes; never persist passwords in browser storage.
     setPasswordSuccess(true);
 
     setCurrentPassword("");

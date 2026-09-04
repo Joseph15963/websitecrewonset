@@ -30,6 +30,7 @@ import {
 } from "lucide-react";
 import { cosmeticCatalog, ownedItemsStore } from "@/lib/demo/portal-shop";
 import { Leaderboards } from "@/components/portal/leaderboards";
+import { sortNewestFirst } from "@/lib/validation";
 
 const badges = [
   {
@@ -78,16 +79,18 @@ type ActivityItem = {
   title: string;
   detail: string;
   time: string;
+  createdAt: string;
   icon: typeof Film;
 };
 
-const recentActivity: ActivityItem[] = [
+const recentActivity: ActivityItem[] = sortNewestFirst([
   {
     id: "act-1",
     kind: "production",
     title: "Wrapped “Northline Optics — NL-70 Launch”",
     detail: "Scored 94% as Cameraman",
     time: "2 hours ago",
+    createdAt: "2026-09-04T08:00:00.000Z",
     icon: Film,
   },
   {
@@ -96,6 +99,7 @@ const recentActivity: ActivityItem[] = [
     title: "Achievement unlocked — One Take Wonder",
     detail: "+450 XP awarded",
     time: "Yesterday",
+    createdAt: "2026-09-03T18:00:00.000Z",
     icon: Award,
   },
   {
@@ -104,6 +108,7 @@ const recentActivity: ActivityItem[] = [
     title: "Completed a practice session",
     detail: "Lighting department drill, 38 minutes",
     time: "Yesterday",
+    createdAt: "2026-09-03T12:00:00.000Z",
     icon: Play,
   },
   {
@@ -112,6 +117,7 @@ const recentActivity: ActivityItem[] = [
     title: "Purchased Studio Curls",
     detail: "400 C-Coins spent in the Shop",
     time: "2 days ago",
+    createdAt: "2026-09-02T12:00:00.000Z",
     icon: ShoppingBag,
   },
   {
@@ -120,9 +126,10 @@ const recentActivity: ActivityItem[] = [
     title: "Reached Crew Level 27",
     detail: "6,820 / 10,000 XP toward Level 28",
     time: "4 days ago",
+    createdAt: "2026-08-31T12:00:00.000Z",
     icon: Sparkles,
   },
-];
+], (activity) => activity.createdAt);
 
 function PlayerDashboardPage() {
   const [ownedIds] = ownedItemsStore.useStore();

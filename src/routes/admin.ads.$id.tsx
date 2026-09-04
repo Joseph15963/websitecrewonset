@@ -73,14 +73,14 @@ function AdDetailPage() {
   useEffect(() => {
     if (!ad || now === null || hasFiredExpiry.current) return;
     const remaining = new Date(ad.expiresAt).getTime() - now;
-    if (remaining <= 0 && ad.status !== "Expired") {
+    if (remaining <= 0 && ad.status !== "Done") {
       hasFiredExpiry.current = true;
-      setAds(ads.map((a) => (a.id === ad.id ? { ...a, status: "Expired" } : a)));
+      setAds(ads.map((a) => (a.id === ad.id ? { ...a, status: "Done", endedAt: a.endedAt ?? new Date(ad.expiresAt).toISOString() } : a)));
       setNotifications([
         {
           id: uid("ntf"),
           title: "Advertisement expired",
-          body: `${ad.brand} — ${ad.exactModel} has reached its contract expiration and was automatically marked Expired.`,
+          body: `${ad.brand} — ${ad.exactModel} has reached its contract expiration and was automatically marked Done.`,
           createdAt: new Date().toISOString(),
           kind: "system",
           read: false,
@@ -111,9 +111,9 @@ function AdDetailPage() {
     );
   }
 
-  const remainingMs = now === null ? null : new Date(ad.expiresAt).getTime() - now;
-  const countdown = remainingMs === null ? null : splitCountdown(remainingMs);
   const isDone = ad.status === "Done";
+  const remainingMs = isDone ? 0 : now === null ? null : new Date(ad.expiresAt).getTime() - now;
+  const countdown = remainingMs === null ? null : splitCountdown(remainingMs);
   const isExpired = !isDone && (ad.status === "Expired" || (remainingMs !== null && remainingMs <= 0));
 
   return (
@@ -140,7 +140,7 @@ function AdDetailPage() {
       {adminNotified && (
         <div className="mb-5 flex items-center gap-3 rounded-md border border-coral/25 bg-coral/10 px-4 py-3 text-xs font-bold !text-[#ff7663]">
           <BellRing className="size-4 shrink-0" />
-          Admin Notified: Ad Expired — status automatically updated and an alert was pushed to notifications.
+          Admin Notified: Ad marked Done — status automatically updated and an alert was pushed to notifications.
         </div>
       )}
 

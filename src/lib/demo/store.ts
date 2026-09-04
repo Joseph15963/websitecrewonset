@@ -8,7 +8,7 @@
 
 import { useEffect, useState } from "react";
 
-import { getSupabaseClient } from "@/lib/supabase";
+import { getSupabaseClient, uploadAttachment } from "@/lib/supabase";
 
 /* ---------------------------------------------------------------- utilities */
 
@@ -423,13 +423,9 @@ export function formatMoney(value: number) {
   return `₱${value.toLocaleString("en-US")}`;
 }
 
-export function readAttachmentAsDataUrl(file: File): Promise<string> {
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.onload = () => resolve(typeof reader.result === "string" ? reader.result : "");
-    reader.onerror = () => reject(reader.error ?? new Error("Unable to read attachment."));
-    reader.readAsDataURL(file);
-  });
+export async function readAttachmentAsDataUrl(file: File, folder = "submissions"): Promise<string> {
+  const uploaded = await uploadAttachment(file, folder);
+  return uploaded.url;
 }
 
 /* ------------------------------------------------- system requirements (admin) */

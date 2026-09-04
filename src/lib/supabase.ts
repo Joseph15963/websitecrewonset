@@ -2,6 +2,8 @@ import { createClient, type SupabaseClient } from "@supabase/supabase-js";
 
 let client: SupabaseClient | undefined;
 
+export const ATTACHMENT_BUCKET = "cos-attachments";
+
 export function getSupabaseClient() {
   if (client) return client;
   const url =
@@ -19,4 +21,18 @@ export function getSupabaseClient() {
   if (!url || !key) return null;
   client = createClient(url, key);
   return client;
+}
+
+export async function uploadAttachment(file: File, folder: string) {
+  const supabase = getSupabaseClient();
+  if (!supabase) throw new Error("Supabase is not configured.");
+  const extension = file.name.split(".").pop()?.toLowerCase() || "bin";
+  const path = `${folder}/${crypto.randomUUID()}.${extension}`;
+  const { error } = await supabase.storage.from(ATTACHMENT_BUCKET).upload(path, file, {
+    contentType: file.type || undefined,
+    upsert: false,
+  });
+  if (error) throw error;
+  const { data } = supabase.storage.from(ATTACHMENT_BUCKET).getPublicUrl(path);
+  return { path, url: data.publicUrl };
 }

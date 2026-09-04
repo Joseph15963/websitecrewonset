@@ -258,6 +258,8 @@ export type PartnershipApplication = {
   description?: string;
   submittedAt: string;
   status: PartnershipStatus;
+  archived?: boolean;
+  archivedAt?: string;
 };
 
 const seedApplications: PartnershipApplication[] = [
@@ -354,6 +356,8 @@ export type ActiveAd = {
   status: "On-going" | "Expiring" | "Expired" | "Done";
   /** Set when an administrator finishes an advertisement early. */
   endedAt?: string;
+  archived?: boolean;
+  archivedAt?: string;
   revenue: number;
   clicks: number;
   visits: number;

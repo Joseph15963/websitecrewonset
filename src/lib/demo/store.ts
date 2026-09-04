@@ -133,7 +133,7 @@ export function createStore<T>(key: string, seed: T[]) {
       let active = true;
       setItems(reconcileExpired(key, get()));
       void loadSharedTable<T>(key).then((remoteItems) => {
-        if (active && remoteItems && remoteItems.length > 0) setItems(reconcileExpired(key, remoteItems));
+        if (active && remoteItems) setItems(reconcileExpired(key, remoteItems));
       });
       const sync = () => setItems(get());
       window.addEventListener(event, sync);

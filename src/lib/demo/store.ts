@@ -19,12 +19,20 @@ const sharedTables: Record<string, string> = {
 };
 
 function toDatabaseRow(item: Record<string, unknown>) {
-  return Object.fromEntries(
+  const row = Object.fromEntries(
     Object.entries(item).map(([key, value]) => [
       key.replace(/[A-Z]/g, (letter) => `_${letter.toLowerCase()}`),
-      value,
+      value === undefined ? null : value,
     ]),
   );
+
+  // The partnership table calls the UI's fileName field attachment_name.
+  if ("file_name" in row) {
+    row.attachment_name = row.file_name;
+    delete row.file_name;
+  }
+
+  return row;
 }
 
 function fromDatabaseRow<T>(row: Record<string, unknown>): T {
@@ -32,8 +40,10 @@ function fromDatabaseRow<T>(row: Record<string, unknown>): T {
     Object.entries(row)
       .filter(([key]) => !["created_at"].includes(key))
       .map(([key, value]) => [
-        key.replace(/_([a-z])/g, (_, letter: string) => letter.toUpperCase()),
-        value,
+        key === "attachment_name"
+          ? "fileName"
+          : key.replace(/_([a-z])/g, (_, letter: string) => letter.toUpperCase()),
+        value ?? undefined,
       ]),
   ) as T;
 }

@@ -51,9 +51,11 @@ const MAX_ATTACHMENT_BYTES = 5 * 1024 * 1024;
 
 /** Validates that a file is an image or PDF (ZIP and everything else rejected). */
 function isAllowedAttachment(file: File): boolean {
-  const isPdf = file.type === "application/pdf" || file.name.toLowerCase().endsWith(".pdf");
-  const isImage = file.type.startsWith("image/");
-  return (isImage || isPdf) && file.size <= MAX_ATTACHMENT_BYTES;
+  const extension = file.name.toLowerCase().split(".").pop() ?? "";
+  const allowedExtension = ["jpg", "jpeg", "png", "webp", "gif", "pdf"].includes(extension);
+  const isPdf = extension === "pdf" || file.type === "application/pdf";
+  const isImage = file.type.startsWith("image/") || ["jpg", "jpeg", "png", "webp", "gif"].includes(extension);
+  return allowedExtension && (isImage || isPdf) && file.size <= MAX_ATTACHMENT_BYTES;
 }
 
 /** Demo player identity used for player-submitted bug reports. */
@@ -517,9 +519,9 @@ function SettingsPage() {
     let attachmentUrl = "";
     if (bugAttachment) {
       try {
-        attachmentUrl = await readAttachmentAsDataUrl(bugAttachment);
+        attachmentUrl = await readAttachmentAsDataUrl(bugAttachment, "bug-reports");
       } catch {
-        setBugError("We could not read that attachment. Please try again.");
+        setBugError("Attachment upload failed. Please try again.");
         return;
       }
     }
@@ -620,9 +622,9 @@ function SettingsPage() {
     let attachmentUrl = "";
     if (playerReportAttachment) {
       try {
-        attachmentUrl = await readAttachmentAsDataUrl(playerReportAttachment);
+        attachmentUrl = await readAttachmentAsDataUrl(playerReportAttachment, "player-reports");
       } catch {
-        setPlayerReportError("We could not read that attachment. Please try again.");
+        setPlayerReportError("Attachment upload failed. Please try again.");
         return;
       }
     }

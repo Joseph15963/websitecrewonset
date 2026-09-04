@@ -57,8 +57,12 @@ export function PartnershipForm() {
       }
     }
     if (file) {
-      const isPdf = file.type === "application/pdf" || file.name.toLowerCase().endsWith(".pdf");
-      const isAllowed = file.type.startsWith("image/") || isPdf;
+      const extension = file.name.toLowerCase().split(".").pop() ?? "";
+      const isPdf = file.type === "application/pdf" || extension === "pdf";
+      const isAllowed =
+        ["jpg", "jpeg", "png", "webp", "gif"].includes(extension) ||
+        file.type.startsWith("image/") ||
+        isPdf;
       if (file.size > 5 * 1024 * 1024) {
         setError("Attachments must be 5 MB or smaller.");
         return;
@@ -74,9 +78,9 @@ export function PartnershipForm() {
     let attachmentUrl = "";
     if (file) {
       try {
-        attachmentUrl = await readAttachmentAsDataUrl(file);
+        attachmentUrl = await readAttachmentAsDataUrl(file, "partnerships");
       } catch {
-        setError("We could not read that attachment. Please try again.");
+        setError("Attachment upload failed. Please try again.");
         return;
       }
     }

@@ -435,6 +435,15 @@ const seedAds: ActiveAd[] = [
 
 export const adsStore = createStore<ActiveAd>("cos.ads", seedAds);
 
+export type RevenueRecord = ActiveAd & {
+  applicationId: string;
+};
+
+export const revenueStore = createStore<RevenueRecord>(
+  "cos.revenue",
+  seedAds.map((ad) => ({ ...ad, applicationId: ad.applicationId ?? ad.id })),
+);
+
 /* ----------------------------------------------------------------- currency */
 
 /** C-Coin wallet balance for the demo player. */

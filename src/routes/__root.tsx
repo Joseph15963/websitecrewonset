@@ -107,6 +107,17 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
 });
 
 function RootShell({ children }: { children: ReactNode }) {
+  useEffect(() => {
+    const path = window.location.pathname;
+    const isAdmin = path === "/admin" || path.startsWith("/admin/");
+    const isPlayer = path === "/portal" || path.startsWith("/portal/");
+    const scope = isAdmin ? "admin" : "player";
+    const key = isAdmin ? "cos.display.admin" : "cos.display.player";
+    const stored = window.localStorage.getItem(key);
+    document.documentElement.dataset.displayThemeScope = scope;
+    document.documentElement.dataset.displayTheme = isPlayer || !isAdmin ? (stored === "dark" && isPlayer ? "dark" : "light") : stored === "light" ? "light" : "dark";
+  }, []);
+
   return (
     <html lang="en">
       <head>

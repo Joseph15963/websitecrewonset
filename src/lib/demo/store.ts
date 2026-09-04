@@ -76,14 +76,7 @@ function read<T>(key: string, fallback: T): T {
 function write<T>(key: string, value: T) {
   if (!isBrowser()) return;
   try {
-    const localValue = Array.isArray(value)
-      ? value.map((item) => {
-          if (!item || typeof item !== "object") return item;
-          const { attachmentUrl: _attachmentUrl, ...withoutAttachment } = item as Record<string, unknown>;
-          return withoutAttachment;
-        })
-      : value;
-    window.localStorage.setItem(key, JSON.stringify(localValue));
+    window.localStorage.setItem(key, JSON.stringify(value));
   } catch {
     /* storage unavailable — shared data stays in Supabase */
   }

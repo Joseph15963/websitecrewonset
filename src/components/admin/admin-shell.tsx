@@ -66,7 +66,7 @@ const navigation = [
 export function AdminShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const router = useRouter();
-  const displayTheme = useDisplayTheme();
+  const displayTheme = useDisplayTheme("admin");
   const [mobileOpen, setMobileOpen] = useState(false);
   const [collapsed, setCollapsed] = useState(false);
   const [identityHover, setIdentityHover] = useState(false);

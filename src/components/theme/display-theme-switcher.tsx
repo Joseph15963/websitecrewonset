@@ -2,31 +2,35 @@ import { useEffect, useState } from "react";
 
 export type DisplayTheme = "light" | "dark";
 
-const STORAGE_KEY = "cos.display.theme";
+const STORAGE_KEYS = { player: "cos.display.player", admin: "cos.display.admin" } as const;
+type ThemeScope = keyof typeof STORAGE_KEYS;
 
-export function getDisplayTheme(): DisplayTheme {
-  if (typeof window === "undefined") return "light";
-  return window.localStorage.getItem(STORAGE_KEY) === "dark" ? "dark" : "light";
+export function getDisplayTheme(scope: ThemeScope = "player"): DisplayTheme {
+  if (typeof window === "undefined") return scope === "admin" ? "dark" : "light";
+  const stored = window.localStorage.getItem(STORAGE_KEYS[scope]);
+  return stored === "dark" || stored === "light" ? stored : scope === "admin" ? "dark" : "light";
 }
 
-export function applyDisplayTheme(theme: DisplayTheme) {
+export function applyDisplayTheme(theme: DisplayTheme, scope: ThemeScope = "player") {
   document.documentElement.dataset.displayTheme = theme;
-  window.localStorage.setItem(STORAGE_KEY, theme);
+  document.documentElement.dataset.displayThemeScope = scope;
+  window.localStorage.setItem(STORAGE_KEYS[scope], theme);
   window.dispatchEvent(new CustomEvent("cos:display-theme", { detail: theme }));
 }
 
 export function DisplayThemeSwitcher({ admin = false }: { admin?: boolean }) {
-  const [theme, setTheme] = useState<DisplayTheme>("light");
+  const scope: ThemeScope = admin ? "admin" : "player";
+  const [theme, setTheme] = useState<DisplayTheme>(() => getDisplayTheme(scope));
 
   useEffect(() => {
-    const current = getDisplayTheme();
+    const current = getDisplayTheme(scope);
     setTheme(current);
-    applyDisplayTheme(current);
+    applyDisplayTheme(current, scope);
   }, []);
 
   function select(next: DisplayTheme) {
     setTheme(next);
-    applyDisplayTheme(next);
+    applyDisplayTheme(next, scope);
   }
 
   return (
@@ -50,10 +54,10 @@ export function DisplayThemeSwitcher({ admin = false }: { admin?: boolean }) {
   );
 }
 
-export function useDisplayTheme() {
-  const [theme, setTheme] = useState<DisplayTheme>("light");
+export function useDisplayTheme(scope: ThemeScope = "player") {
+  const [theme, setTheme] = useState<DisplayTheme>(() => getDisplayTheme(scope));
   useEffect(() => {
-    const sync = () => setTheme(getDisplayTheme());
+    const sync = () => setTheme(getDisplayTheme(scope));
     sync();
     window.addEventListener("cos:display-theme", sync);
     return () => window.removeEventListener("cos:display-theme", sync);

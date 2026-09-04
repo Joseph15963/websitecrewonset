@@ -3,19 +3,36 @@
 ========================================================= */
 
 .team-page {
-  --team-bg: #060a10;
-  --team-panel: #0b1117;
-  --team-panel-2: #101820;
-  --team-red: #ef5136;
-  --team-green: #b7dc00;
-  --team-white: #ffffff;
-  --team-muted: rgba(255, 255, 255, 0.4);
+  --team-bg: var(--blueprint-paper);
+  --team-panel: var(--blueprint-paper-soft);
+  --team-panel-2: #e8e2d4;
+  --team-red: var(--blueprint-coral);
+  --team-green: var(--blueprint-gold);
+  --team-white: var(--blueprint-ink);
+  --team-muted: rgba(20, 33, 61, 0.68);
 
   min-height: 100vh;
   overflow: hidden;
   background: var(--team-bg);
   color: var(--team-white);
 }
+
+.team-page .team-grid-overlay,
+.team-page .crew-grid-pattern { display: none; }
+.team-page .team-hero { background: var(--blueprint-accent); color: #fffdf7; }
+.team-page .team-hero-copy > p { color: rgba(255,253,247,0.78); }
+.team-page .team-hero-copy h1 { color: #fffdf7; }
+.team-page .team-hero-copy h1 span,
+.team-page .team-hero-kicker span,
+.team-page .team-hero-kicker svg { color: var(--team-green); }
+.team-page .journey-title span { color: var(--team-green); }
+.team-page .journey-copy p,
+.team-page .crew-heading p { color: var(--team-muted); }
+.team-page .crew-profile { background: var(--team-panel); color: var(--team-white); border-color: var(--blueprint-line-strong); }
+.team-page .crew-profile-image::after { background: linear-gradient(to left, rgba(20,33,61,0.72), transparent); }
+.team-page .crew-image-gradient { background: linear-gradient(to top, var(--team-panel), transparent 55%); }
+.team-page .hero-photo-shadow { background: var(--blueprint-accent-hover); }
+
 
 .team-container {
   width: min(100% - 40px, 1200px);

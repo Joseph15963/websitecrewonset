@@ -34,6 +34,7 @@ import {
 import {
   adsStore,
   applicationsStore,
+  revenueStore,
   formatMoney,
   uid,
   type ActiveAd,
@@ -76,6 +77,7 @@ function PartnershipsPage() {
   const [selectedAdIds, setSelectedAdIds] = useState<string[]>([]);
 
   const [ads, setAds] = adsStore.useStore();
+  const [revenue, setRevenue] = revenueStore.useStore();
   const [adStatusFilter, setAdStatusFilter] = useState<"All" | ActiveAd["status"]>("All");
 
   const filtered = useMemo(
@@ -168,8 +170,7 @@ function PartnershipsPage() {
       (ads.find((ad) => ad.applicationId === app.id) ??
         ads.find((ad) => ad.brand === app.brand && ad.exactModel === app.exactModel));
     if (app && status === "On-going" && !matchedAd) {
-      setAds([
-        {
+      const newAd: ActiveAd = {
           id: uid("AD"),
           applicationId: app.id,
           brand: app.brand,
@@ -186,25 +187,22 @@ function PartnershipsPage() {
           visits: 0,
           impressions: 0,
           placement: "Pending placement",
-        },
-        ...ads,
-      ]);
+        };
+      setAds([newAd, ...ads]);
+      setRevenue((current) => current.some((record) => record.applicationId === app.id) ? current : [{ ...newAd, applicationId: app.id }, ...current]);
     } else if (matchedAd && (status === "On-going" || status === "Done")) {
       const expiresAt = statusChangedToOngoing ? transitionExpiresAt : matchedAd.expiresAt;
-      setAds(
-        ads.map((ad) =>
-          ad.id === matchedAd.id
-            ? {
-                ...ad,
-                applicationId: app.id,
-                status,
-                startDate: statusChangedToOngoing ? transitionStartedAt : ad.startDate,
-                expiresAt,
-                endedAt: status === "Done" ? new Date().toISOString() : undefined,
-              }
-            : ad,
-        ),
+      const updatedAds = ads.map((ad) =>
+        ad.id === matchedAd.id
+          ? { ...ad, applicationId: app.id, status: status === "On-going" ? "On-going" : "Done", startDate: statusChangedToOngoing ? transitionStartedAt : ad.startDate, expiresAt, endedAt: status === "Done" ? new Date().toISOString() : undefined }
+          : ad,
       );
+      setAds(updatedAds);
+      setRevenue((current) => {
+        const existing = current.find((record) => record.applicationId === app.id);
+        const updated = { ...matchedAd, applicationId: app.id, status: status === "On-going" ? "On-going" : "Done", startDate: statusChangedToOngoing ? transitionStartedAt : matchedAd.startDate, expiresAt, endedAt: status === "Done" ? new Date().toISOString() : undefined };
+        return existing ? current.map((record) => record.applicationId === app.id ? { ...record, ...updated } : record) : [{ ...updated, applicationId: app.id }, ...current];
+      });
     }
     if (selected?.id === id) setSelected({ ...selected, status });
 

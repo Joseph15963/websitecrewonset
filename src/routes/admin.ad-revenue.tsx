@@ -27,7 +27,6 @@ import {
   X,
 } from "lucide-react";
 import {
-  adsStore,
   applicationsStore,
   revenueStore,
   formatMoney,
@@ -52,7 +51,6 @@ function findAdForApplication(app: PartnershipApplication, ads: ActiveAd[]) {
 
 function AdRevenuePage() {
   const [applications] = applicationsStore.useStore();
-  const [ads, setAds] = adsStore.useStore();
   const [revenue, setRevenue] = revenueStore.useStore();
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const [deleteIds, setDeleteIds] = useState<string[] | null>(null);
@@ -80,9 +78,6 @@ function AdRevenuePage() {
   function deleteRevenue() {
     if (!deleteIds) return;
     const ids = new Set(deleteIds);
-    const deleted = revenue.filter((record) => ids.has(record.id));
-    const activeIds = new Set(deleted.filter((record) => record.status === "On-going" || record.status === "Expiring").map((record) => record.id));
-    if (activeIds.size) setAds(ads.map((ad) => activeIds.has(ad.id) ? { ...ad, status: "Done", endedAt: new Date().toISOString() } : ad));
     setRevenue(revenue.filter((record) => !ids.has(record.id)));
     setSelectedIds([]);
     setDeleteIds(null);

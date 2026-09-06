@@ -122,11 +122,12 @@ export function createStore<T>(key: string, seed: T[]) {
     return read<T[]>(key, seed);
   }
 
-  function set(next: T[]) {
-    write(key, next);
+  function set(next: T[] | ((current: T[]) => T[])) {
+    const current = get();
+    write(key, typeof next === "function" ? next(current) : next);
   }
 
-  function useStore(): [T[], (next: T[]) => void] {
+  function useStore(): [T[], (next: T[] | ((current: T[]) => T[])) => void] {
     const [items, setItems] = useState<T[]>(seed);
 
     useEffect(() => {
@@ -147,10 +148,11 @@ export function createStore<T>(key: string, seed: T[]) {
 
     return [
       items,
-      (next: T[]) => {
-        setItems(next);
-        set(next);
-        void syncSharedTable(key, next);
+      (next: T[] | ((current: T[]) => T[])) => {
+        const resolved = typeof next === "function" ? next(get()) : next;
+        setItems(resolved);
+        set(resolved);
+        void syncSharedTable(key, resolved);
       },
     ];
   }

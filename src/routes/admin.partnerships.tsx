@@ -14,10 +14,8 @@ export const Route = createFileRoute("/admin/partnerships")({
 });
 
 import { useMemo, useState } from "react";
-import Link from "@/components/next-compat/link";
 import {
   Banknote,
-  BarChart3,
   CalendarClock,
   Eye,
   FileText,
@@ -25,10 +23,7 @@ import {
   Link2,
   Mail,
   MailCheck,
-  Megaphone,
   Trash2,
-  MousePointerClick,
-  Wallet2,
   X,
 } from "lucide-react";
 import {
@@ -52,13 +47,6 @@ const statusStyles: Record<PartnershipStatus, string> = {
   Declined: "bg-coral/15 text-[#ff7663]",
 };
 
-const adStatusStyles: Record<ActiveAd["status"], string> = {
-  "On-going": "bg-[#2d9d8f]/15 text-[#4bc4b4]",
-  Expiring: "bg-[#d9a514]/15 text-[#e1b42b]",
-  Expired: "bg-coral/15 text-[#ff7663]",
-  Done: "bg-white/[.08] text-white/50",
-};
-
 function formatDate(iso: string) {
   return new Date(iso).toLocaleDateString("en-US", {
     year: "numeric",
@@ -78,7 +66,10 @@ function PartnershipsPage() {
 
   const [ads, setAds] = adsStore.useStore();
   const [revenue, setRevenue] = revenueStore.useStore();
-  const [adStatusFilter, setAdStatusFilter] = useState<"All" | ActiveAd["status"]>("All");
+  const filteredAds: ActiveAd[] = [];
+  const adSummaries: never[] = [];
+  const adStatusOptions: ActiveAd["status"][] = [];
+  const [adStatusFilter, setAdStatusFilter] = useState<ActiveAd["status"]>("On-going");
 
   const filtered = useMemo(
     () =>
@@ -86,71 +77,18 @@ function PartnershipsPage() {
     [applications, statusFilter],
   );
 
-  const filteredAds = useMemo(
-    () => (adStatusFilter === "All" ? ads : ads.filter((a) => a.status === adStatusFilter)).filter((a) => !a.archived),
-    [ads, adStatusFilter],
-  );
-
-  const adTotals = useMemo(
-    () =>
-      ads.filter((ad) => !ad.archived).reduce(
-        (acc, ad) => ({
-          revenue: acc.revenue + ad.revenue,
-          clicks: acc.clicks + ad.clicks,
-          visits: acc.visits + ad.visits,
-        }),
-        { revenue: 0, clicks: 0, visits: 0 },
-      ),
-    [ads],
-  );
-
-  const adSummaries = [
-    {
-      label: "Total Ad Revenue",
-      value: formatMoney(adTotals.revenue),
-      icon: Wallet2,
-      color: "bg-[#d9a514] text-[#101923]",
-    },
-    {
-      label: "Total Ad Clicks",
-      value: adTotals.clicks.toLocaleString(),
-      icon: MousePointerClick,
-      color: "bg-coral text-white",
-    },
-    {
-      label: "Total Visits",
-      value: adTotals.visits.toLocaleString(),
-      icon: BarChart3,
-      color: "bg-[#243241] text-white",
-    },
-  ];
-
-  const adStatusOptions: ("All" | ActiveAd["status"])[] = [
-    "All",
-    "On-going",
-    "Expiring",
-    "Expired",
-    "Done",
-  ];
-
   function deleteApplication(app: PartnershipApplication) {
     const archivedAt = new Date().toISOString();
-    const nextStatus: PartnershipStatus = app.status === "Approved" || app.status === "On-going" ? "Done" : app.status;
-    setApplications(applications.map((item) => item.id === app.id ? { ...item, status: nextStatus, archived: true, archivedAt } : item));
-    setAds(ads.map((ad) => ad.applicationId === app.id ? { ...ad, status: "Done", endedAt: ad.endedAt ?? archivedAt, archived: true, archivedAt } : ad));
+    setApplications(applications.map((item) => item.id === app.id ? { ...item, archived: true, archivedAt } : item));
     setSelected((current) => current?.id === app.id ? null : current);
     setDeleteTarget(null);
   }
 
   function archiveSelected() {
-    const total = selectedApplicationIds.length + selectedAdIds.length;
-    if (!window.confirm(`Delete ${total} selected management record${total === 1 ? "" : "s"}? Active advertisements will be ended and historical revenue will be preserved.`)) return;
     const archivedAt = new Date().toISOString();
     const appIds = new Set(selectedApplicationIds);
-    const adIds = new Set(selectedAdIds);
-    setApplications(applications.map((item) => appIds.has(item.id) ? { ...item, status: item.status === "Approved" || item.status === "On-going" ? "Done" : item.status, archived: true, archivedAt } : item));
-    setAds(ads.map((item) => appIds.has(item.applicationId ?? "") || adIds.has(item.id) ? { ...item, status: "Done", endedAt: item.endedAt ?? archivedAt, archived: true, archivedAt } : item));
-    setSelectedApplicationIds([]); setSelectedAdIds([]);
+    setApplications(applications.map((item) => appIds.has(item.id) ? { ...item, archived: true, archivedAt } : item));
+    setSelectedApplicationIds([]);
   }
 
   function updateStatus(id: string, status: PartnershipStatus) {
@@ -220,7 +158,7 @@ function PartnershipsPage() {
         <p className="text-xs font-black tracking-[.18em] !text-coral">PARTNERSHIPS &amp; ADS</p>
         <h1 className="admin-heading mt-2 !text-white">Partnerships &amp; Ads</h1>
         <p className="admin-kicker !text-white/45">
-          Review brand proposals and monitor live advertisements in one place.
+          Review brand proposals and manage application approval status.
         </p>
         <nav className="mt-4 flex flex-wrap gap-3 text-[11px] font-black uppercase tracking-wide">
           <a
@@ -228,12 +166,6 @@ function PartnershipsPage() {
             className="rounded-md border border-white/10 px-3 py-1.5 !text-white/50 transition hover:border-coral hover:!text-white"
           >
             Partnership Applications
-          </a>
-          <a
-            href="#active-advertisements"
-            className="rounded-md border border-white/10 px-3 py-1.5 !text-white/50 transition hover:border-coral hover:!text-white"
-          >
-            Active Advertisements
           </a>
         </nav>
       </header>
@@ -368,7 +300,8 @@ function PartnershipsPage() {
         </div>
       </section>
 
-      <section id="active-advertisements" className="mt-12 scroll-mt-6">
+      {false && (
+        <section id="active-advertisements" className="hidden">
         <div className="mb-6 flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
           <div>
             <h2 className="text-lg font-black uppercase !text-white">Active Advertisements</h2>
@@ -487,18 +420,17 @@ function PartnershipsPage() {
             </table>
           </div>
         </div>
-      </section>
+        </section>
+      )}
 
       {deleteTarget && (
         <div className="fixed inset-0 z-[120] flex items-center justify-center bg-black/70 p-4 backdrop-blur-sm" onClick={() => setDeleteTarget(null)}>
           <div className="w-full max-w-lg rounded-xl border border-coral/40 bg-[#151c28] p-6 shadow-2xl" onClick={(event) => event.stopPropagation()}>
             <h3 className="text-lg font-black uppercase !text-white">
-              {deleteTarget.status === "On-going" ? "Delete On-going Advertisement?" : deleteTarget.status === "Approved" ? "Delete Approved Application?" : "Delete Partnership Application?"}
+              {deleteTarget.status === "Approved" ? "Delete Approved Application?" : "Delete Partnership Application?"}
             </h3>
             <p className="mt-3 text-sm leading-relaxed !text-white/55">
-              {deleteTarget.status === "On-going"
-                ? "Warning: This advertisement is currently On-going. Deleting it will immediately end the advertisement and stop its countdown. It will be removed from the Partnerships & Ads management list, but its historical record will remain in Advertisement Revenue."
-                : deleteTarget.status === "Approved"
+              {deleteTarget.status === "Approved"
                   ? "Warning: This application is currently Approved. Deleting it will remove it from the active Partnerships & Ads management list. Its historical advertisement record will remain in Advertisement Revenue."
                   : deleteTarget.status === "Pending"
                     ? "Are you sure you want to remove this pending partnership application?"

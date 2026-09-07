@@ -21,8 +21,8 @@ import {
 
 const statuses: PlayerReportStatus[] = ["New", "Investigating", "Resolved"];
 const statusStyles: Record<PlayerReportStatus, string> = {
-  New: "bg-coral/15 text-[#ff7663]",
-  Investigating: "bg-[#d9a514]/15 text-[#e1b42b]",
+  New: "bg-[#d9a514]/15 text-[#f3c747]",
+  Investigating: "bg-[#c96a2d]/15 text-[#f39a5a]",
   Resolved: "bg-[#2d9d8f]/15 text-[#4bc4b4]",
 };
 
@@ -45,6 +45,8 @@ function PlayerReportsRouteComponent() {
   const [status, setStatus] = useState<"All Statuses" | PlayerReportStatus>("All Statuses");
   const [selected, setSelected] = useState<PlayerReport | null>(null);
   const [deleteTarget, setDeleteTarget] = useState<PlayerReport | null>(null);
+  const [selectedIds, setSelectedIds] = useState<string[]>([]);
+  const [bulkDeleteTarget, setBulkDeleteTarget] = useState<PlayerReport[] | null>(null);
   const filtered = useMemo(() => {
     const search = query.trim().toLowerCase();
     return reports.filter(
@@ -66,11 +68,21 @@ function PlayerReportsRouteComponent() {
     setReports(reports.filter((item) => item.id !== report.id));
     setSelected((current) => (current?.id === report.id ? null : current));
     setDeleteTarget(null);
-    logAdminActivity({
-      kind: "bug",
-      label: "Player report deleted",
-      detail: `${report.id} was removed from the queue.`,
-    });
+    logAdminActivity({ kind: "bug", label: "Player report deleted", detail: `${report.id} was removed from the queue.` });
+  }
+
+  function deleteSelected() {
+    const targets = filtered.filter((report) => selectedIds.includes(report.id));
+    if (targets.length) setBulkDeleteTarget(targets);
+  }
+
+  function confirmBulkDelete() {
+    if (!bulkDeleteTarget) return;
+    const ids = new Set(bulkDeleteTarget.map((report) => report.id));
+    setReports(reports.filter((report) => !ids.has(report.id)));
+    setSelectedIds([]);
+    logAdminActivity({ kind: "bug", label: "Player reports bulk deleted", detail: `${bulkDeleteTarget.length} reports were removed.` });
+    setBulkDeleteTarget(null);
   }
 
   return (
@@ -103,6 +115,7 @@ function PlayerReportsRouteComponent() {
           ))}
         </select>
       </section>
+      <div className="mb-3 flex items-center justify-between rounded-lg border border-white/[0.06] bg-[#182330] px-4 py-3"><label className="flex items-center gap-3 text-xs font-bold uppercase text-white/60"><input type="checkbox" checked={filtered.length > 0 && selectedIds.length === filtered.length} onChange={(event) => setSelectedIds(event.target.checked ? filtered.map((report) => report.id) : [])} /> Select all <span className="text-coral">{selectedIds.length} selected</span></label><button type="button" disabled={!selectedIds.length} onClick={deleteSelected} className="inline-flex items-center gap-2 rounded-md bg-coral px-3 py-2 text-[10px] font-black uppercase text-white disabled:opacity-30"><Trash2 className="size-3.5" /> Delete selected</button></div>
       <section className="admin-table-wrap overflow-hidden rounded-lg border border-white/[0.06] bg-[#182330] shadow-xl">
         <div className="overflow-x-auto">
           <table className="admin-table min-w-[1050px] w-full text-left">
@@ -130,7 +143,7 @@ function PlayerReportsRouteComponent() {
             <tbody>
               {filtered.map((report) => (
                 <tr key={report.id} className="border-b border-white/[0.05] hover:bg-white/[0.025]">
-                  <td className="px-5 py-4 text-xs font-black !text-coral">{report.id}</td>
+                  <td className="px-5 py-4 text-xs font-black !text-coral"><div className="flex items-center gap-3"><input type="checkbox" checked={selectedIds.includes(report.id)} onChange={(event) => setSelectedIds((current) => event.target.checked ? [...current, report.id] : current.filter((id) => id !== report.id))} aria-label={`Select ${report.id}`} />{report.id}</div></td>
                   <td className="px-5 py-4">
                     <p className="font-bold !text-white">{report.reporterName}</p>
                     <p className="text-[10px] !text-white/30">{report.reporterId}</p>
@@ -260,6 +273,9 @@ function PlayerReportsRouteComponent() {
             ) : null}
           </div>
         </div>
+      )}
+      {bulkDeleteTarget && (
+        <div className="fixed inset-0 z-[110] flex items-center justify-center bg-black/70 p-4"><div className="w-full max-w-sm rounded-xl border border-[#ff6248]/40 bg-[#151c28] p-6 shadow-2xl"><h2 className="text-lg font-black uppercase text-white">Delete Selected Player Reports?</h2>{bulkDeleteTarget.some((report) => report.status !== "Resolved") && <p className="mt-3 rounded border border-[#f3c747]/40 bg-[#d9a514]/10 p-3 text-sm font-bold text-[#f3c747]">Warning: You are about to delete reports that are still New or Investigating. These reports have not been fully resolved.</p>}<p className="mt-3 text-sm text-white/50">This permanently removes {bulkDeleteTarget.length} reports.</p><div className="mt-6 flex justify-end gap-2"><button onClick={() => setBulkDeleteTarget(null)} className="rounded-md border border-white/10 px-4 py-2 text-xs font-bold text-white/60">Cancel</button><button onClick={confirmBulkDelete} className="rounded-md bg-[#ff6248] px-4 py-2 text-xs font-black uppercase text-white">Confirm Delete</button></div></div></div>
       )}
       {deleteTarget && (
         <div

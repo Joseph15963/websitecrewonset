@@ -14,6 +14,7 @@ import { getSupabaseClient, uploadAttachment } from "@/lib/supabase";
 
 const sharedTables: Record<string, string> = {
   "cos.playerReports": "cos_player_reports",
+  "cos.bugReports": "cos_bug_reports",
   "cos.adminNotifications": "cos_admin_notifications",
   "cos.applications": "cos_partnership_applications",
 };

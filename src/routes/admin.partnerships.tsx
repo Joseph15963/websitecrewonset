@@ -260,11 +260,9 @@ function PartnershipsPage() {
                       {formatDate(app.submittedAt)}
                     </td>
                     <td className="px-5 py-4">
-                      <span
-                        className={`rounded px-2.5 py-1 text-[10px] font-black uppercase ${statusStyles[app.status]}`}
-                      >
-                        {app.status}
-                      </span>
+                      <select value={app.status} onChange={(event) => updateStatus(app.id, event.target.value as PartnershipStatus)} className={`rounded px-2.5 py-1.5 text-[10px] font-black uppercase outline-none ${statusStyles[app.status]}`} aria-label={`Status for ${app.brand}`}>
+                        {statuses.map((item) => <option key={item} value={item} className="bg-[#101923] text-white">{item}</option>)}
+                      </select>
                     </td>
                     <td className="px-5 py-4 text-right">
                       <button

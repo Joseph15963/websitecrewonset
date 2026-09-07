@@ -29,6 +29,7 @@ import {
 import {
   adsStore,
   applicationsStore,
+  updateSharedRecord,
   revenueStore,
   formatMoney,
   uid,
@@ -77,21 +78,27 @@ function PartnershipsPage() {
     [applications, statusFilter],
   );
 
-  function deleteApplication(app: PartnershipApplication) {
+  async function deleteApplication(app: PartnershipApplication) {
     const archivedAt = new Date().toISOString();
-    setApplications(applications.map((item) => item.id === app.id ? { ...item, archived: true, archivedAt } : item));
+    const updated = { ...app, archived: true, archivedAt };
+    if (!(await updateSharedRecord("cos.applications", updated))) return;
+    setApplications((current) => current.map((item) => item.id === app.id ? updated : item));
     setSelected((current) => current?.id === app.id ? null : current);
     setDeleteTarget(null);
   }
 
-  function archiveSelected() {
+  async function archiveSelected() {
     const archivedAt = new Date().toISOString();
+    const targets = applications.filter((item) => selectedApplicationIds.includes(item.id));
+    const updated = targets.map((item) => ({ ...item, archived: true, archivedAt }));
+    const persisted = await Promise.all(updated.map((item) => updateSharedRecord("cos.applications", item)));
+    if (persisted.some((success) => !success)) return;
     const appIds = new Set(selectedApplicationIds);
-    setApplications(applications.map((item) => appIds.has(item.id) ? { ...item, archived: true, archivedAt } : item));
+    setApplications((current) => current.map((item) => appIds.has(item.id) ? { ...item, archived: true, archivedAt } : item));
     setSelectedApplicationIds([]);
   }
 
-  function updateStatus(id: string, status: PartnershipStatus) {
+  async function updateStatus(id: string, status: PartnershipStatus) {
     const app = applications.find((a) => a.id === id);
     const previousStatus = app?.status;
     const statusChangedToOngoing = status === "On-going" && previousStatus !== "On-going";
@@ -102,6 +109,8 @@ function PartnershipsPage() {
         ).toISOString()
       : "";
     const next = applications.map((a) => (a.id === id ? { ...a, status } : a));
+    const updatedApplication = next.find((application) => application.id === id);
+    if (updatedApplication && !(await updateSharedRecord("cos.applications", updatedApplication))) return;
     setApplications(next);
     const matchedAd =
       app &&
@@ -130,16 +139,33 @@ function PartnershipsPage() {
       setRevenue((current) => current.some((record) => record.applicationId === app.id) ? current : [{ ...newAd, applicationId: app.id }, ...current]);
     } else if (matchedAd && (status === "On-going" || status === "Done")) {
       const expiresAt = statusChangedToOngoing ? transitionExpiresAt : matchedAd.expiresAt;
-      const updatedAds = ads.map((ad) =>
-        ad.id === matchedAd.id
-          ? { ...ad, applicationId: app.id, status: status === "On-going" ? "On-going" : "Done", startDate: statusChangedToOngoing ? transitionStartedAt : ad.startDate, expiresAt, endedAt: status === "Done" ? new Date().toISOString() : undefined }
-          : ad,
-      );
+      const updatedAds: ActiveAd[] = ads.map((ad) => {
+        if (ad.id !== matchedAd.id) return ad;
+        const updated: ActiveAd = {
+          ...ad,
+          applicationId: app.id,
+          status: status === "On-going" ? "On-going" : "Done",
+          startDate: statusChangedToOngoing ? transitionStartedAt : ad.startDate,
+          expiresAt,
+        };
+        if (status === "Done") updated.endedAt = new Date().toISOString();
+        else delete updated.endedAt;
+        return updated;
+      });
       setAds(updatedAds);
       setRevenue((current) => {
         const existing = current.find((record) => record.applicationId === app.id);
-        const updated = { ...matchedAd, applicationId: app.id, status: status === "On-going" ? "On-going" : "Done", startDate: statusChangedToOngoing ? transitionStartedAt : matchedAd.startDate, expiresAt, endedAt: status === "Done" ? new Date().toISOString() : undefined };
-        return existing ? current.map((record) => record.applicationId === app.id ? { ...record, ...updated } : record) : [{ ...updated, applicationId: app.id }, ...current];
+        const updated: ActiveAd = {
+          ...matchedAd,
+          applicationId: app.id,
+          status: status === "On-going" ? "On-going" : "Done",
+          startDate: statusChangedToOngoing ? transitionStartedAt : matchedAd.startDate,
+          expiresAt,
+        };
+        if (status === "Done") updated.endedAt = new Date().toISOString();
+        else delete updated.endedAt;
+        const revenueRecord = { ...updated, applicationId: app.id };
+        return existing ? current.map((record) => record.applicationId === app.id ? { ...record, ...revenueRecord } : record) : [revenueRecord, ...current];
       });
     }
     if (selected?.id === id) setSelected({ ...selected, status });

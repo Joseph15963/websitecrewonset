@@ -1,9 +1,10 @@
-import { FormEvent, useState } from "react";
-import { CheckCircle2, FileImage, Send } from "lucide-react";
+import { FormEvent, useRef, useState } from "react";
+import { CheckCircle2, FileImage, Send, X } from "lucide-react";
 
 import { EMAIL_ERROR, isValidEmail } from "@/lib/validation";
 import {
   applicationsStore,
+  insertSharedRecord,
   readAttachmentAsDataUrl,
   uid,
   type PartnershipApplication,
@@ -11,6 +12,7 @@ import {
 
 export function PartnershipForm() {
   const [file, setFile] = useState<File | null>(null);
+  const fileInput = useRef<HTMLInputElement>(null);
   const [submitted, setSubmitted] = useState(false);
   const [error, setError] = useState("");
 
@@ -94,8 +96,8 @@ export function PartnershipForm() {
       exactModel,
       link,
       fileName: file?.name ?? "",
-      attachmentUrl: attachmentUrl || undefined,
-      attachmentType: file?.type,
+      ...(attachmentUrl ? { attachmentUrl } : {}),
+      ...(file?.type ? { attachmentType: file.type } : {}),
       budget,
       duration,
       durationUnit,
@@ -105,7 +107,12 @@ export function PartnershipForm() {
       status: "Pending",
     };
 
-    applicationsStore.set([application, ...applicationsStore.get()]);
+    const persisted = await insertSharedRecord("cos.applications", application);
+    if (!persisted) {
+      setError("We could not submit your application. Please try again.");
+      return;
+    }
+    applicationsStore.set((current) => [application, ...current.filter((item) => item.id !== application.id)]);
     setSubmitted(true);
   }
 
@@ -253,7 +260,23 @@ export function PartnershipForm() {
             <span className="min-w-0 flex-1 truncate font-bold">
               {file ? file.name : "Choose a file (image or PDF only)"}
             </span>
+            {file && (
+              <button
+                type="button"
+                aria-label="Remove attachment"
+                onClick={(event) => {
+                  event.preventDefault();
+                  event.stopPropagation();
+                  setFile(null);
+                  if (fileInput.current) fileInput.current.value = "";
+                }}
+                className="grid size-7 shrink-0 place-items-center rounded border border-navy/15 text-navy/60 transition hover:border-coral hover:text-coral"
+              >
+                <X className="size-4" />
+              </button>
+            )}
             <input
+              ref={fileInput}
               type="file"
               accept="image/*,application/pdf,.pdf"
               className="sr-only"

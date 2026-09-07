@@ -17,18 +17,20 @@ import { Bug, Eye, Search, Trash2, X } from "lucide-react";
 import {
   bugCategories,
   bugReportsStore,
+  deleteSharedRecord,
+  updateSharedRecord,
   logAdminActivity,
   type BugReport,
   type BugStatus,
 } from "@/lib/demo/store";
 
-const statusOptions: BugStatus[] = ["New", "Investigating", "Resolved"];
+const statusOptions: BugStatus[] = ["New", "Investigating", "Done"];
 
-const statusTextColors: Record<BugStatus, string> = { New: "#F3C747", Investigating: "#F39A5A", Resolved: "#4BC4B4" };
+const statusTextColors: Record<BugStatus, string> = { New: "#F3C747", Investigating: "#F39A5A", Done: "#4BC4B4" };
 const statusStyles: Record<BugStatus, string> = {
   New: "bg-[#d9a514]/15 text-[#f3c747]",
   Investigating: "bg-[#c96a2d]/15 text-[#f39a5a]",
-  Resolved: "bg-[#2d9d8f]/15 text-[#4bc4b4]",
+  Done: "bg-[#2d9d8f]/15 text-[#4bc4b4]",
 };
 
 function formatDate(iso: string) {
@@ -67,8 +69,10 @@ function BugReportsPage() {
     });
   }, [bugs, query, category, status]);
 
-  function updateStatus(bug: BugReport, next: BugStatus) {
-    setBugs(bugs.map((b) => (b.id === bug.id ? { ...b, status: next } : b)));
+  async function updateStatus(bug: BugReport, next: BugStatus) {
+    const updated = { ...bug, status: next };
+    if (!(await updateSharedRecord("cos.bugReports", updated))) return;
+    setBugs((current) => current.map((b) => (b.id === bug.id ? updated : b)));
     logAdminActivity({
       kind: "bug",
       label: "Bug report status updated",
@@ -76,8 +80,9 @@ function BugReportsPage() {
     });
   }
 
-  function deleteBug(bug: BugReport) {
-    setBugs(bugs.filter((b) => b.id !== bug.id));
+  async function deleteBug(bug: BugReport) {
+    if (!(await deleteSharedRecord("cos.bugReports", bug.id))) return;
+    setBugs((current) => current.filter((b) => b.id !== bug.id));
     logAdminActivity({ kind: "bug", label: "Bug report deleted", detail: `${bug.id} (${bug.playerName}) was removed.` });
     setDeleteTarget(null);
   }
@@ -87,10 +92,14 @@ function BugReportsPage() {
     if (targets.length) setBulkDeleteTarget(targets);
   }
 
-  function confirmBulkDelete() {
+  async function confirmBulkDelete() {
     if (!bulkDeleteTarget) return;
+    const deleted = await Promise.all(
+      bulkDeleteTarget.map((bug) => deleteSharedRecord("cos.bugReports", bug.id)),
+    );
+    if (deleted.some((success) => !success)) return;
     const ids = new Set(bulkDeleteTarget.map((bug) => bug.id));
-    setBugs(bugs.filter((bug) => !ids.has(bug.id)));
+    setBugs((current) => current.filter((bug) => !ids.has(bug.id)));
     setSelectedIds([]);
     logAdminActivity({ kind: "bug", label: "Bug reports bulk deleted", detail: `${bulkDeleteTarget.length} reports were removed.` });
     setBulkDeleteTarget(null);

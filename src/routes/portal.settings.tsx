@@ -41,6 +41,7 @@ import {
   bugCategories,
   adminNotificationsStore,
   bugReportsStore,
+  insertSharedRecord,
   playerReportsStore,
   playerReportTypes,
   uid,
@@ -531,22 +532,24 @@ function SettingsPage() {
       }
     }
 
-    bugReportsStore.set([
-      ...bugReportsStore.get(),
-      {
-        id: uid("BUG"),
-        playerName: BUG_REPORT_PLAYER_NAME,
-        playerId: BUG_REPORT_PLAYER_ID,
-        category: bugCategory,
-        description: bugDescription.trim(),
-        email: bugEmail.trim(),
-        attachmentName: bugAttachment?.name,
-        attachmentUrl: attachmentUrl || undefined,
-        attachmentType: bugAttachment?.type,
-        submittedAt: new Date().toISOString(),
-        status: "New",
-      },
-    ]);
+    const bugReport = {
+      id: uid("BUG"),
+      playerName: BUG_REPORT_PLAYER_NAME,
+      playerId: BUG_REPORT_PLAYER_ID,
+      category: bugCategory,
+      description: bugDescription.trim(),
+      email: bugEmail.trim(),
+      attachmentName: bugAttachment?.name,
+      attachmentUrl: attachmentUrl || undefined,
+      attachmentType: bugAttachment?.type,
+      submittedAt: new Date().toISOString(),
+      status: "New" as const,
+    };
+    if (!(await insertSharedRecord("cos.bugReports", bugReport))) {
+      setBugError("We could not submit your bug report. Please try again.");
+      return;
+    }
+    bugReportsStore.set((current) => [bugReport, ...current.filter((item) => item.id !== bugReport.id)]);
 
     setBugCategory("");
     setBugEmail("");
@@ -637,22 +640,24 @@ function SettingsPage() {
 
     const reportId = uid("PRPT");
     const submittedAt = new Date().toISOString();
-    playerReportsStore.set([
-      ...playerReportsStore.get(),
-      {
-        id: reportId,
-        reporterName: BUG_REPORT_PLAYER_NAME,
-        reporterId: BUG_REPORT_PLAYER_ID,
-        reportType: playerReportType,
-        description: playerReportDescription.trim(),
-        reportedUsername: playerReportUsername.trim(),
-        attachmentName: playerReportAttachment?.name,
-        attachmentUrl: attachmentUrl || undefined,
-        attachmentType: playerReportAttachment?.type,
-        submittedAt,
-        status: "New",
-      },
-    ]);
+    const playerReport = {
+      id: reportId,
+      reporterName: BUG_REPORT_PLAYER_NAME,
+      reporterId: BUG_REPORT_PLAYER_ID,
+      reportType: playerReportType,
+      description: playerReportDescription.trim(),
+      reportedUsername: playerReportUsername.trim(),
+      attachmentName: playerReportAttachment?.name,
+      attachmentUrl: attachmentUrl || undefined,
+      attachmentType: playerReportAttachment?.type,
+      submittedAt,
+      status: "New" as const,
+    };
+    if (!(await insertSharedRecord("cos.playerReports", playerReport))) {
+      setPlayerReportError("We could not submit your report. Please try again.");
+      return;
+    }
+    playerReportsStore.set((current) => [playerReport, ...current.filter((item) => item.id !== playerReport.id)]);
     adminNotificationsStore.set([
       ...adminNotificationsStore.get(),
       {

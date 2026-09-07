@@ -22,13 +22,13 @@ import {
   type BugStatus,
 } from "@/lib/demo/store";
 
-const statusOptions: BugStatus[] = ["New", "Investigating", "Done"];
+const statusOptions: BugStatus[] = ["New", "Investigating", "Resolved"];
 
-const statusTextColors: Record<BugStatus, string> = { New: "#F3C747", Investigating: "#F39A5A", Done: "#4BC4B4" };
+const statusTextColors: Record<BugStatus, string> = { New: "#F3C747", Investigating: "#F39A5A", Resolved: "#4BC4B4" };
 const statusStyles: Record<BugStatus, string> = {
   New: "bg-[#d9a514]/15 text-[#f3c747]",
   Investigating: "bg-[#c96a2d]/15 text-[#f39a5a]",
-  Done: "bg-[#2d9d8f]/15 text-[#4bc4b4]",
+  Resolved: "bg-[#2d9d8f]/15 text-[#4bc4b4]",
 };
 
 function formatDate(iso: string) {

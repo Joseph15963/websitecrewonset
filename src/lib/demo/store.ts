@@ -47,7 +47,6 @@ function fromDatabaseRow<T>(row: Record<string, unknown>): T {
         value ?? undefined,
       ]),
   ) as Record<string, unknown>;
-  if (item["status"] === "Resolved") item["status"] = "Done";
   return item as T;
 }
 
@@ -153,11 +152,7 @@ export function createStore<T>(key: string, seed: T[]) {
 
   function get() {
     const items = read<T[]>(key, seed);
-    if (key !== "cos.playerReports" && key !== "cos.bugReports") return items;
-    return items.map((item) => {
-      const record = item as T & { status?: string };
-      return record.status === "Resolved" ? ({ ...record, status: "Done" } as T) : item;
-    });
+    return items;
   }
 
   function set(next: T[] | ((current: T[]) => T[])) {
@@ -728,7 +723,7 @@ export const buildHistoryStore = createStore<GameBuild>("cos.buildHistory", []);
 
 /* ------------------------------------------------------------- bug reports */
 
-export type BugStatus = "New" | "Investigating" | "Done";
+export type BugStatus = "New" | "Investigating" | "Resolved";
 
 export type BugReport = {
   id: string;
@@ -787,13 +782,13 @@ export const bugReportsStore = createStore<BugReport>("cos.bugReports", [
     category: "Graphics / Visual",
     description: "Softbox diffusion renders as a black square on low graphics settings.",
     submittedAt: "2026-08-22T11:40:00.000Z",
-    status: "Done",
+    status: "Resolved",
   },
 ]);
 
 /* ---------------------------------------------------------- player reports */
 
-export type PlayerReportStatus = "New" | "Investigating" | "Done";
+export type PlayerReportStatus = "New" | "Investigating" | "Resolved";
 
 export type PlayerReport = {
   id: string;

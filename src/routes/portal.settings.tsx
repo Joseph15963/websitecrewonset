@@ -163,6 +163,7 @@ function SettingsPage() {
   const [bugDescription, setBugDescription] = useState("");
   const [bugAttachment, setBugAttachment] = useState<File | null>(null);
   const [bugError, setBugError] = useState("");
+  const [bugWarning, setBugWarning] = useState("");
   const [bugSubmitted, setBugSubmitted] = useState(false);
   const bugAttachmentInput = useRef<HTMLInputElement>(null);
 
@@ -460,9 +461,10 @@ function SettingsPage() {
     setBugCategory("");
     setBugEmail("");
     setBugDescription("");
-    setBugAttachment(null);
-    setBugError("");
-    setBugSubmitted(false);
+  setBugAttachment(null);
+  setBugError("");
+  setBugWarning("");
+  setBugSubmitted(false);
     setBugReportOpen(true);
   };
 
@@ -471,9 +473,10 @@ function SettingsPage() {
     setBugCategory("");
     setBugEmail("");
     setBugDescription("");
-    setBugAttachment(null);
-    setBugError("");
-    setBugSubmitted(false);
+  setBugAttachment(null);
+  setBugError("");
+  setBugWarning("");
+  setBugSubmitted(false);
   };
 
   const handleBugAttachmentChange = (event: ChangeEvent<HTMLInputElement>) => {
@@ -521,14 +524,15 @@ function SettingsPage() {
       return;
     }
 
+    setBugWarning("");
     let attachmentUrl = "";
     if (bugAttachment) {
       try {
         attachmentUrl = await readAttachmentAsDataUrl(bugAttachment, "bug-reports");
       } catch (error) {
         const message = error instanceof Error ? error.message : String(error);
-        setBugError(`Attachment upload failed: ${message}`);
-        return;
+        console.warn(`[v0] Bug report attachment upload failed; submitting without attachment: ${message}`);
+        setBugWarning("The attachment could not be uploaded, but your bug report will still be submitted.");
       }
     }
 
@@ -539,18 +543,18 @@ function SettingsPage() {
       category: bugCategory,
       description: bugDescription.trim(),
       email: bugEmail.trim(),
-      attachmentName: bugAttachment?.name,
-      attachmentUrl: attachmentUrl || undefined,
-      attachmentType: bugAttachment?.type,
+      ...(bugAttachment?.name ? { attachmentName: bugAttachment.name } : {}),
+      ...(attachmentUrl ? { attachmentUrl } : {}),
+      ...(bugAttachment?.type ? { attachmentType: bugAttachment.type } : {}),
       submittedAt: new Date().toISOString(),
       status: "New" as const,
     };
-    if (!(await insertSharedRecord("cos.bugReports", bugReport))) {
-      setBugError("We could not submit your bug report. Please try again.");
+    let insertError = "";
+    if (!(await insertSharedRecord("cos.bugReports", bugReport, (message) => { insertError = message; }))) {
+      setBugError(insertError || "We could not submit your bug report. Please try again.");
       return;
     }
     bugReportsStore.set((current) => [bugReport, ...current.filter((item) => item.id !== bugReport.id)]);
-
     setBugCategory("");
     setBugEmail("");
     setBugDescription("");
@@ -558,9 +562,64 @@ function SettingsPage() {
     setBugSubmitted(true);
   };
 
-  /* =========================================================
-     PLAYER REPORT
-  ========================================================= */
+  const submitPlayerReport = async () => {
+    setPlayerReportError("");
+    if (!playerReportType.trim()) {
+      setPlayerReportError("Please choose a report type.");
+      return;
+    }
+    if (!playerReportUsername.trim()) {
+      setPlayerReportError("Please enter the username of the player you are reporting.");
+      return;
+    }
+    if (!playerReportDescription.trim()) {
+      setPlayerReportError("Please describe the issue.");
+      return;
+    }
+    if (playerReportAttachment && !isAllowedAttachment(playerReportAttachment)) {
+      setPlayerReportError("Only image or PDF files are allowed.");
+      return;
+    }
+    let playerAttachmentUrl = "";
+    if (playerReportAttachment) {
+      try {
+        playerAttachmentUrl = await readAttachmentAsDataUrl(playerReportAttachment, "player-reports");
+      } catch (error) {
+        const message = error instanceof Error ? error.message : String(error);
+        setPlayerReportError(`Attachment upload failed: ${message}`);
+        return;
+      }
+    }
+    const reportId = uid("PRPT");
+    const submittedAt = new Date().toISOString();
+    const playerReport = {
+      id: reportId,
+      reporterName: BUG_REPORT_PLAYER_NAME,
+      reporterId: BUG_REPORT_PLAYER_ID,
+      reportType: playerReportType,
+      description: playerReportDescription.trim(),
+      reportedUsername: playerReportUsername.trim(),
+      ...(playerReportAttachment?.name ? { attachmentName: playerReportAttachment.name } : {}),
+      ...(playerAttachmentUrl ? { attachmentUrl: playerAttachmentUrl } : {}),
+      ...(playerReportAttachment?.type ? { attachmentType: playerReportAttachment.type } : {}),
+      submittedAt,
+      status: "New" as const,
+    };
+    if (!(await insertSharedRecord("cos.playerReports", playerReport))) {
+      setPlayerReportError("We could not submit your report. Please try again.");
+      return;
+    }
+    playerReportsStore.set((current) => [playerReport, ...current.filter((item) => item.id !== playerReport.id)]);
+    adminNotificationsStore.set([
+      ...adminNotificationsStore.get(),
+      { id: `player-report-${reportId}`, title: "New player report submitted", body: `${reportId}: ${BUG_REPORT_PLAYER_NAME} reported ${playerReportUsername.trim()}.`, kind: "player-report", href: "/admin/player-reports", entityId: reportId, entityType: "player-report", read: false, createdAt: submittedAt },
+    ]);
+    setPlayerReportType("");
+    setPlayerReportUsername("");
+    setPlayerReportDescription("");
+    setPlayerReportAttachment(null);
+    setPlayerReportSubmitted(true);
+  };
 
   const openPlayerReport = () => {
     setPlayerReportType("");
@@ -602,82 +661,6 @@ function SettingsPage() {
     }
     setPlayerReportError("");
     setPlayerReportAttachment(file);
-  };
-
-  const submitPlayerReport = async () => {
-    setPlayerReportError("");
-
-    if (!playerReportType.trim()) {
-      setPlayerReportError("Please choose a report type.");
-      return;
-    }
-
-    if (!playerReportUsername.trim()) {
-      setPlayerReportError("Please enter the username of the player you are reporting.");
-      return;
-    }
-
-    if (!playerReportDescription.trim()) {
-      setPlayerReportError("Please describe the issue.");
-      return;
-    }
-
-    if (playerReportAttachment && !isAllowedAttachment(playerReportAttachment)) {
-      setPlayerReportError("Only image or PDF files are allowed.");
-      return;
-    }
-
-    let attachmentUrl = "";
-    if (playerReportAttachment) {
-      try {
-        attachmentUrl = await readAttachmentAsDataUrl(playerReportAttachment, "player-reports");
-      } catch (error) {
-        const message = error instanceof Error ? error.message : String(error);
-        setPlayerReportError(`Attachment upload failed: ${message}`);
-        return;
-      }
-    }
-
-    const reportId = uid("PRPT");
-    const submittedAt = new Date().toISOString();
-    const playerReport = {
-      id: reportId,
-      reporterName: BUG_REPORT_PLAYER_NAME,
-      reporterId: BUG_REPORT_PLAYER_ID,
-      reportType: playerReportType,
-      description: playerReportDescription.trim(),
-      reportedUsername: playerReportUsername.trim(),
-      attachmentName: playerReportAttachment?.name,
-      attachmentUrl: attachmentUrl || undefined,
-      attachmentType: playerReportAttachment?.type,
-      submittedAt,
-      status: "New" as const,
-    };
-    if (!(await insertSharedRecord("cos.playerReports", playerReport))) {
-      setPlayerReportError("We could not submit your report. Please try again.");
-      return;
-    }
-    playerReportsStore.set((current) => [playerReport, ...current.filter((item) => item.id !== playerReport.id)]);
-    adminNotificationsStore.set([
-      ...adminNotificationsStore.get(),
-      {
-        id: `player-report-${reportId}`,
-        title: "New player report submitted",
-        body: `${reportId}: ${BUG_REPORT_PLAYER_NAME} reported ${playerReportUsername.trim()}.`,
-        kind: "player-report",
-        href: "/admin/player-reports",
-        entityId: reportId,
-        entityType: "player-report",
-        read: false,
-        createdAt: submittedAt,
-      },
-    ]);
-
-    setPlayerReportType("");
-    setPlayerReportUsername("");
-    setPlayerReportDescription("");
-    setPlayerReportAttachment(null);
-    setPlayerReportSubmitted(true);
   };
 
   /* =========================================================
@@ -1315,11 +1298,16 @@ function SettingsPage() {
               </div>
             ) : (
               <>
-                {bugError && (
-                  <div className="mt-4 rounded-md border border-coral/20 bg-coral/10 p-3 text-sm font-bold text-coral">
-                    {bugError}
-                  </div>
-                )}
+          {bugError && (
+            <div className="mt-4 rounded-md border border-coral/20 bg-coral/10 p-3 text-sm font-bold text-coral">
+              {bugError}
+            </div>
+          )}
+          {bugWarning && (
+            <div className="mt-4 rounded-md border border-[#F3C747]/25 bg-[#F3C747]/10 p-3 text-sm font-bold text-[#F3C747]">
+              {bugWarning}
+            </div>
+          )}
 
                 <div className="mt-5 space-y-4">
                   <label className="block text-[10px] font-black uppercase tracking-wider text-white/35">

@@ -239,9 +239,11 @@ function AdRevenuePage() {
                       Contract {formatDate(app.submittedAt)}
                     </span>
                     {ad ? (
-                      <span className="text-[10px] font-bold uppercase tracking-wide !text-white/45">
-                        {ad.status === "Done" ? `Ended ${formatDate(ad.endedAt ?? ad.expiresAt)}` : `Ends ${formatDate(ad.expiresAt)}`}
-                      </span>
+                      <div className="text-right text-[10px] font-bold uppercase tracking-wide !text-white/45">
+                        <p>Live Date: {formatDate(ad.startDate)}</p>
+                        <p>Scheduled End: {formatDate(ad.expiresAt)}</p>
+                        {ad.status === "Done" && ad.endedAt && new Date(ad.endedAt).getTime() < new Date(ad.expiresAt).getTime() && <p className="text-[#f39a5a]">Actual End: {formatDate(ad.endedAt)} · Ended early</p>}
+                      </div>
                     ) : (
                       <span className="text-[10px] font-bold uppercase tracking-wide !text-[#e1b42b]">
                         Awaiting placement

@@ -113,7 +113,10 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
             <p className="text-xs font-black uppercase tracking-wide text-white">
               Admin Notifications
             </p>
-            <span className="text-[10px] text-white/40">{unread} unread</span>
+            <div className="flex items-center gap-2">
+              <span className="text-[10px] text-white/40">{unread} unread</span>
+              <button type="button" disabled={!unread} onClick={() => setReadIds(alerts.map((alert) => alert.id))} className="text-[9px] font-black uppercase text-coral disabled:cursor-not-allowed disabled:opacity-30">Mark all read</button>
+            </div>
           </div>
           <div className="max-h-80 overflow-y-auto">
             {alerts.map((alert) => (

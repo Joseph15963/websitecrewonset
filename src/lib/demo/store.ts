@@ -63,44 +63,67 @@ function timestampFor(key: string, item: Record<string, unknown>) {
   return 0;
 }
 
-async function syncSharedTable<T>(key: string, items: T[]) {
+const sharedKeys = new Set(["cos.playerReports", "cos.bugReports", "cos.applications"]);
+
+function logSupabaseMutation(table: string, operation: string, id: string, error: { message: string; details?: string; hint?: string }) {
+  console.error(`[v0] Supabase ${operation} failed for ${table} ${id}: ${error.message}`, { details: error.details, hint: error.hint });
+}
+
+export async function insertSharedRecord<T extends { id: string }>(key: string, item: T) {
   const table = sharedTables[key];
-  const supabase = getSupabaseClient();
-  if (!table || !supabase) return;
-  const rows = items.map((item) => toDatabaseRow(item as Record<string, unknown>));
-  const { error: upsertError } = rows.length
-    ? await supabase.from(table).upsert(rows, { onConflict: "id" })
-    : { error: null };
-  if (upsertError) {
-    console.error(`[v0] Shared store upsert failed for ${table}: ${upsertError.message}`);
-    return;
+  if (!table || !sharedKeys.has(key)) return false;
+  try {
+    const { error } = await getSupabaseClient().from(table).upsert(toDatabaseRow(item as Record<string, unknown>), { onConflict: "id" });
+    if (error) logSupabaseMutation(table, "INSERT", item.id, error);
+    return !error;
+  } catch (error) {
+    console.error(`[v0] Supabase INSERT failed for ${table} ${item.id}:`, error);
+    return false;
   }
-  const { data: existing, error: readError } = await supabase.from(table).select("id");
-  if (readError) {
-    console.error(`[v0] Shared store sync read failed for ${table}: ${readError.message}`);
-    return;
+}
+
+export async function updateSharedRecord<T extends { id: string }>(key: string, item: T) {
+  const table = sharedTables[key];
+  if (!table || !sharedKeys.has(key)) return false;
+  try {
+    const { error } = await getSupabaseClient().from(table).update(toDatabaseRow(item as Record<string, unknown>)).eq("id", item.id);
+    if (error) logSupabaseMutation(table, "UPDATE", item.id, error);
+    return !error;
+  } catch (error) {
+    console.error(`[v0] Supabase UPDATE failed for ${table} ${item.id}:`, error);
+    return false;
   }
-  const keepIds = new Set(rows.map((row) => String(row["id"])));
-  const staleIds = (existing ?? []).map((row) => String(row.id)).filter((id) => !keepIds.has(id));
-  if (!staleIds.length) return;
-  const { error: deleteError } = await supabase.from(table).delete().in("id", staleIds);
-  if (deleteError) {
-    console.error(`[v0] Shared store delete failed for ${table}: ${deleteError.message}`);
+}
+
+export async function deleteSharedRecord(key: string, id: string) {
+  const table = sharedTables[key];
+  if (!table || !sharedKeys.has(key)) return false;
+  try {
+    const { error } = await getSupabaseClient().from(table).delete().eq("id", id);
+    if (error) logSupabaseMutation(table, "DELETE", id, error);
+    return !error;
+  } catch (error) {
+    console.error(`[v0] Supabase DELETE failed for ${table} ${id}:`, error);
+    return false;
   }
 }
 
 async function loadSharedTable<T>(key: string) {
   const table = sharedTables[key];
-  const supabase = getSupabaseClient();
-  if (!table || !supabase) return null;
-  const { data, error } = await supabase.from(table).select("*");
-  if (error) {
-    console.error(`[v0] Shared store read failed for ${table}: ${error.message}`);
+  if (!table) return null;
+  try {
+    const { data, error } = await getSupabaseClient().from(table).select("*");
+    if (error) {
+      console.error(`[v0] Supabase SELECT failed for ${table}: ${error.message}`, { details: error.details, hint: error.hint });
+      return null;
+    }
+    return (data ?? [])
+    .map((row) => fromDatabaseRow<T>(row as Record<string, unknown>))
+      .sort((a, b) => timestampFor(key, b as Record<string, unknown>) - timestampFor(key, a as Record<string, unknown>));
+  } catch (error) {
+    console.error(`[v0] Supabase SELECT failed for ${table}:`, error);
     return null;
   }
-  return (data ?? [])
-    .map((row) => fromDatabaseRow<T>(row as Record<string, unknown>))
-    .sort((a, b) => timestampFor(key, b as Record<string, unknown>) - timestampFor(key, a as Record<string, unknown>));
 }
 
 const isBrowser = () => typeof window !== "undefined";
@@ -136,10 +159,7 @@ function reconcileExpired<T>(key: string, items: T[], now = Date.now()) {
     }
     return item;
   });
-  if (changed) {
-    write(key, next);
-    void syncSharedTable(key, next);
-  }
+  if (changed) write(key, next);
   return next;
 }
 
@@ -191,7 +211,6 @@ export function createStore<T>(key: string, seed: T[]) {
         localWriteRef.current = true;
         setItems(resolved);
         set(resolved);
-        void syncSharedTable(key, resolved);
       },
     ];
   }
@@ -723,7 +742,7 @@ export const buildHistoryStore = createStore<GameBuild>("cos.buildHistory", []);
 
 /* ------------------------------------------------------------- bug reports */
 
-export type BugStatus = "New" | "Investigating" | "Resolved";
+export type BugStatus = "New" | "Investigating" | "Done";
 
 export type BugReport = {
   id: string;
@@ -782,13 +801,13 @@ export const bugReportsStore = createStore<BugReport>("cos.bugReports", [
     category: "Graphics / Visual",
     description: "Softbox diffusion renders as a black square on low graphics settings.",
     submittedAt: "2026-08-22T11:40:00.000Z",
-    status: "Resolved",
+    status: "Done",
   },
 ]);
 
 /* ---------------------------------------------------------- player reports */
 
-export type PlayerReportStatus = "New" | "Investigating" | "Resolved";
+export type PlayerReportStatus = "New" | "Investigating" | "Done";
 
 export type PlayerReport = {
   id: string;

@@ -13,18 +13,20 @@ export const Route = createFileRoute("/admin/player-reports")({
 import { useMemo, useState } from "react";
 import { Eye, FileText, Search, Trash2, UserRound, X } from "lucide-react";
 import {
+  deleteSharedRecord,
   logAdminActivity,
   playerReportsStore,
+  updateSharedRecord,
   type PlayerReport,
   type PlayerReportStatus,
 } from "@/lib/demo/store";
 
-const statuses: PlayerReportStatus[] = ["New", "Investigating", "Resolved"];
-const statusTextColors: Record<PlayerReportStatus, string> = { New: "#F3C747", Investigating: "#F39A5A", Resolved: "#4BC4B4" };
+const statuses: PlayerReportStatus[] = ["New", "Investigating", "Done"];
+const statusTextColors: Record<PlayerReportStatus, string> = { New: "#F3C747", Investigating: "#F39A5A", Done: "#4BC4B4" };
 const statusStyles: Record<PlayerReportStatus, string> = {
   New: "bg-[#d9a514]/15 text-[#f3c747]",
   Investigating: "bg-[#c96a2d]/15 text-[#f39a5a]",
-  Resolved: "bg-[#2d9d8f]/15 text-[#4bc4b4]",
+  Done: "bg-[#2d9d8f]/15 text-[#4bc4b4]",
 };
 
 function formatDate(iso: string) {
@@ -60,13 +62,16 @@ function PlayerReportsRouteComponent() {
     );
   }, [reports, query, status]);
 
-  function updateStatus(report: PlayerReport, next: PlayerReportStatus) {
-    setReports(reports.map((item) => (item.id === report.id ? { ...item, status: next } : item)));
-    if (selected?.id === report.id) setSelected({ ...report, status: next });
+  async function updateStatus(report: PlayerReport, next: PlayerReportStatus) {
+    const updated = { ...report, status: next };
+    if (!(await updateSharedRecord("cos.playerReports", updated))) return;
+    setReports((current) => current.map((item) => (item.id === report.id ? updated : item)));
+    if (selected?.id === report.id) setSelected(updated);
   }
 
-  function deleteReport(report: PlayerReport) {
-    setReports(reports.filter((item) => item.id !== report.id));
+  async function deleteReport(report: PlayerReport) {
+    if (!(await deleteSharedRecord("cos.playerReports", report.id))) return;
+    setReports((current) => current.filter((item) => item.id !== report.id));
     setSelected((current) => (current?.id === report.id ? null : current));
     setDeleteTarget(null);
     logAdminActivity({ kind: "bug", label: "Player report deleted", detail: `${report.id} was removed from the queue.` });
@@ -77,10 +82,14 @@ function PlayerReportsRouteComponent() {
     if (targets.length) setBulkDeleteTarget(targets);
   }
 
-  function confirmBulkDelete() {
+  async function confirmBulkDelete() {
     if (!bulkDeleteTarget) return;
+    const deleted = await Promise.all(
+      bulkDeleteTarget.map((report) => deleteSharedRecord("cos.playerReports", report.id)),
+    );
+    if (deleted.some((success) => !success)) return;
     const ids = new Set(bulkDeleteTarget.map((report) => report.id));
-    setReports(reports.filter((report) => !ids.has(report.id)));
+    setReports((current) => current.filter((report) => !ids.has(report.id)));
     setSelectedIds([]);
     logAdminActivity({ kind: "bug", label: "Player reports bulk deleted", detail: `${bulkDeleteTarget.length} reports were removed.` });
     setBulkDeleteTarget(null);

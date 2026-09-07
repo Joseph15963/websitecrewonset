@@ -69,12 +69,15 @@ function logSupabaseMutation(table: string, operation: string, id: string, error
   console.error(`[v0] Supabase ${operation} failed for ${table} ${id}: ${error.message}`, { details: error.details, hint: error.hint });
 }
 
-export async function insertSharedRecord<T extends { id: string }>(key: string, item: T) {
+export async function insertSharedRecord<T extends { id: string }>(key: string, item: T, onError?: (message: string) => void) {
   const table = sharedTables[key];
   if (!table || !sharedKeys.has(key)) return false;
   try {
     const { error } = await getSupabaseClient().from(table).upsert(toDatabaseRow(item as Record<string, unknown>), { onConflict: "id" });
-    if (error) logSupabaseMutation(table, "INSERT", item.id, error);
+    if (error) {
+      logSupabaseMutation(table, "INSERT", item.id, error);
+      onError?.(error.message);
+    }
     return !error;
   } catch (error) {
     console.error(`[v0] Supabase INSERT failed for ${table} ${item.id}:`, error);
@@ -742,7 +745,7 @@ export const buildHistoryStore = createStore<GameBuild>("cos.buildHistory", []);
 
 /* ------------------------------------------------------------- bug reports */
 
-export type BugStatus = "New" | "Investigating" | "Done";
+export type BugStatus = "New" | "Investigating" | "Resolved";
 
 export type BugReport = {
   id: string;
@@ -801,13 +804,13 @@ export const bugReportsStore = createStore<BugReport>("cos.bugReports", [
     category: "Graphics / Visual",
     description: "Softbox diffusion renders as a black square on low graphics settings.",
     submittedAt: "2026-08-22T11:40:00.000Z",
-    status: "Done",
+    status: "Resolved",
   },
 ]);
 
 /* ---------------------------------------------------------- player reports */
 
-export type PlayerReportStatus = "New" | "Investigating" | "Done";
+export type PlayerReportStatus = "New" | "Investigating" | "Resolved";
 
 export type PlayerReport = {
   id: string;

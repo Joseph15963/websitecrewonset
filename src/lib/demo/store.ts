@@ -6,7 +6,7 @@
  * every mutation goes through a single `update*` helper.
  */
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 import { getSupabaseClient, uploadAttachment } from "@/lib/supabase";
 
@@ -29,47 +29,79 @@ function toDatabaseRow(item: Record<string, unknown>) {
 
   // The partnership table calls the UI's fileName field attachment_name.
   if ("file_name" in row) {
-    row.attachment_name = row.file_name;
-    delete row.file_name;
+    row["attachment_name"] = row["file_name"];
+    delete row["file_name"];
   }
 
   return row;
 }
 
 function fromDatabaseRow<T>(row: Record<string, unknown>): T {
-  return Object.fromEntries(
+  const item = Object.fromEntries(
     Object.entries(row)
-      .filter(([key]) => !["created_at"].includes(key))
+      .filter(([key]) => key !== "created_at")
       .map(([key, value]) => [
         key === "attachment_name"
           ? "fileName"
           : key.replace(/_([a-z])/g, (_, letter: string) => letter.toUpperCase()),
         value ?? undefined,
       ]),
-  ) as T;
+  ) as Record<string, unknown>;
+  if (item["status"] === "Resolved") item["status"] = "Done";
+  return item as T;
+}
+
+function timestampFor(key: string, item: Record<string, unknown>) {
+  const fields = key === "cos.adminNotifications"
+    ? ["createdAt"]
+    : key === "cos.applications"
+      ? ["submittedAt", "createdAt", "updatedAt"]
+      : ["submittedAt", "createdAt", "updatedAt"];
+  for (const field of fields) {
+    const value = item[field];
+    if (typeof value === "string" && !Number.isNaN(Date.parse(value))) return Date.parse(value);
+  }
+  return 0;
 }
 
 async function syncSharedTable<T>(key: string, items: T[]) {
   const table = sharedTables[key];
   const supabase = getSupabaseClient();
   if (!table || !supabase) return;
-  const { error } = await supabase.from(table).upsert(
-    items.map((item) => toDatabaseRow(item as Record<string, unknown>)),
-    { onConflict: "id" },
-  );
-  if (error) console.error("[v0] Shared store write failed", error);
+  const rows = items.map((item) => toDatabaseRow(item as Record<string, unknown>));
+  const { error: upsertError } = rows.length
+    ? await supabase.from(table).upsert(rows, { onConflict: "id" })
+    : { error: null };
+  if (upsertError) {
+    console.error(`[v0] Shared store upsert failed for ${table}: ${upsertError.message}`);
+    return;
+  }
+  const { data: existing, error: readError } = await supabase.from(table).select("id");
+  if (readError) {
+    console.error(`[v0] Shared store sync read failed for ${table}: ${readError.message}`);
+    return;
+  }
+  const keepIds = new Set(rows.map((row) => String(row["id"])));
+  const staleIds = (existing ?? []).map((row) => String(row.id)).filter((id) => !keepIds.has(id));
+  if (!staleIds.length) return;
+  const { error: deleteError } = await supabase.from(table).delete().in("id", staleIds);
+  if (deleteError) {
+    console.error(`[v0] Shared store delete failed for ${table}: ${deleteError.message}`);
+  }
 }
 
 async function loadSharedTable<T>(key: string) {
   const table = sharedTables[key];
   const supabase = getSupabaseClient();
   if (!table || !supabase) return null;
-  const { data, error } = await supabase.from(table).select("*").order("created_at", { ascending: false });
+  const { data, error } = await supabase.from(table).select("*");
   if (error) {
-    console.error("[v0] Shared store read failed", error);
+    console.error(`[v0] Shared store read failed for ${table}: ${error.message}`);
     return null;
   }
-  return (data ?? []).map((row) => fromDatabaseRow<T>(row as Record<string, unknown>));
+  return (data ?? [])
+    .map((row) => fromDatabaseRow<T>(row as Record<string, unknown>))
+    .sort((a, b) => timestampFor(key, b as Record<string, unknown>) - timestampFor(key, a as Record<string, unknown>));
 }
 
 const isBrowser = () => typeof window !== "undefined";
@@ -120,7 +152,12 @@ export function createStore<T>(key: string, seed: T[]) {
   const event = `cos:${key}`;
 
   function get() {
-    return read<T[]>(key, seed);
+    const items = read<T[]>(key, seed);
+    if (key !== "cos.playerReports" && key !== "cos.bugReports") return items;
+    return items.map((item) => {
+      const record = item as T & { status?: string };
+      return record.status === "Resolved" ? ({ ...record, status: "Done" } as T) : item;
+    });
   }
 
   function set(next: T[] | ((current: T[]) => T[])) {
@@ -130,12 +167,17 @@ export function createStore<T>(key: string, seed: T[]) {
 
   function useStore(): [T[], (next: T[] | ((current: T[]) => T[])) => void] {
     const [items, setItems] = useState<T[]>(seed);
+    const localWriteRef = useRef(false);
 
     useEffect(() => {
       let active = true;
       setItems(reconcileExpired(key, get()));
       void loadSharedTable<T>(key).then((remoteItems) => {
-        if (active && remoteItems) setItems(reconcileExpired(key, remoteItems));
+        if (active && !localWriteRef.current && remoteItems) {
+          const reconciled = reconcileExpired(key, remoteItems);
+          write(key, reconciled);
+          setItems(reconciled);
+        }
       });
       const sync = () => setItems(get());
       window.addEventListener(event, sync);
@@ -151,6 +193,7 @@ export function createStore<T>(key: string, seed: T[]) {
       items,
       (next: T[] | ((current: T[]) => T[])) => {
         const resolved = typeof next === "function" ? next(get()) : next;
+        localWriteRef.current = true;
         setItems(resolved);
         set(resolved);
         void syncSharedTable(key, resolved);
@@ -685,7 +728,7 @@ export const buildHistoryStore = createStore<GameBuild>("cos.buildHistory", []);
 
 /* ------------------------------------------------------------- bug reports */
 
-export type BugStatus = "New" | "Investigating" | "Resolved";
+export type BugStatus = "New" | "Investigating" | "Done";
 
 export type BugReport = {
   id: string;
@@ -744,13 +787,13 @@ export const bugReportsStore = createStore<BugReport>("cos.bugReports", [
     category: "Graphics / Visual",
     description: "Softbox diffusion renders as a black square on low graphics settings.",
     submittedAt: "2026-08-22T11:40:00.000Z",
-    status: "Resolved",
+    status: "Done",
   },
 ]);
 
 /* ---------------------------------------------------------- player reports */
 
-export type PlayerReportStatus = "New" | "Investigating" | "Resolved";
+export type PlayerReportStatus = "New" | "Investigating" | "Done";
 
 export type PlayerReport = {
   id: string;

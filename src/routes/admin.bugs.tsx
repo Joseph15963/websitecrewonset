@@ -22,12 +22,13 @@ import {
   type BugStatus,
 } from "@/lib/demo/store";
 
-const statusOptions: BugStatus[] = ["New", "Investigating", "Resolved"];
+const statusOptions: BugStatus[] = ["New", "Investigating", "Done"];
 
+const statusTextColors: Record<BugStatus, string> = { New: "#F3C747", Investigating: "#F39A5A", Done: "#4BC4B4" };
 const statusStyles: Record<BugStatus, string> = {
   New: "bg-[#d9a514]/15 text-[#f3c747]",
   Investigating: "bg-[#c96a2d]/15 text-[#f39a5a]",
-  Resolved: "bg-[#2d9d8f]/15 text-[#4bc4b4]",
+  Done: "bg-[#2d9d8f]/15 text-[#4bc4b4]",
 };
 
 function formatDate(iso: string) {
@@ -189,7 +190,7 @@ function BugReportsPage() {
                     <select
                       value={bug.status}
                       onChange={(event) => updateStatus(bug, event.target.value as BugStatus)}
-                      className={`rounded px-2.5 py-1.5 text-[10px] font-black uppercase outline-none ${statusStyles[bug.status]}`}
+                      className={`rounded px-2.5 py-1.5 text-[10px] font-black uppercase outline-none ${statusStyles[bug.status]}`} style={{ color: statusTextColors[bug.status] }}
                     >
                       {statusOptions.map((s) => (
                         <option key={s} value={s} className="bg-[#101923] text-white">
@@ -302,7 +303,7 @@ function BugReportsPage() {
       )}
 
       {bulkDeleteTarget && (
-        <div className="fixed inset-0 z-[110] flex items-center justify-center bg-black/70 p-4"><div className="w-full max-w-sm rounded-xl border border-[#ff6248]/40 bg-[#151c28] p-6 shadow-2xl"><h3 className="text-lg font-black uppercase text-white">Delete Selected Bug Reports?</h3>{bulkDeleteTarget.some((bug) => bug.status !== "Resolved") && <p className="mt-3 rounded border border-[#f3c747]/40 bg-[#d9a514]/10 p-3 text-sm font-bold text-[#f3c747]">Warning: You are about to delete reports that are still New or Investigating. These reports have not been fully resolved.</p>}<p className="mt-3 text-sm text-white/50">This permanently removes {bulkDeleteTarget.length} reports.</p><div className="mt-6 flex justify-end gap-2"><button onClick={() => setBulkDeleteTarget(null)} className="rounded-md border border-white/10 px-4 py-2 text-xs font-bold text-white/60">Cancel</button><button onClick={confirmBulkDelete} className="rounded-md bg-[#ff6248] px-4 py-2 text-xs font-black uppercase text-white">Confirm Delete</button></div></div></div>
+        <div className="fixed inset-0 z-[110] flex items-center justify-center bg-black/70 p-4"><div className="w-full max-w-sm rounded-xl border border-[#ff6248]/40 bg-[#151c28] p-6 shadow-2xl"><h3 className="text-lg font-black uppercase text-white">Delete Selected Bug Reports?</h3>{bulkDeleteTarget.some((bug) => bug.status === "New" || bug.status === "Investigating") && <p className="mt-3 rounded border border-[#f3c747]/40 bg-[#d9a514]/10 p-3 text-sm font-bold text-[#f3c747]">Warning: You are about to delete reports that are still New or Investigating. These reports have not been fully resolved.</p>}<p className="mt-3 text-sm text-white/50">This permanently removes {bulkDeleteTarget.length} reports.</p><div className="mt-6 flex justify-end gap-2"><button onClick={() => setBulkDeleteTarget(null)} className="rounded-md border border-white/10 px-4 py-2 text-xs font-bold text-white/60">Cancel</button><button onClick={confirmBulkDelete} className="rounded-md bg-[#ff6248] px-4 py-2 text-xs font-black uppercase text-white">Confirm Delete</button></div></div></div>
       )}
 
       {/* DELETE CONFIRMATION */}

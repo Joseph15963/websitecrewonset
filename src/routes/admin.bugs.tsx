@@ -55,6 +55,7 @@ function BugReportsPage() {
   const [deleteTarget, setDeleteTarget] = useState<BugReport | null>(null);
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const [bulkDeleteTarget, setBulkDeleteTarget] = useState<BugReport[] | null>(null);
+  const [databaseError, setDatabaseError] = useState(false);
 
   const filtered = useMemo(() => {
     const search = query.trim().toLowerCase();
@@ -82,7 +83,11 @@ function BugReportsPage() {
   }
 
   async function deleteBug(bug: BugReport) {
-    if (!(await deleteSharedRecord("cos.bugReports", bug.id))) return;
+    setDatabaseError(false);
+    if (!(await deleteSharedRecord("cos.bugReports", bug.id))) {
+      setDatabaseError(true);
+      return;
+    }
     setBugs((current) => current.filter((b) => b.id !== bug.id));
     logAdminActivity({ kind: "bug", label: "Bug report deleted", detail: `${bug.id} (${bug.playerName}) was removed.` });
     setDeleteTarget(null);
@@ -95,8 +100,12 @@ function BugReportsPage() {
 
   async function confirmBulkDelete() {
     if (!bulkDeleteTarget) return;
+    setDatabaseError(false);
     const deleted = await deleteSharedRecords("cos.bugReports", bulkDeleteTarget.map((bug) => bug.id));
-    if (!deleted) return;
+    if (!deleted) {
+      setDatabaseError(true);
+      return;
+    }
     const ids = new Set(bulkDeleteTarget.map((bug) => bug.id));
     setBugs((current) => current.filter((bug) => !ids.has(bug.id)));
     setSelectedIds([]);
@@ -113,6 +122,13 @@ function BugReportsPage() {
           Review player-submitted issues and track triage status.
         </p>
       </header>
+
+      {databaseError && (
+        <div role="alert" className="mb-4 rounded-lg border border-[#ff6248]/40 bg-[#ff6248]/10 px-4 py-3 text-xs font-bold text-[#ff9a8a]">
+          <span className="font-black uppercase tracking-wide">Database error</span>
+          <span className="ml-2">Could not delete this report. Please check the database permissions or connection. See the browser console for details.</span>
+        </div>
+      )}
 
       {/* FILTERS */}
       <section className="admin-card mb-4 flex flex-col gap-3 rounded-lg border border-white/[0.06] bg-[#182330] p-4 shadow-xl sm:flex-row sm:items-center">

@@ -65,14 +65,35 @@ function timestampFor(key: string, item: Record<string, unknown>) {
 
 const sharedKeys = new Set(["cos.playerReports", "cos.bugReports", "cos.applications"]);
 
-export function logSupabaseError(operation: string, table: string, id: string | undefined, error: { message: string; details?: string; hint?: string }) {
+type SupabaseError = { message: string; details?: string; hint?: string; code?: string };
+
+export function logSupabaseError(operation: string, table: string, id: string | undefined, error: SupabaseError) {
   console.error(`[Crew On Set] ${operation} FAILED`, {
     table: `public.${table}`,
     ...(id ? { id } : {}),
     message: error.message,
     details: error.details,
     hint: error.hint,
+    code: error.code,
   });
+}
+
+async function verifyDeletedRows(table: string, ids: string[]) {
+  const { data, error } = await getSupabaseClient().from(table).select("id").in("id", ids);
+  if (error) {
+    logSupabaseError("DELETE VERIFICATION", table, ids.join(","), error);
+    return false;
+  }
+  const remaining = (data ?? []).map((row) => String((row as { id: string }).id));
+  if (remaining.length) {
+    console.error("[Crew On Set] BUG DELETE VERIFICATION FAILED", {
+      table: `public.${table}`,
+      requestedIds: ids,
+      remainingIds: remaining,
+    });
+    return false;
+  }
+  return true;
 }
 
 export const reportStatusColors = {
@@ -125,12 +146,17 @@ export async function updateSharedRecord<T extends { id: string }>(key: string, 
 export async function deleteSharedRecord(key: string, id: string) {
   const table = sharedTables[key];
   if (!table || !sharedKeys.has(key)) return false;
+  console.info("[Crew On Set] BUG DELETE REQUEST", { table: `public.${table}`, id });
   try {
-    const { error } = await getSupabaseClient().from(table).delete().eq("id", id);
-    if (error) logSupabaseMutation(table, "DELETE", id, error);
-    return !error;
+    const { data, error } = await getSupabaseClient().from(table).delete().eq("id", id).select("id");
+    if (error) {
+      logSupabaseMutation(table, "DELETE", id, error);
+      return false;
+    }
+    console.info("[Crew On Set] BUG DELETE SUCCESS", { table: `public.${table}`, id, data });
+    return await verifyDeletedRows(table, [id]);
   } catch (error) {
-    console.error(`[Crew On Set] DELETE FAILED`, { table: `public.${table}`, id, error });
+    console.error(`[Crew On Set] BUG DELETE FAILED`, { table: `public.${table}`, id, error });
     return false;
   }
 }
@@ -138,12 +164,17 @@ export async function deleteSharedRecord(key: string, id: string) {
 export async function deleteSharedRecords(key: string, ids: string[]) {
   const table = sharedTables[key];
   if (!table || !sharedKeys.has(key) || ids.length === 0) return false;
+  console.info("[Crew On Set] BUG BULK DELETE REQUEST", { table: `public.${table}`, ids, count: ids.length });
   try {
-    const { error } = await getSupabaseClient().from(table).delete().in("id", ids);
-    if (error) logSupabaseError("DELETE", table, ids.join(","), error);
-    return !error;
+    const { data, error } = await getSupabaseClient().from(table).delete().in("id", ids).select("id");
+    if (error) {
+      logSupabaseError("DELETE", table, ids.join(","), error);
+      return false;
+    }
+    console.info("[Crew On Set] BUG BULK DELETE SUCCESS", { table: `public.${table}`, ids, count: ids.length, data });
+    return await verifyDeletedRows(table, ids);
   } catch (error) {
-    console.error(`[Crew On Set] DELETE FAILED`, { table: `public.${table}`, ids, error });
+    console.error(`[Crew On Set] BUG BULK DELETE FAILED`, { table: `public.${table}`, ids, error });
     return false;
   }
 }

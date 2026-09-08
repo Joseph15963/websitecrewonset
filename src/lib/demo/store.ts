@@ -65,8 +65,32 @@ function timestampFor(key: string, item: Record<string, unknown>) {
 
 const sharedKeys = new Set(["cos.playerReports", "cos.bugReports", "cos.applications"]);
 
+export function logSupabaseError(operation: string, table: string, id: string | undefined, error: { message: string; details?: string; hint?: string }) {
+  console.error(`[Crew On Set] ${operation} FAILED`, {
+    table: `public.${table}`,
+    ...(id ? { id } : {}),
+    message: error.message,
+    details: error.details,
+    hint: error.hint,
+  });
+}
+
+export const reportStatusColors = {
+  New: "#F3C747",
+  Investigating: "#F39A5A",
+  Resolved: "#4BC4B4",
+} as const;
+
+export const partnershipStatusColors = {
+  Pending: "#F3C747",
+  Approved: "#4BC4B4",
+  "On-going": "#37C8C0",
+  Done: "#4E8FE7",
+  Declined: "#FF6248",
+} as const;
+
 function logSupabaseMutation(table: string, operation: string, id: string, error: { message: string; details?: string; hint?: string }) {
-  console.error(`[v0] Supabase ${operation} failed for ${table} ${id}: ${error.message}`, { details: error.details, hint: error.hint });
+  logSupabaseError(operation, table, id, error);
 }
 
 export async function insertSharedRecord<T extends { id: string }>(key: string, item: T, onError?: (message: string) => void) {
@@ -106,7 +130,20 @@ export async function deleteSharedRecord(key: string, id: string) {
     if (error) logSupabaseMutation(table, "DELETE", id, error);
     return !error;
   } catch (error) {
-    console.error(`[v0] Supabase DELETE failed for ${table} ${id}:`, error);
+    console.error(`[Crew On Set] DELETE FAILED`, { table: `public.${table}`, id, error });
+    return false;
+  }
+}
+
+export async function deleteSharedRecords(key: string, ids: string[]) {
+  const table = sharedTables[key];
+  if (!table || !sharedKeys.has(key) || ids.length === 0) return false;
+  try {
+    const { error } = await getSupabaseClient().from(table).delete().in("id", ids);
+    if (error) logSupabaseError("DELETE", table, ids.join(","), error);
+    return !error;
+  } catch (error) {
+    console.error(`[Crew On Set] DELETE FAILED`, { table: `public.${table}`, ids, error });
     return false;
   }
 }

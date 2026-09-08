@@ -29,6 +29,8 @@ import {
 import {
   adsStore,
   applicationsStore,
+  deleteSharedRecord,
+  deleteSharedRecords,
   updateSharedRecord,
   partnershipStatusColors,
   revenueStore,
@@ -81,28 +83,26 @@ function PartnershipsPage() {
   );
 
   async function deleteApplication(app: PartnershipApplication) {
-    const archivedAt = new Date().toISOString();
-    const updated = { ...app, archived: true, archivedAt };
-    if (!(await updateSharedRecord("cos.applications", updated))) return;
-    setApplications((current) => current.map((item) => item.id === app.id ? updated : item));
+    if (!(await deleteSharedRecord("cos.applications", app.id))) return;
+    setApplications((current) => current.filter((item) => item.id !== app.id));
     setSelected((current) => current?.id === app.id ? null : current);
+    setSelectedApplicationIds((current) => current.filter((id) => id !== app.id));
     setDeleteTarget(null);
   }
 
-  function requestArchiveSelected() {
+  function requestDeleteSelected() {
     const targets = filtered.filter((item) => selectedApplicationIds.includes(item.id));
     if (targets.length) setBulkDeleteTarget(targets);
   }
 
-  async function archiveSelected() {
-    const archivedAt = new Date().toISOString();
-    const targets = applications.filter((item) => selectedApplicationIds.includes(item.id));
-    const updated = targets.map((item) => ({ ...item, archived: true, archivedAt }));
-    const persisted = await Promise.all(updated.map((item) => updateSharedRecord("cos.applications", item)));
-    if (persisted.some((success) => !success)) return;
-    const appIds = new Set(selectedApplicationIds);
-    setApplications((current) => current.map((item) => appIds.has(item.id) ? { ...item, archived: true, archivedAt } : item));
-    setSelectedApplicationIds([]);
+  async function confirmBulkDelete() {
+    if (!bulkDeleteTarget) return;
+    const ids = bulkDeleteTarget.map((item) => item.id);
+    if (!(await deleteSharedRecords("cos.applications", ids))) return;
+    const idSet = new Set(ids);
+    setApplications((current) => current.filter((item) => !idSet.has(item.id)));
+    setSelected((current) => current && idSet.has(current.id) ? null : current);
+    setSelectedApplicationIds((current) => current.filter((id) => !idSet.has(id)));
     setBulkDeleteTarget(null);
   }
 
@@ -249,7 +249,7 @@ function PartnershipsPage() {
 
         <div className="mb-3 flex items-center justify-between rounded-lg border border-white/[0.06] bg-[#182330] px-4 py-3">
           <label className="flex items-center gap-3 text-xs font-bold uppercase !text-white/60"><input type="checkbox" checked={filtered.length > 0 && selectedApplicationIds.length === filtered.length} onChange={(event) => setSelectedApplicationIds(event.target.checked ? filtered.map((item) => item.id) : [])} /> Select all <span className="!text-coral">{selectedApplicationIds.length} selected</span></label>
-          <button disabled={!selectedApplicationIds.length} onClick={requestArchiveSelected} className="inline-flex items-center gap-2 rounded-md bg-coral px-3 py-2 text-[10px] font-black uppercase text-white disabled:opacity-30"><Trash2 className="size-3.5" /> Delete selected</button>
+          <button disabled={!selectedApplicationIds.length} onClick={requestDeleteSelected} className="inline-flex items-center gap-2 rounded-md bg-coral px-3 py-2 text-[10px] font-black uppercase text-white disabled:opacity-30"><Trash2 className="size-3.5" /> Delete selected</button>
         </div>
         <div className="admin-table-wrap overflow-hidden rounded-lg border border-white/[0.06] bg-[#182330] shadow-xl">
           <div className="admin-table-wrap overflow-x-auto">
@@ -462,7 +462,7 @@ function PartnershipsPage() {
             <p className="mt-3 text-sm leading-relaxed !text-white/55">This will archive {bulkDeleteTarget.length} application{bulkDeleteTarget.length === 1 ? "" : "s"} from Partnerships & Ads. Historical records will be preserved.</p>
             <div className="mt-6 flex justify-end gap-2">
               <button onClick={() => setBulkDeleteTarget(null)} className="rounded-md border border-white/10 px-4 py-2 text-xs font-bold uppercase !text-white/60 hover:!text-white">Cancel</button>
-              <button onClick={archiveSelected} className="rounded-md bg-coral px-4 py-2 text-xs font-black uppercase text-white hover:bg-coral/90">Confirm Delete</button>
+              <button onClick={confirmBulkDelete} className="rounded-md bg-coral px-4 py-2 text-xs font-black uppercase text-white hover:bg-coral/90">Confirm Delete</button>
             </div>
           </div>
         </div>

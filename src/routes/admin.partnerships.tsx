@@ -30,6 +30,7 @@ import {
   adsStore,
   applicationsStore,
   updateSharedRecord,
+  partnershipStatusColors,
   revenueStore,
   formatMoney,
   uid,
@@ -62,6 +63,7 @@ function PartnershipsPage() {
   const [statusFilter, setStatusFilter] = useState<"All" | PartnershipStatus>("All");
   const [emailConfirmation, setEmailConfirmation] = useState<string | null>(null);
   const [deleteTarget, setDeleteTarget] = useState<PartnershipApplication | null>(null);
+  const [bulkDeleteTarget, setBulkDeleteTarget] = useState<PartnershipApplication[] | null>(null);
   const [selectedApplicationIds, setSelectedApplicationIds] = useState<string[]>([]);
   const [selectedAdIds, setSelectedAdIds] = useState<string[]>([]);
 
@@ -87,6 +89,11 @@ function PartnershipsPage() {
     setDeleteTarget(null);
   }
 
+  function requestArchiveSelected() {
+    const targets = filtered.filter((item) => selectedApplicationIds.includes(item.id));
+    if (targets.length) setBulkDeleteTarget(targets);
+  }
+
   async function archiveSelected() {
     const archivedAt = new Date().toISOString();
     const targets = applications.filter((item) => selectedApplicationIds.includes(item.id));
@@ -96,6 +103,7 @@ function PartnershipsPage() {
     const appIds = new Set(selectedApplicationIds);
     setApplications((current) => current.map((item) => appIds.has(item.id) ? { ...item, archived: true, archivedAt } : item));
     setSelectedApplicationIds([]);
+    setBulkDeleteTarget(null);
   }
 
   async function updateStatus(id: string, status: PartnershipStatus) {
@@ -241,7 +249,7 @@ function PartnershipsPage() {
 
         <div className="mb-3 flex items-center justify-between rounded-lg border border-white/[0.06] bg-[#182330] px-4 py-3">
           <label className="flex items-center gap-3 text-xs font-bold uppercase !text-white/60"><input type="checkbox" checked={filtered.length > 0 && selectedApplicationIds.length === filtered.length} onChange={(event) => setSelectedApplicationIds(event.target.checked ? filtered.map((item) => item.id) : [])} /> Select all <span className="!text-coral">{selectedApplicationIds.length} selected</span></label>
-          <button disabled={!selectedApplicationIds.length} onClick={archiveSelected} className="inline-flex items-center gap-2 rounded-md bg-coral px-3 py-2 text-[10px] font-black uppercase text-white disabled:opacity-30"><Trash2 className="size-3.5" /> Delete selected</button>
+          <button disabled={!selectedApplicationIds.length} onClick={requestArchiveSelected} className="inline-flex items-center gap-2 rounded-md bg-coral px-3 py-2 text-[10px] font-black uppercase text-white disabled:opacity-30"><Trash2 className="size-3.5" /> Delete selected</button>
         </div>
         <div className="admin-table-wrap overflow-hidden rounded-lg border border-white/[0.06] bg-[#182330] shadow-xl">
           <div className="admin-table-wrap overflow-x-auto">
@@ -286,7 +294,7 @@ function PartnershipsPage() {
                       {formatDate(app.submittedAt)}
                     </td>
                     <td className="px-5 py-4">
-                      <select value={app.status} onChange={(event) => updateStatus(app.id, event.target.value as PartnershipStatus)} className={`rounded px-2.5 py-1.5 text-[10px] font-black uppercase outline-none ${statusStyles[app.status]}`} aria-label={`Status for ${app.brand}`}>
+                      <select value={app.status} onChange={(event) => updateStatus(app.id, event.target.value as PartnershipStatus)} className={`rounded px-2.5 py-1.5 text-[10px] font-black uppercase outline-none ${statusStyles[app.status]}`} style={{ color: partnershipStatusColors[app.status] }} aria-label={`Status for ${app.brand}`}>
                         {statuses.map((item) => <option key={item} value={item} className="bg-[#101923] text-white">{item}</option>)}
                       </select>
                     </td>
@@ -445,6 +453,19 @@ function PartnershipsPage() {
           </div>
         </div>
         </section>
+      )}
+
+      {bulkDeleteTarget && (
+        <div className="fixed inset-0 z-[120] flex items-center justify-center bg-black/70 p-4 backdrop-blur-sm" onClick={() => setBulkDeleteTarget(null)}>
+          <div className="w-full max-w-md rounded-xl border border-coral/40 bg-[#151c28] p-6 shadow-2xl" onClick={(event) => event.stopPropagation()}>
+            <h3 className="text-lg font-black uppercase !text-white">Delete selected applications?</h3>
+            <p className="mt-3 text-sm leading-relaxed !text-white/55">This will archive {bulkDeleteTarget.length} application{bulkDeleteTarget.length === 1 ? "" : "s"} from Partnerships & Ads. Historical records will be preserved.</p>
+            <div className="mt-6 flex justify-end gap-2">
+              <button onClick={() => setBulkDeleteTarget(null)} className="rounded-md border border-white/10 px-4 py-2 text-xs font-bold uppercase !text-white/60 hover:!text-white">Cancel</button>
+              <button onClick={archiveSelected} className="rounded-md bg-coral px-4 py-2 text-xs font-black uppercase text-white hover:bg-coral/90">Confirm Delete</button>
+            </div>
+          </div>
+        </div>
       )}
 
       {deleteTarget && (

@@ -17,7 +17,9 @@ import { Bug, Eye, Search, Trash2, X } from "lucide-react";
 import {
   bugCategories,
   bugReportsStore,
+  deleteSharedRecords,
   deleteSharedRecord,
+  reportStatusColors,
   updateSharedRecord,
   logAdminActivity,
   type BugReport,
@@ -26,7 +28,6 @@ import {
 
 const statusOptions: BugStatus[] = ["New", "Investigating", "Resolved"];
 
-const statusTextColors: Record<BugStatus, string> = { New: "#F3C747", Investigating: "#F39A5A", Resolved: "#4BC4B4" };
 const statusStyles: Record<BugStatus, string> = {
   New: "bg-[#d9a514]/15 text-[#f3c747]",
   Investigating: "bg-[#c96a2d]/15 text-[#f39a5a]",
@@ -94,10 +95,8 @@ function BugReportsPage() {
 
   async function confirmBulkDelete() {
     if (!bulkDeleteTarget) return;
-    const deleted = await Promise.all(
-      bulkDeleteTarget.map((bug) => deleteSharedRecord("cos.bugReports", bug.id)),
-    );
-    if (deleted.some((success) => !success)) return;
+    const deleted = await deleteSharedRecords("cos.bugReports", bulkDeleteTarget.map((bug) => bug.id));
+    if (!deleted) return;
     const ids = new Set(bulkDeleteTarget.map((bug) => bug.id));
     setBugs((current) => current.filter((bug) => !ids.has(bug.id)));
     setSelectedIds([]);
@@ -199,7 +198,7 @@ function BugReportsPage() {
                     <select
                       value={bug.status}
                       onChange={(event) => updateStatus(bug, event.target.value as BugStatus)}
-                      className={`rounded px-2.5 py-1.5 text-[10px] font-black uppercase outline-none ${statusStyles[bug.status]}`} style={{ color: statusTextColors[bug.status] }}
+                      className={`rounded px-2.5 py-1.5 text-[10px] font-black uppercase outline-none ${statusStyles[bug.status]}`} style={{ color: reportStatusColors[bug.status] }}
                     >
                       {statusOptions.map((s) => (
                         <option key={s} value={s} className="bg-[#101923] text-white">

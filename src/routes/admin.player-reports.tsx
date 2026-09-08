@@ -13,7 +13,9 @@ export const Route = createFileRoute("/admin/player-reports")({
 import { useMemo, useState } from "react";
 import { Eye, FileText, Search, Trash2, UserRound, X } from "lucide-react";
 import {
+  deleteSharedRecords,
   deleteSharedRecord,
+  reportStatusColors,
   logAdminActivity,
   playerReportsStore,
   updateSharedRecord,
@@ -22,7 +24,6 @@ import {
 } from "@/lib/demo/store";
 
 const statuses: PlayerReportStatus[] = ["New", "Investigating", "Resolved"];
-const statusTextColors: Record<PlayerReportStatus, string> = { New: "#F3C747", Investigating: "#F39A5A", Resolved: "#4BC4B4" };
 const statusStyles: Record<PlayerReportStatus, string> = {
   New: "bg-[#d9a514]/15 text-[#f3c747]",
   Investigating: "bg-[#c96a2d]/15 text-[#f39a5a]",
@@ -84,10 +85,8 @@ function PlayerReportsRouteComponent() {
 
   async function confirmBulkDelete() {
     if (!bulkDeleteTarget) return;
-    const deleted = await Promise.all(
-      bulkDeleteTarget.map((report) => deleteSharedRecord("cos.playerReports", report.id)),
-    );
-    if (deleted.some((success) => !success)) return;
+    const deleted = await deleteSharedRecords("cos.playerReports", bulkDeleteTarget.map((report) => report.id));
+    if (!deleted) return;
     const ids = new Set(bulkDeleteTarget.map((report) => report.id));
     setReports((current) => current.filter((report) => !ids.has(report.id)));
     setSelectedIds([]);
@@ -172,7 +171,7 @@ function PlayerReportsRouteComponent() {
                       onChange={(event) =>
                         updateStatus(report, event.target.value as PlayerReportStatus)
                       }
-                      className={`rounded px-2.5 py-1.5 text-[10px] font-black uppercase outline-none ${statusStyles[report.status]}`} style={{ color: statusTextColors[report.status] }}
+                      className={`rounded px-2.5 py-1.5 text-[10px] font-black uppercase outline-none ${statusStyles[report.status]}`} style={{ color: reportStatusColors[report.status] }}
                     >
                       {statuses.map((item) => (
                         <option key={item}>{item}</option>

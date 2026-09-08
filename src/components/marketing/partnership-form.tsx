@@ -84,8 +84,7 @@ export function PartnershipForm() {
         attachmentUrl = await readAttachmentAsDataUrl(file, "partnerships");
       } catch (error) {
         const message = error instanceof Error ? error.message : String(error);
-        setError(`Attachment upload failed: ${message}`);
-        return;
+        console.warn(`[Crew On Set] partnership attachment upload failed; submitting without attachment`, { message });
       }
     }
 

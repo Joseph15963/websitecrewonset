@@ -97,14 +97,14 @@ export async function insertSharedRecord<T extends { id: string }>(key: string, 
   const table = sharedTables[key];
   if (!table || !sharedKeys.has(key)) return false;
   try {
-    const { error } = await getSupabaseClient().from(table).upsert(toDatabaseRow(item as Record<string, unknown>), { onConflict: "id" });
+    const { error } = await getSupabaseClient().from(table).insert(toDatabaseRow(item as Record<string, unknown>));
     if (error) {
       logSupabaseMutation(table, "INSERT", item.id, error);
       onError?.(error.message);
     }
     return !error;
   } catch (error) {
-    console.error(`[v0] Supabase INSERT failed for ${table} ${item.id}:`, error);
+    console.error(`[Crew On Set] INSERT FAILED`, { table: `public.${table}`, id: item.id, error });
     return false;
   }
 }
@@ -154,7 +154,7 @@ async function loadSharedTable<T>(key: string) {
   try {
     const { data, error } = await getSupabaseClient().from(table).select("*");
     if (error) {
-      console.error(`[v0] Supabase SELECT failed for ${table}: ${error.message}`, { details: error.details, hint: error.hint });
+      logSupabaseError("SELECT", table, undefined, error);
       return null;
     }
     return (data ?? [])
